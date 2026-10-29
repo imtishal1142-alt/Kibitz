@@ -1,0 +1,27 @@
+# Cloudflare (Workers static assets / Pages) headers.
+# Cross-origin isolation lets the browser run the multi-threaded engine (SharedArrayBuffer). "credentialless" keeps
+# cross-origin images (Chess.com avatars) working without extra headers from their server.
+/*
+  Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Embedder-Policy: credentialless
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: no-referrer
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+
+# Hashed build files never change: cache them for a year.
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Engine files and icons change only with a new engine version.
+/engines/*
+  Cache-Control: public, max-age=604800
+/icons/*
+  Cache-Control: public, max-age=604800
+
+# The page, service worker and manifest must always be re-checked, or an update could never arrive.
+/index.html
+  Cache-Control: no-cache
+/sw.js
+  Cache-Control: no-cache
+/manifest.webmanifest
+  Cache-Control: no-cache
