@@ -1,6 +1,6 @@
 {
   "name": "chess-coach",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Local-first chess analysis and coaching app: web, offline and desktop (Stockfish WASM, Chess.com public data)",
   "private": true,
   "license": "GPL-3.0-or-later",

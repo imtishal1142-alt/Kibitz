@@ -2089,3 +2089,56 @@ html[data-motion='off'] .nav-card:hover {
     display: none;
   }
 }
+
+/* ------------------------------ collapsible navigation rail ------------------------------ */
+.rail-toggle {
+  display: none;
+}
+@media (min-width: 900px) {
+  .shell {
+    transition: grid-template-columns 0.2s ease;
+  }
+  .rail-toggle {
+    display: flex;
+  }
+  .shell[data-collapsed='true'] {
+    --rail-w: 68px;
+  }
+  .shell[data-collapsed='true'] .rail {
+    padding-inline: 8px;
+  }
+  /* The text stays in the page for screen readers; it is only taken out of sight. */
+  .shell[data-collapsed='true'] .rail-link span,
+  .shell[data-collapsed='true'] .brand-text {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+  .shell[data-collapsed='true'] .rail-link {
+    justify-content: center;
+    padding-inline: 0;
+  }
+  .shell[data-collapsed='true'] .brand {
+    justify-content: center;
+    padding-inline: 0;
+  }
+  .shell[data-collapsed='true'] .rail-link[aria-current='page']::before {
+    left: -8px;
+  }
+}
+@media (min-width: 900px) and (max-width: 1199px) {
+  .shell:not([data-collapsed='true']) .rail-toggle span {
+    font-size: 0.7rem;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .shell {
+    transition: none;
+  }
+}
+html[data-motion='off'] .shell {
+  transition: none;
+}

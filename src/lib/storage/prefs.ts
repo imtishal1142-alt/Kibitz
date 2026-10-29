@@ -20,6 +20,8 @@ export interface Prefs {
   reviewFlavor: string;
   /** Games analysed at the same time by the background queue: 0 = automatic from the number of cores, otherwise 1 to 4. */
   analysisWorkers: number;
+  /** The navigation rail shows only icons (wide screens). */
+  railCollapsed: boolean;
   /** Analyse games that have no analysis yet, in the background, when the app opens or games are added. */
   autoAnalyse: boolean;
   /** Only the newest N of your games are queued automatically (0 = all of them). */
@@ -50,6 +52,7 @@ export const DEFAULT_PREFS: Prefs = {
   flavorChosen: false,
   reviewFlavor: 'same',
   analysisWorkers: 0,
+  railCollapsed: false,
   autoAnalyse: true,
   autoAnalyseLimit: 200,
   hashMb: 32,

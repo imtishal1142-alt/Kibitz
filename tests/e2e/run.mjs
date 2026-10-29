@@ -138,6 +138,36 @@ await test('bots: cards listed by tier; choosing a bot opens Play with its name 
   await context.close();
 });
 
+await test('sidebar collapses to icons, keeps working for keyboard and screen readers, and stays collapsed after a reload', async () => {
+  const { page, problems, context, go } = await session({ viewport: { width: 1440, height: 900 } });
+  await go('');
+  await page.getByRole('heading', { name: 'Your desk' }).waitFor();
+  const width = async () => (await page.locator('nav.rail').boundingBox()).width;
+  assert((await width()) > 150, 'the sidebar should start expanded');
+  await page.getByRole('button', { name: 'Collapse sidebar' }).click();
+  await page.waitForFunction(() => document.querySelector('nav.rail').getBoundingClientRect().width < 100);
+  assert(await page.locator('nav.rail').getByRole('link', { name: 'Play', exact: true }).isVisible(), 'the Play link should still be there');
+  await page.reload();
+  await page.getByRole('heading', { name: 'Your desk' }).waitFor();
+  assert((await width()) < 100, 'collapsed state should survive a reload');
+  await page.getByRole('button', { name: 'Expand sidebar' }).click();
+  await page.waitForFunction(() => document.querySelector('nav.rail').getBoundingClientRect().width > 150);
+  noProblems(problems, 'sidebar');
+  await context.close();
+});
+
+await test('a page file that fails to load once is retried and the page appears', async () => {
+  const { page, context, go } = await session();
+  let failed = 0;
+  await page.route('**/assets/Settings-*.js', (route) => (failed++ === 0 ? route.abort() : route.continue()));
+  await go('');
+  await page.getByRole('heading', { name: 'Your desk' }).waitFor();
+  await go('settings');
+  await page.getByRole('heading', { name: 'Settings' }).first().waitFor({ timeout: 20000 });
+  assert(failed >= 2, `the file should have been requested again (requests: ${failed})`);
+  await context.close();
+});
+
 await test('engine rejects an illegal position instead of crashing (shows a readable message)', async () => {
   const { page, problems, context, go } = await session();
   // Nine white pawns cannot occur in a legal game.
