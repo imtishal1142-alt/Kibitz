@@ -3,6 +3,8 @@ import { useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Banner, Empty, PageHead, StatBlock } from '../components/ui';
 import { Icon } from '../components/Icon';
+import { MiniBoard } from '../components/MiniBoard';
+import { START_FEN, parsePgn } from '../lib/chess/rules';
 import { analysedEntries } from '../lib/games/entries';
 import { isPersonal } from '../lib/games/records';
 import { detectWeaknesses } from '../lib/analysis/weaknesses';
@@ -57,7 +59,17 @@ export default function Home() {
       deviations,
     });
     const last = [...games.data].sort((a, b) => b.endTime - a.endTime).find((g) => g.analyzed);
-    return { personal, entries, plan, due, last, today, puzzleCount: puzzles.data.length };
+    const srsById = new Map(srs.data.map((r) => [r.puzzleId, r]));
+    const duePuzzle = puzzles.data.find((p) => (srsById.get(p.id) ? isDue(srsById.get(p.id)!, now) : true)) ?? puzzles.data[0];
+    let lastFen = START_FEN;
+    if (last) {
+      try {
+        lastFen = parsePgn(last.pgn).fens.at(-1) ?? START_FEN;
+      } catch {
+        /* a game that cannot be read keeps the start position */
+      }
+    }
+    return { personal, entries, plan, due, last, today, puzzleCount: puzzles.data.length, duePuzzle, lastFen };
   }, [games.data, analyses.data, puzzles.data, srs.data, lines.data, calendar.data, prefs.includeDemoInStats, prefs.dailyGoal]);
 
   const loading = !view;
@@ -103,6 +115,65 @@ export default function Home() {
         </section>
       ) : (
         <>
+        <section className="hero" aria-label="Start here">
+          <div className="hero-top">
+            <div className="hero-who">
+              <span className="strip-avatar strip-avatar-b" aria-hidden="true">
+                {(prefs.chesscomUser.trim() || 'K').slice(0, 1).toUpperCase()}
+              </span>
+              {prefs.chesscomUser.trim() || 'Welcome back'}
+            </div>
+            {sv.loading ? null : (
+              <Link to="/session" className="hero-streak" aria-label={`Practice streak: ${sv.streak.current} ${sv.streak.current === 1 ? 'day' : 'days'}`}>
+                <span className="hero-flame" aria-hidden="true">
+                  <Icon name="target" size={20} />
+                </span>
+                {sv.streak.current} {sv.streak.current === 1 ? 'Day' : 'Days'}
+              </Link>
+            )}
+          </div>
+          <div className="hero-grid">
+            <div className="hero-play">
+              <h2>Play</h2>
+              <Link className="btn btn-primary" to="/play">
+                Start game
+              </Link>
+              <Link className="btn btn-block" to="/bots">
+                <Icon name="bot" /> Play bots
+              </Link>
+              <Link className="btn btn-block" to="/match">
+                <Icon name="swords" /> Engine vs engine
+              </Link>
+              <Link className="btn btn-block" to="/analysis">
+                <Icon name="board" /> Analysis board
+              </Link>
+            </div>
+            <Link className="hero-card" to="/puzzles">
+              <MiniBoard fen={view.duePuzzle?.fen ?? START_FEN} orientation={view.duePuzzle?.sideToMove ?? 'w'} />
+              <span className="hero-card-meta">
+                <strong>Puzzles from your games</strong>
+                <span className="muted small">{view.puzzleCount ? `${view.due} due · ${view.puzzleCount} in your set` : 'Made from your analysed games'}</span>
+              </span>
+              <span className="btn btn-sm">Solve puzzles</span>
+            </Link>
+            <Link className="hero-card" to={view.plan[0]?.to ?? '/train'}>
+              <MiniBoard fen={START_FEN} />
+              <span className="hero-card-meta">
+                <strong>{view.plan[0]?.title ?? 'Training'}</strong>
+                <span className="muted small">{view.plan[0]?.detail ?? 'Practice built from your games'}</span>
+              </span>
+              <span className="btn btn-sm">Start training</span>
+            </Link>
+            <Link className="hero-card" to={view.last ? `/analysis/${view.last.id}` : '/library'}>
+              <MiniBoard fen={view.lastFen} orientation={view.last?.userColor ?? 'w'} />
+              <span className="hero-card-meta">
+                <strong>{view.last ? gameTitle(view.last) : 'Your games'}</strong>
+                <span className="muted small">{view.last ? gameSubtitle(view.last) : 'Import or analyse a game'}</span>
+              </span>
+              <span className="btn btn-sm">{view.last ? 'Review game' : 'Open games'}</span>
+            </Link>
+          </div>
+        </section>
         {sv.loading ? null : (
           <section className="sheet pad stack" aria-labelledby="session-h">
             <div className="row" style={{ justifyContent: 'space-between' }}>

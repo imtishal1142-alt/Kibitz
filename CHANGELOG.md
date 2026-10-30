@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.0
+
+**Look, from your Chess.com screenshots (structure and feel only; no artwork, names or icons of theirs).** The game review panel has a dark title bar, a coach bubble ("There are 4 critical moments…"), white and dark accuracy chips, grade counts on either side of a centred icon, and a large Start review button pinned to the bottom. Player strips have an avatar tile and a bolder clock. The Desk opens with a hero: your name and streak, Start game, Play bots, Engine vs engine, Analysis board, and three board cards (puzzles from your games, today's training, your last game). Pages fade in; cards lift on hover; all motion obeys the reduced-motion setting.
+
+**Bots screen redone** as a board with a bot picker: choose a portrait (original drawn faces, not likenesses of anyone), choose a colour, press Play and the game starts at once.
+
 ## 0.3.2
 
 **Pages that would not load.** After a new version is published, a tab that is still open can ask for page files that no longer exist. A page file that fails to load is now retried, then the stored copies of the app are cleared and the page reloads once (never in a loop), and if that fails a clear "reload the latest version" screen replaces the generic error.

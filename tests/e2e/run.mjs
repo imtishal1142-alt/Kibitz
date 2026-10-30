@@ -125,14 +125,15 @@ await test('multi-threaded Stockfish runs when the page is cross-origin isolated
   await context.close();
 });
 
-await test('bots: cards listed by tier; choosing a bot opens Play with its name and starts a game', async () => {
+await test('bots: choose a bot and a colour, Play starts the game against it straight away', async () => {
   const { page, problems, context, go } = await session();
   await go('bots');
   await page.getByRole('heading', { name: 'Bots', level: 1 }).waitFor();
-  assert((await page.getByRole('button', { name: /^Play / }).count()) >= 8, 'expected several bots');
+  assert((await page.locator('.bot-tile').count()) >= 8, 'expected several bots');
+  await page.getByRole('button', { name: 'Rex', exact: true }).click();
+  assert(/Rex/.test(await page.locator('.bots-selected').innerText()), 'the chosen bot should be described');
+  await page.getByRole('button', { name: 'Play as Black' }).click();
   await page.getByRole('button', { name: 'Play Rex' }).click();
-  await page.getByText(/Playing/).first().waitFor();
-  await page.getByRole('button', { name: /Start game/ }).click();
   await page.getByRole('heading', { name: /You vs Rex/ }).waitFor({ timeout: 20000 });
   noProblems(problems, 'bots');
   await context.close();

@@ -10,6 +10,7 @@ export function PlayerStrip({
   captured,
   balance,
   note,
+  avatarHue,
 }: {
   name: string;
   rating?: number | string;
@@ -20,11 +21,15 @@ export function PlayerStrip({
   /** Material lead for this side in pawns (shown as +3). */
   balance?: number;
   note?: string;
+  /** Colour of the avatar tile (bots); players get a neutral tile. */
+  avatarHue?: number;
 }) {
   const low = clockMs !== null && clockMs !== undefined && clockMs < 10_000;
   return (
     <div className="strip">
-      <span aria-hidden="true" style={{ width: 14, height: 14, borderRadius: 4, border: '1.5px solid var(--ink-3)', background: color === 'w' ? '#fff' : '#1c2438', flex: 'none' }} />
+      <span className={`strip-avatar strip-avatar-${color}`} aria-hidden="true" style={avatarHue === undefined ? undefined : { background: `hsl(${avatarHue} 42% 38%)`, color: '#fff' }}>
+        {name.trim().slice(0, 1).toUpperCase() || '?'}
+      </span>
       <div className="grow">
         <div className="strip-name ellipsis">
           {name}

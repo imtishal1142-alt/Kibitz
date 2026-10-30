@@ -35,18 +35,31 @@ export function ReviewSummary({
   return (
     <section className="review" aria-label="Game review summary">
       <div className="review-head">
-        <h2>Game review</h2>
-        <div className="row">
-          <button className="btn btn-primary" type="button" onClick={onStart} disabled={steps === 0} title={steps === 0 ? 'Nothing to step through: no mistakes, misses or standout moves.' : undefined}>
-            <Icon name="play" /> Start review{steps ? ` (${steps})` : ''}
-          </button>
-          {compact ? (
+        <h2>
+          <span className="review-head-icon" aria-hidden="true">
+            <Icon name="insights" size={18} />
+          </span>
+          Game review
+        </h2>
+        {compact ? (
+          <div className="row">
+            <button className="btn btn-sm btn-primary" type="button" onClick={onStart} disabled={steps === 0}>
+              <Icon name="play" /> Start review{steps ? ` (${steps})` : ''}
+            </button>
             <button className="btn btn-sm" type="button" onClick={onOpenReport}>
               Full report
             </button>
-          ) : null}
-        </div>
+          </div>
+        ) : null}
       </div>
+      {compact ? null : (
+        <div className="coach-say">
+          <span className="coach-avatar" aria-hidden="true">
+            <Icon name="knight" size={26} />
+          </span>
+          <p className="coach-bubble">{steps ? (steps === 1 ? 'There is one critical moment in this game. Let’s look at it.' : `There are ${steps} critical moments in this game. Let’s walk through them.`) : 'A clean game: no mistakes, misses or standout moves to step through.'}</p>
+        </div>
+      )}
       <div className="review-players">
         {sides.map((c) => (
           <div key={c} className={`review-player ${userColor === c ? 'review-me' : ''}`}>
@@ -74,6 +87,9 @@ export function ReviewSummary({
                   <th scope="col" className="right">
                     White
                   </th>
+                  <th scope="col" className="review-mid">
+                    <span className="sr-only">Icon</span>
+                  </th>
                   <th scope="col" className="right">
                     Black
                   </th>
@@ -83,12 +99,13 @@ export function ReviewSummary({
                 {rows.map((cls) => (
                   <tr key={cls}>
                     <th scope="row" title={CLASS_MEANING[cls]}>
-                      <span className="row-nowrap" style={{ gap: 8 }}>
-                        <GradeIcon cls={cls} size={20} /> <span className={`cls-${cls}`}>{CLASS_LABEL[cls]}</span>
-                      </span>
+                      <span className={`cls-${cls}`}>{CLASS_LABEL[cls]}</span>
                     </th>
-                    <td className="right num">{analysis.summary.w.counts[cls]}</td>
-                    <td className="right num">{analysis.summary.b.counts[cls]}</td>
+                    <td className={`right num ${analysis.summary.w.counts[cls] ? `cls-${cls}` : 'faint'}`}>{analysis.summary.w.counts[cls]}</td>
+                    <td className="review-mid" aria-hidden="true">
+                      <GradeIcon cls={cls} size={22} />
+                    </td>
+                    <td className={`right num ${analysis.summary.b.counts[cls] ? `cls-${cls}` : 'faint'}`}>{analysis.summary.b.counts[cls]}</td>
                   </tr>
                 ))}
               </tbody>
@@ -104,6 +121,13 @@ export function ReviewSummary({
             Accuracy is computed from win-chance loss on every move (see Help); it is not Chess.com&apos;s number.
           </p>
         </>
+      )}
+      {compact ? null : (
+        <div className="review-cta">
+          <button className="btn btn-primary btn-lg" type="button" onClick={onStart} disabled={steps === 0} title={steps === 0 ? 'Nothing to step through: no mistakes, misses or standout moves.' : undefined}>
+            <Icon name="play" /> Start review{steps ? ` (${steps})` : ''}
+          </button>
+        </div>
       )}
     </section>
   );
