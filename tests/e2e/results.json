@@ -1,202 +1,202 @@
 {
-  "at": "2026-10-31T16:29:30.821Z",
+  "at": "2026-10-31T16:44:03.403Z",
   "passed": 39,
   "failed": 0,
   "results": [
     {
       "name": "app boots: no console or page errors, onboarding is offered, privacy stated",
       "ok": true,
-      "ms": 704
+      "ms": 879
     },
     {
       "name": "every page renders a heading with no console errors (desktop)",
       "ok": true,
-      "ms": 10734
+      "ms": 9919
     },
     {
       "name": "mobile (390 and 320 px wide): no horizontal scrolling on any page, bottom navigation visible",
       "ok": true,
-      "ms": 30111
+      "ms": 30332
     },
     {
       "name": "Stockfish WebAssembly runs in a worker and answers (depth, score, principal variation)",
       "ok": true,
-      "ms": 1831
+      "ms": 1741
     },
     {
       "name": "multi-threaded Stockfish runs when the page is cross-origin isolated",
       "ok": true,
-      "ms": 1996
+      "ms": 2389
     },
     {
       "name": "bots: choose a bot and a colour, Play starts the game against it straight away",
       "ok": true,
-      "ms": 1264
+      "ms": 1338
     },
     {
       "name": "Maia bot: the network downloads, runs in a worker, and replies with a legal human-like move",
       "ok": true,
-      "ms": 2150
+      "ms": 2216
     },
     {
       "name": "board resizes by dragging its corner, stays inside the screen, and the size is remembered",
       "ok": true,
-      "ms": 15151
+      "ms": 16408
     },
     {
       "name": "sidebar collapses to icons, keeps working for keyboard and screen readers, and stays collapsed after a reload",
       "ok": true,
-      "ms": 1414
+      "ms": 1461
     },
     {
       "name": "a page file that fails to load once is retried and the page appears",
       "ok": true,
-      "ms": 1579
+      "ms": 1569
     },
     {
       "name": "engine rejects an illegal position instead of crashing (shows a readable message)",
       "ok": true,
-      "ms": 1814
+      "ms": 1833
     },
     {
       "name": "demo game: labelled as a demo, analysed in the browser, report and critical-move navigation work",
       "ok": true,
-      "ms": 14093
+      "ms": 14697
     },
     {
       "name": "analysis board: type moves, flip, copy FEN and PGN, save to notebook, threat check",
       "ok": true,
-      "ms": 2525
+      "ms": 2594
     },
     {
       "name": "PGN import: opens the game, shows it in the library, survives a reload, a repeat is refused as a duplicate",
       "ok": true,
-      "ms": 1994
+      "ms": 2083
     },
     {
       "name": "settings persist across reloads: dark theme, board colours, daily goal",
       "ok": true,
-      "ms": 1836
+      "ms": 1869
     },
     {
       "name": "backup, delete everything, restore: data comes back; a bad file is refused",
       "ok": true,
-      "ms": 2475
+      "ms": 2617
     },
     {
       "name": "play: vs engine, typed move, engine replies, takeback, resign, saved to the library",
       "ok": true,
-      "ms": 2246
+      "ms": 2660
     },
     {
       "name": "play: a timed game runs the clock and the flag falls",
       "ok": true,
-      "ms": 3239
+      "ms": 3202
     },
     {
       "name": "engine vs engine match lab: a 1-game series runs to the end, is saved, and can be replayed in analysis",
       "ok": true,
-      "ms": 6627
+      "ms": 7253
     },
     {
       "name": "puzzles [seeded puzzle]: a wrong move is explained, retry works, an engine-approved alternative is accepted, results are recorded",
       "ok": true,
-      "ms": 3658
+      "ms": 3195
     },
     {
       "name": "from imported games to training: analysis, weaknesses, honest strength output, generated puzzles with a verified solution",
       "ok": true,
-      "ms": 23442
+      "ms": 25459
     },
     {
       "name": "Chess.com [MOCKED API]: import, profile card, duplicates, caching of complete months",
       "ok": true,
-      "ms": 3892
+      "ms": 3534
     },
     {
       "name": "Chess.com [MOCKED API]: unknown user, network failure, rate limiting with retry, cancel",
       "ok": true,
-      "ms": 13112
+      "ms": 13157
     },
     {
       "name": "endgame lab: pick a lesson, move, the engine defends, the move is graded, hint and idea open",
       "ok": true,
-      "ms": 2555
+      "ms": 2706
     },
     {
       "name": "notebook: create, add a variation, save, survives a reload, delete",
       "ok": true,
-      "ms": 2876
+      "ms": 3009
     },
     {
       "name": "openings: add a repertoire line, a wrong move is refused, the right line completes, bad input is explained",
       "ok": true,
-      "ms": 5811
+      "ms": 6005
     },
     {
       "name": "calendar: practice shows up on today and the day detail explains it",
       "ok": true,
-      "ms": 3064
+      "ms": 2803
     },
     {
       "name": "auto-analysis: imported games are analysed in the background without being asked, two at a time",
       "ok": true,
-      "ms": 11136
+      "ms": 11758
     },
     {
       "name": "auto-analysis can be switched off: imported games stay unanalysed",
       "ok": true,
-      "ms": 10069
+      "ms": 10172
     },
     {
       "name": "game-based training tools: guess the move, candidate moves, blunder prevention, mistake replay, reflection",
       "ok": true,
-      "ms": 42045
+      "ms": 47216
     },
     {
       "name": "daily session and progress: steps from your data, a review and a retest count, streak, charts, accessible in both themes",
       "ok": true,
-      "ms": 30039
+      "ms": 31477
     },
     {
       "name": "grade stats: brilliant count opens the list of brilliant moves and links to the game; other grades are counts",
       "ok": true,
-      "ms": 15750
+      "ms": 19286
     },
     {
       "name": "game review: grades for both players, guided review, retry a mistake with the engine's move, accessible in both themes",
       "ok": true,
-      "ms": 19602
+      "ms": 21577
     },
     {
       "name": "time use, theory and opponent notes, human-like opponent, play from your mistake, endgame record",
       "ok": true,
-      "ms": 26554
+      "ms": 26116
     },
     {
       "name": "installable and offline: manifest and icons are valid, the app and the engine still work with the network off",
       "ok": true,
-      "ms": 3172
+      "ms": 3758
     },
     {
       "name": "automatic backup to a chosen folder: files written once a day style, only its own files rotated, settings never exported",
       "ok": true,
-      "ms": 3757
+      "ms": 3953
     },
     {
       "name": "accessibility (axe-core): every page, light and dark on desktop, light and dark on a phone",
       "ok": true,
-      "ms": 126368
+      "ms": 127437
     },
     {
       "name": "accessibility (axe-core): pages with real content and open dialogs (analysed game, insights, puzzles, play, onboarding, delete dialog)",
       "ok": true,
-      "ms": 58347
+      "ms": 56640
     },
     {
       "name": "keyboard only: skip link, tab order reaches the main content, board pieces are named, typed moves work without a mouse",
       "ok": true,
-      "ms": 2221
+      "ms": 2209
     }
   ]
 }

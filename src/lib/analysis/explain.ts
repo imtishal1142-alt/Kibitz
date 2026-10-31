@@ -8,7 +8,7 @@ import { CLASS_GLYPH, CLASS_LABEL, lossClassOf } from '../chess/classify';
 import { forMover, formatScore, winPctFor } from '../chess/eval';
 import { formatClock, materialCount, normalizeFen, phaseOf, uciLineToSan } from '../chess/rules';
 import { settledMaterial } from './grades';
-import { describeMove, pawnStructure, PIECE_NAME, whatItDoes } from './tactics';
+import { describeMove, pawnStructure, PIECE_NAME, VAL, whatItDoes } from './tactics';
 import type { MoveFacts } from './tactics';
 
 export type Category =
@@ -94,6 +94,10 @@ export interface Explanation {
   };
   /** True when every quoted variation was replayed and found legal. */
   verified: boolean;
+  /** What the move threatens to do next (found by passing the move and looking for forcing ideas), or null. */
+  threat: string | null;
+  /** The opponent's best reply from the engine line, with what it does. */
+  reply: string | null;
 }
 
 export const moveLabel = (m: Pick<MoveAnalysis, 'ply' | 'color' | 'san'>): string => `${Math.ceil(m.ply / 2)}${m.color === 'w' ? '.' : '...'}${m.san}`;
@@ -138,7 +142,66 @@ function undevelopedMinors(fen: string, color: 'w' | 'b'): number {
 
 const nm = (p: keyof typeof PIECE_NAME): string => PIECE_NAME[p];
 
+const RANK_WORD = { mate: 'checkmate', fork: 'a fork', win: 'winning material', pin: 'a pin', skewer: 'a skewer', disc: 'a discovered attack' } as const;
+
+/** What the side that just moved threatens to do next, found by handing the move back to it (a "null move"). */
+export function threatAfter(fenAfter: string, mover: 'w' | 'b'): string | null {
+  let chess: Chess;
+  try {
+    chess = new Chess(normalizeFen(fenAfter));
+  } catch {
+    return null;
+  }
+  if (chess.turn() === mover || chess.inCheck()) return null;
+  const parts = normalizeFen(fenAfter).split(' ');
+  parts[1] = mover;
+  parts[3] = '-';
+  let swapped: Chess;
+  try {
+    swapped = new Chess(parts.join(' '));
+  } catch {
+    return null;
+  }
+  let best: { score: number; kind: keyof typeof RANK_WORD; facts: MoveFacts } | null = null;
+  for (const mv of swapped.moves({ verbose: true })) {
+    const facts = describeMove(swapped.fen(), mv.from + mv.to + (mv.promotion ?? ''));
+    if (!facts) continue;
+    let score = 0;
+    let kind: keyof typeof RANK_WORD = 'win';
+    if (facts.mate) { score = 100; kind = 'mate'; }
+    else if (facts.fork) { score = 8; kind = 'fork'; }
+    else if (facts.capture && (!facts.capture.defended || facts.capture.gain >= 3) && !facts.movedPieceUnsafe) { score = 4 + facts.capture.gain; kind = 'win'; }
+    else if (facts.skewers.some((k) => VAL[k.front.piece] > VAL[k.behind.piece] && VAL[k.behind.piece] >= 3)) { score = 5; kind = 'skewer'; }
+    else if (facts.pins.some((k) => k.pinned.piece !== 'p' && VAL[k.behind.piece] > VAL[k.pinned.piece])) { score = 4; kind = 'pin'; }
+    else if (facts.discovered.length) { score = 4; kind = 'disc'; }
+    if (score > (best?.score ?? 0)) best = { score, kind, facts };
+  }
+  if (!best || best.score < 4) return null;
+  const doing = whatItDoes(best.facts).slice(0, 2).join(', and ');
+  return `It threatens ${best.facts.san} next, which ${doing || RANK_WORD[best.kind]}.`;
+}
+
 export function explainMove(m: MoveAnalysis, a: GameAnalysis): Explanation {
+  const base = explainMoveCore(m, a);
+  if (m.cls === 'forced') return { ...base, threat: null, reply: null };
+  let threat: string | null = null;
+  let reply: string | null = null;
+  try {
+    threat = threatAfter(m.fenAfter, m.color);
+    const pv = a.positions[m.ply]?.lines[0]?.pv ?? [];
+    const chk = uciLineToSan(m.fenAfter, pv, 3);
+    if (chk.valid && chk.sans.length) {
+      const facts = describeMove(m.fenAfter, pv[0]!);
+      const does = facts ? whatItDoes(facts).slice(0, 2) : [];
+      reply = `${m.color === 'w' ? 'Black' : 'White'}'s best reply is ${chk.sans[0]}${does.length ? `, which ${does.join(', and ')}` : ''}.`;
+    }
+  } catch {
+    /* the extra notes are optional */
+  }
+  return { ...base, threat, reply };
+}
+
+function explainMoveCore(m: MoveAnalysis, a: GameAnalysis): Omit<Explanation, 'threat' | 'reply'> {
   const label = moveLabel(m);
   const evBefore = formatScore(forMover(m.evalBefore, m.color));
   const evAfter = formatScore(forMover(m.evalAfter, m.color));

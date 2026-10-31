@@ -53,6 +53,7 @@ export function useSessionView() {
       unreviewed: unreviewed ? { id: unreviewed.game.id, title: gameTitle(unreviewed.game) } : null,
       reflectedToday,
       today,
+      dateKey: todayKey,
     });
     return { loading: false as const, session, streak: streakInfo(calendar.data, todayKey), todayKey };
   }, [games.data, analyses.data, srs.data, calendar.data, reflections.data, retests.data, reviewed.data, prefs.includeDemoInStats, prefs.dailyGoal]);

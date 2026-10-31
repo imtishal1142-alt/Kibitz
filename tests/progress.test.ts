@@ -136,3 +136,23 @@ describe('is practice working?', () => {
     expect(practiceFindings(recent, mk('r', 8), { defense: 25 }, now)).toEqual([]); // nothing to compare with
   });
 });
+
+describe('daily variety', () => {
+  const base = { gamesTotal: 5, analysedGames: 5, duePuzzles: 0, freshPuzzles: 0, dailyGoal: 8, retestable: 0, weakness: null, unreviewed: null, reflectedToday: false };
+  it('adds one rotating exercise that changes from day to day and is not the weakness exercise', () => {
+    const picks = new Set<string>();
+    for (let d = 1; d <= 10; d++) {
+      const s = buildSession({ ...base, dateKey: `2026-11-${String(d).padStart(2, '0')}` });
+      const v = s.steps.find((x) => x.id === 'variety');
+      expect(v).toBeTruthy();
+      picks.add(v!.to);
+    }
+    expect(picks.size).toBe(5);
+    const w = buildSession({ ...base, weakness: { category: 'endgame-technique', label: 'Endgames' }, dateKey: '2026-11-02' });
+    expect(w.steps.find((x) => x.id === 'variety')!.to).not.toBe('/train/endgames');
+  });
+  it('is complete once a lesson was done that the weakness step did not use', () => {
+    const s = buildSession({ ...base, dateKey: '2026-11-02', today: { date: 'd', puzzles: 0, puzzlesCorrect: 0, reviews: 0, gamesAnalyzed: 0, lessons: 1, minutes: 0, played: 0 } });
+    expect(s.steps.find((x) => x.id === 'variety')!.complete).toBe(true);
+  });
+});
