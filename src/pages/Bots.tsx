@@ -77,7 +77,7 @@ export default function Bots() {
             {BOT_TIERS.map((tier) => (
               <div key={tier} className="bots-tier">
                 <h3 className="bots-tier-h">
-                  {tier} <span className="muted small">{BOTS.filter((b) => b.tier === tier).length} bots</span>
+                  {tier === 'Maia' ? 'Learned from human games (Maia)' : tier} <span className="muted small">{BOTS.filter((b) => b.tier === tier).length} bots</span>
                 </h3>
                 <ul className="bots-grid list-plain">
                   {BOTS.filter((b) => b.tier === tier).map((b) => (

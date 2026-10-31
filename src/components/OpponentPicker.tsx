@@ -43,8 +43,20 @@ export function OpponentPicker({ value, onChange, idPrefix, timed }: { value: Op
               { value: 'skill', label: 'Skill Level' },
               { value: 'beginner', label: 'Shallow' },
               { value: 'human', label: 'Human-like' },
+              { value: 'maia', label: 'Maia' },
             ]}
           />
+          {value.mode === 'maia' ? (
+            <Field label={`Maia rating band: ${value.maia ?? 1500}`} hint="A neural network trained on Lichess games of players in this band (Lichess scale, which differs from Chess.com's). It chooses a move like those players do, with no search, so it also makes their kinds of mistakes. It is not a rating for this opponent." htmlFor={`${idPrefix}-maia`}>
+              <select id={`${idPrefix}-maia`} className="select" value={value.maia ?? 1500} onChange={(e) => set({ maia: Number(e.target.value) })}>
+                {[1100, 1300, 1500, 1700, 1900].map((r) => (
+                  <option key={r} value={r}>
+                    {r}
+                  </option>
+                ))}
+              </select>
+            </Field>
+          ) : null}
           {value.mode === 'elo' ? (
             <Field label={`UCI_Elo: ${value.elo}`} hint="Stockfish's own scale, from its engine-vs-engine rating list. It is not a Chess.com, Lichess or FIDE rating, and people usually find it harder or easier than the number suggests." htmlFor={`${idPrefix}-elo`}>
               <input id={`${idPrefix}-elo`} type="range" min={ELO_MIN} max={ELO_MAX} step={10} value={value.elo} onChange={(e) => set({ elo: clamp(Number(e.target.value), ELO_MIN, ELO_MAX) })} style={{ accentColor: 'var(--accent)' }} />

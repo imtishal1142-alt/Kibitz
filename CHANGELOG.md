@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.4.1
+
+**Maia bots.** Five new opponents, Maia 1100, 1300, 1500, 1700 and 1900: neural networks trained on human Lichess games, so they play the openings and make the mistakes of people at that level. They also appear as an opponent type in Play and in the Match Lab. They run in a Web Worker with a small runner written for this project (no search; about a tenth of a second per move on a laptop). The networks (GPL-3.0, CSSLab) download the first time one is played. Lc0 itself could not be added; see `docs/LIMITATIONS.md`.
+
 ## 0.4.0
 
 **Look, from your Chess.com screenshots (structure and feel only; no artwork, names or icons of theirs).** The game review panel has a dark title bar, a coach bubble ("There are 4 critical moments…"), white and dark accuracy chips, grade counts on either side of a centred icon, and a large Start review button pinned to the bottom. Player strips have an avatar tile and a bolder clock. The Desk opens with a hero: your name and streak, Start game, Play bots, Engine vs engine, Analysis board, and three board cards (puzzles from your games, today's training, your last game). Pages fade in; cards lift on hover; all motion obeys the reduced-motion setting.

@@ -9,7 +9,7 @@
 // people when it is allowed to search deeply.
 import type { GoParams } from './uci';
 
-export type StrengthMode = 'full' | 'elo' | 'skill' | 'beginner' | 'human';
+export type StrengthMode = 'full' | 'elo' | 'skill' | 'beginner' | 'human' | 'maia';
 /** A real, modest bias in which move a human-like opponent prefers among its candidates (see human.ts). */
 export type BotStyle = 'attacker' | 'trader' | 'defender';
 
@@ -22,11 +22,16 @@ export interface OpponentConfig {
   /** Optional depth cap. Always applied for 'beginner'. */
   depthCap?: number;
   useClock: boolean;
+  /** Rating band of the Maia network (mode 'maia'): 1100, 1300, 1500, 1700 or 1900, Lichess scale. */
+  maia?: number;
   /** Move-choice bias, used by the human-like mode only. */
   style?: BotStyle;
   /** Display name of a bot (from the Bots page). */
   name?: string;
 }
+
+const MAIA = [1100, 1300, 1500, 1700, 1900];
+const nearestMaiaRating = (r: number): number => MAIA.reduce((b, x) => (Math.abs(x - r) < Math.abs(b - r) ? x : b), 1100);
 
 export const ELO_MIN = 1320;
 export const ELO_MAX = 3190;
@@ -58,6 +63,7 @@ export function optionsFor(c: OpponentConfig): Record<string, string | number | 
   switch (c.mode) {
     case 'full':
     case 'human':
+    case 'maia':
       return { UCI_LimitStrength: false, 'Skill Level': 20 };
     case 'elo':
       return { UCI_LimitStrength: true, UCI_Elo: clamp(c.elo, ELO_MIN, ELO_MAX), 'Skill Level': 20 };
@@ -93,6 +99,8 @@ export function describeConfig(c: OpponentConfig): string {
       return `Stockfish Skill Level ${c.skill}, ${think}${cap}`;
     case 'beginner':
       return `Stockfish Skill Level ${c.skill}, depth ${c.depthCap ?? 2}`;
+    case 'maia':
+      return `Maia ${c.maia ?? 1500}: a neural network trained on games of people rated about ${c.maia ?? 1500} on Lichess (Lichess scale, not Chess.com), one move choice per turn with no search`;
     case 'human':
       return `Human-like opponent, carefulness ${c.skill} of 20 (full-strength Stockfish picks among its top moves), ${think}${cap}`;
   }
@@ -101,12 +109,13 @@ export function describeConfig(c: OpponentConfig): string {
 export function sanitizeConfig(c: Partial<OpponentConfig> | undefined): OpponentConfig {
   const m = { ...DEFAULT_OPPONENT, ...c };
   return {
-    mode: (['full', 'elo', 'skill', 'beginner', 'human'] as const).includes(m.mode) ? m.mode : 'elo',
+    mode: (['full', 'elo', 'skill', 'beginner', 'human', 'maia'] as const).includes(m.mode) ? m.mode : 'elo',
     elo: clamp(m.elo, ELO_MIN, ELO_MAX),
     skill: clamp(m.skill, 0, 20),
     movetimeMs: clamp(m.movetimeMs, 20, 60_000),
     depthCap: m.depthCap ? clamp(m.depthCap, 1, 30) : undefined,
     useClock: !!m.useClock,
+    maia: m.mode === 'maia' ? nearestMaiaRating(m.maia ?? 1500) : undefined,
     style: m.style === 'attacker' || m.style === 'trader' || m.style === 'defender' ? m.style : undefined,
     name: typeof m.name === 'string' && m.name.trim() ? m.name.trim().slice(0, 40) : undefined,
   };

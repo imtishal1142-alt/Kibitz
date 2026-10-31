@@ -7,6 +7,7 @@ Kibitz is licensed under the GNU General Public License v3.0 or later (see `LICE
 | Component | Version | Licence | Notes |
 | --- | --- | --- | --- |
 | **Stockfish.js** (Chess.com, LLC), built from **Stockfish** (T. Romstad, M. Costalba, J. Kiiski, G. Linscott and contributors) | 19.0.1 | **GPL-3.0** | The engine, as WebAssembly and asm.js, copied from the `stockfish` npm package into `/engines/` together with its licence text (`LICENSE-stockfish-GPL-3.0.txt`) and a notice. Sources: https://github.com/nmrugg/stockfish.js and https://github.com/official-stockfish/Stockfish. Because the app distributes it, the app as a whole is distributed under GPL-3.0-or-later and the corresponding source must be offered to those who receive it. |
+| **Maia networks** (`public/maia/maia-1100.pb.gz` to `maia-1900.pb.gz`) | maia_weights from the CSSLab repository | **GPL-3.0** | Networks in Lc0 file format trained on human games, by R. McIlroy-Young, S. Sen, J. Kleinberg and A. Anderson ("Aligning Superhuman AI with Human Behavior: Chess as a Model System", KDD 2020). Source: https://github.com/CSSLab/maia-chess. They are run by Kibitz's own small runner (`src/lib/engine/lc0net.ts`), which was written from the network file format and contains no Lc0 code. |
 | **chess.js** | 1.4.0 | BSD-2-Clause | Rules, move generation, PGN and FEN. |
 | **React**, **React DOM** | 19.3.0 | MIT | |
 | **React Router** (`react-router-dom`) | 7.18.4 | MIT | |

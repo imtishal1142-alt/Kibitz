@@ -139,6 +139,23 @@ await test('bots: choose a bot and a colour, Play starts the game against it str
   await context.close();
 });
 
+await test('Maia bot: the network downloads, runs in a worker, and replies with a legal human-like move', async () => {
+  const { page, problems, context, go } = await session();
+  await go('bots');
+  await page.getByRole('heading', { name: 'Bots', level: 1 }).waitFor();
+  await page.getByRole('button', { name: 'Maia 1500', exact: true }).click();
+  assert(/Maia 1500/.test(await page.locator('.bots-selected').innerText()), 'the Maia bot should be described');
+  await page.getByRole('button', { name: 'Play Maia 1500' }).click();
+  await page.getByRole('heading', { name: /You vs Maia 1500/ }).waitFor({ timeout: 20000 });
+  const box = page.getByRole('textbox', { name: /Type a move/ });
+  await box.fill('e4');
+  await box.press('Enter');
+  await page.waitForFunction(() => document.querySelectorAll('[aria-label="Moves"] .mv, [aria-label="Moves"] button').length >= 2, null, { timeout: 60000 });
+  await page.getByText(/Engine played/).waitFor({ timeout: 30000 });
+  noProblems(problems, 'maia');
+  await context.close();
+});
+
 await test('sidebar collapses to icons, keeps working for keyboard and screen readers, and stays collapsed after a reload', async () => {
   const { page, problems, context, go } = await session({ viewport: { width: 1440, height: 900 } });
   await go('');

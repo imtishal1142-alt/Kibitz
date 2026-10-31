@@ -41,7 +41,7 @@ npm install
 npm run desktop:dist      # run this on the system you want an installer for
 ```
 
-- **On Windows** this makes `release/Kibitz Setup 0.3.1.exe` (installer) and a portable `.exe`. Building the installer needs a Windows machine (or Linux with Wine).
+- **On Windows** this makes `release/Kibitz Setup 0.4.1.exe` (installer) and a portable `.exe`. Building the installer needs a Windows machine (or Linux with Wine).
 - The packages were also built once from Linux (a Windows portable `.exe` and `.zip`, a Linux AppImage and `.deb`; about 100 to 160 MB each, too large to attach to the delivery, so build your own as above). Only the Linux builds were run and tested; **the Windows files have never been run on Windows**. None of the builds is code-signed, so Windows SmartScreen or macOS Gatekeeper will warn the first time (on Windows: "More info", then "Run anyway"). See [docs/LIMITATIONS.md](docs/LIMITATIONS.md).
 - Your data lives in the app's own data folder (on Windows `%APPDATA%\chess-coach`). Use **Settings, Automatic backup** to have a backup file written daily to a folder you choose.
 - Desktop tests: `npm run build`, then `xvfb-run -a node tests/e2e/desktop.mjs` on Linux without a screen, or `node tests/e2e/desktop.mjs` with one. `KIBITZ_APP=release/linux-unpacked/kibitz` tests the packaged build.
