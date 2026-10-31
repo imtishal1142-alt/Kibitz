@@ -328,7 +328,7 @@ function Lab({ series: initial, alternate, time, onExit, onRestart }: { series: 
         <div className="stack-sm">
           <PlayerStrip {...strip('b')} />
           <div className="board-wrap">
-            <Board fen={session?.fen ?? series.startFen} orientation="w" movable={null} lastMove={session?.lastMove ?? null} ariaLabel="Engine match board" />
+            <Board resizable fen={session?.fen ?? series.startFen} orientation="w" movable={null} lastMove={session?.lastMove ?? null} ariaLabel="Engine match board" />
           </div>
           <PlayerStrip {...strip('w')} />
           <div className="controls" role="group" aria-label="Series controls">

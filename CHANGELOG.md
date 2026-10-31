@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.5.0
+
+- Black-and-white look: white-dominant in light mode, black-dominant in dark mode, black-and-white board by default (people on the old green default move to it once; other board colours are kept). Move-grade colours stay, because they carry meaning.
+- Board size: drag the bottom-right corner of the board to make it bigger or smaller (Analysis, Play, Match, Puzzles). It never grows past what fits on screen, the page does not move, the size is remembered, double-click resets, and the arrow keys work on the handle. Settings has a reset button.
+- "Fix this first" card on the desk: your most important recurring weakness, how often it happens, and what to practise.
+- Review notes: each move now also says what it threatens next and what the opponent's best reply is (from the engine line), both checked for legality.
+- Today's session adds one rotating "something different" exercise (guess the move, endgame lesson, candidate moves, blunder prevention, opening check), changing daily and skipping the one already chosen for your weakness.
+- Rounder buttons, flatter cards, sharper board frame.
+- No further engines added: none of the other open-source engines found could be run in the browser with a compatible licence (see docs/LIMITATIONS.md).
+
 ## 0.4.1
 
 **Maia bots.** Five new opponents, Maia 1100, 1300, 1500, 1700 and 1900: neural networks trained on human Lichess games, so they play the openings and make the mistakes of people at that level. They also appear as an opponent type in Play and in the Match Lab. They run in a Web Worker with a small runner written for this project (no search; about a tenth of a second per move on a laptop). The networks (GPL-3.0, CSSLab) download the first time one is played. Lc0 itself could not be added; see `docs/LIMITATIONS.md`.

@@ -5,6 +5,10 @@ export type PresetId = 'quick' | 'standard' | 'deep';
 export interface Prefs {
   theme: ThemeChoice;
   boardTheme: string;
+  /** Board size as a percentage of the automatic size (50 to 100, where 100 is the largest that fits the screen). */
+  boardScale: number;
+  /** Look version: lets a new default look replace the old board colours once. */
+  look: number;
   pieceSet: 'classic' | 'glyph';
   coordinates: boolean;
   highlightMoves: boolean;
@@ -39,7 +43,9 @@ export interface Prefs {
 
 export const DEFAULT_PREFS: Prefs = {
   theme: 'system',
-  boardTheme: 'green',
+  boardTheme: 'mono',
+  boardScale: 90,
+  look: 2,
   pieceSet: 'classic',
   coordinates: true,
   highlightMoves: true,
@@ -86,6 +92,13 @@ function read(): Prefs {
     /* storage unavailable: fall back to memory */
   }
   const merged = { ...DEFAULT_PREFS, ...stored };
+  // 0.5 look: black and white. Anyone still on the old default colours moves to it once; later choices are kept.
+  if ((stored.look ?? 1) < 2) {
+    merged.boardScale = 90;
+    if (!stored.boardTheme || stored.boardTheme === 'green') merged.boardTheme = 'mono';
+    merged.look = 2;
+  }
+  merged.boardScale = Math.min(100, Math.max(50, Math.round(Number(merged.boardScale) || 90)));
   // Before 0.3 the default was written out as 'lite-wasm'; treat that as "automatic" unless it was a deliberate choice.
   if (merged.flavor === 'lite-wasm' && !merged.flavorChosen) merged.flavor = 'auto';
   return merged;
@@ -137,6 +150,9 @@ export function subscribePrefs(cb: () => void): () => void {
 }
 
 export const BOARD_THEMES: Record<string, { label: string; light: string; dark: string }> = {
+  mono: { label: 'Black and white', light: '#ececec', dark: '#7b7b7b' },
+  graphite: { label: 'Graphite', light: '#c9c9c9', dark: '#4a4a4a' },
+  paper: { label: 'Paper', light: '#fafafa', dark: '#a9a9a9' },
   green: { label: 'Green', light: '#eeeed2', dark: '#769656' },
   brown: { label: 'Brown', light: '#f0d9b5', dark: '#b58863' },
   dusk: { label: 'Dusk', light: '#d6dce8', dark: '#6f86a8' },

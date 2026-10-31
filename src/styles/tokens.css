@@ -1,26 +1,25 @@
 /* Design tokens. Light is the default; dark follows the system unless the user picks one
-   (html[data-theme]). The palette is a warm charcoal with a green accent, in the manner of popular chess sites, without
-   using any of their artwork. Every colour that carries meaning is paired with a glyph or a word in the markup, so
+   (html[data-theme]). The palette is a strict black and white (white-dominant in light mode, black-dominant in dark mode); only the move-grade colours carry hue. Every colour that carries meaning is paired with a glyph or a word in the markup, so
    nothing relies on colour alone. */
 :root {
   --font-display: 'Bricolage Grotesque Variable', 'Avenir Next', 'Segoe UI', system-ui, sans-serif;
   --font-body: 'IBM Plex Sans', 'Segoe UI', system-ui, -apple-system, sans-serif;
 
-  --paper: #ebe9e5;
-  --paper-2: #e1ded9;
+  --paper: #f6f6f6;
+  --paper-2: #ececec;
   --card: #ffffff;
-  --card-2: #f6f5f2;
-  --ink: #262421;
-  --ink-2: #4a4743;
-  --ink-3: #625e59;
-  --line: #d3d0ca;
-  --line-2: #e5e2dd;
-  --accent: #3b6016;
-  --accent-2: #2d4c10;
-  --accent-tint: #e2eed3;
+  --card-2: #f9f9f9;
+  --ink: #0b0b0b;
+  --ink-2: #333333;
+  --ink-3: #595959;
+  --line: #dcdcdc;
+  --line-2: #ebebeb;
+  --accent: #0b0b0b;
+  --accent-2: #262626;
+  --accent-tint: #ececec;
   --on-accent: #ffffff;
-  --brass: #7a5a08;
-  --brass-tint: #f6ecd0;
+  --brass: #555555;
+  --brass-tint: #ececec;
   --c-brilliant: #0a6e60;
   --c-great: #2a5b8a;
   --c-best: #3b6a17;
@@ -50,11 +49,11 @@
   --warn-tint: #faedc2;
   --bad-tint: #f9d9d5;
   --tide-light: #ffffff;
-  --tide-dark: #4a4743;
-  --hi-last: rgba(255, 224, 51, 0.42);
-  --hi-select: rgba(255, 224, 51, 0.7);
-  --shadow-float: 0 10px 30px rgba(38, 36, 33, 0.18), 0 2px 6px rgba(38, 36, 33, 0.1);
-  --focus: 0 0 0 3px rgba(59, 96, 22, 0.5);
+  --tide-dark: #3a3a3a;
+  --hi-last: rgba(0, 0, 0, 0.16);
+  --hi-select: rgba(0, 0, 0, 0.3);
+  --shadow-float: 0 12px 32px rgba(0, 0, 0, 0.14), 0 2px 6px rgba(0, 0, 0, 0.08);
+  --focus: 0 0 0 3px rgba(0, 0, 0, 0.55);
 
   /* Fills of the round grade icons (the same in both themes; the glyph on them is always dark or white as set in app.css). */
   --g-brilliant: #26c2a3;
@@ -69,12 +68,12 @@
   --g-blunder: #ca3431;
   --g-forced: #9a9894;
 
-  --rail-bg: #262421;
-  --rail-ink: #c4c1bc;
-  --rail-hover: #34312d;
-  --rail-on: #9bd05f;
-  --rail-on-bg: #34312d;
-  --accent-edge: #28440d;
+  --rail-bg: #ffffff;
+  --rail-ink: #4a4a4a;
+  --rail-hover: #f0f0f0;
+  --rail-on: #0b0b0b;
+  --rail-on-bg: #ececec;
+  --accent-edge: #000000;
   --radius: 10px;
   --radius-sm: 7px;
   --rail-w: 88px;
@@ -84,25 +83,26 @@
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
-    --paper: #2b2926;
-    --paper-2: #353230;
-    --card: #262522;
-    --card-2: #2f2d2a;
-    --ink: #f3f2ef;
-    --ink-2: #c4c1bc;
-    --ink-3: #a5a29c;
-    --line: #403d39;
-    --line-2: #34312d;
-    --accent: #81b64c;
-    --accent-2: #a4d06a;
-    --accent-tint: #2f3b22;
-  --accent-edge: #4c7a26;
-  --rail-bg: #1f1e1b;
-  --rail-hover: #2b2926;
-  --rail-on-bg: #2b2926;
-    --on-accent: #1b1a18;
-    --brass: #d6b25a;
-    --brass-tint: #332b15;
+    --paper: #0a0a0a;
+    --paper-2: #161616;
+    --card: #111111;
+    --card-2: #181818;
+    --ink: #f4f4f4;
+    --ink-2: #c8c8c8;
+    --ink-3: #a0a0a0;
+    --line: #2a2a2a;
+    --line-2: #1f1f1f;
+    --accent: #f4f4f4;
+    --accent-2: #ffffff;
+    --accent-tint: #222222;
+  --accent-edge: #bdbdbd;
+  --rail-bg: #000000;
+  --rail-hover: #161616;
+  --rail-ink: #b5b5b5;
+  --rail-on-bg: #1c1c1c;
+    --on-accent: #0a0a0a;
+    --brass: #b8b8b8;
+    --brass-tint: #222222;
     --c-brilliant: #3fd2b4;
     --c-great: #8bb0d6;
     --c-best: #9bd05f;
@@ -131,36 +131,37 @@
     --ok-tint: #2a3a1a;
     --warn-tint: #403513;
     --bad-tint: #3f1d1a;
-    --tide-light: #f3f2ef;
-    --tide-dark: #161512;
-    --hi-last: rgba(255, 224, 51, 0.34);
-    --hi-select: rgba(255, 224, 51, 0.6);
-    --shadow-float: 0 12px 34px rgba(0, 0, 0, 0.55), 0 2px 6px rgba(0, 0, 0, 0.4);
-    --focus: 0 0 0 3px rgba(129, 182, 76, 0.65);
+    --tide-light: #f0f0f0;
+    --tide-dark: #141414;
+    --hi-last: rgba(255, 255, 255, 0.22);
+    --hi-select: rgba(255, 255, 255, 0.4);
+    --shadow-float: 0 14px 36px rgba(0, 0, 0, 0.7), 0 2px 6px rgba(0, 0, 0, 0.5);
+    --focus: 0 0 0 3px rgba(255, 255, 255, 0.7);
     color-scheme: dark;
   }
 }
 
 :root[data-theme='dark'] {
-  --paper: #2b2926;
-  --paper-2: #353230;
-  --card: #262522;
-  --card-2: #2f2d2a;
-  --ink: #f3f2ef;
-  --ink-2: #c4c1bc;
-  --ink-3: #a5a29c;
-  --line: #403d39;
-  --line-2: #34312d;
-  --accent: #81b64c;
-  --accent-2: #a4d06a;
-  --accent-tint: #2f3b22;
-  --accent-edge: #4c7a26;
-  --rail-bg: #1f1e1b;
-  --rail-hover: #2b2926;
-  --rail-on-bg: #2b2926;
-  --on-accent: #1b1a18;
-  --brass: #d6b25a;
-  --brass-tint: #332b15;
+  --paper: #0a0a0a;
+  --paper-2: #161616;
+  --card: #111111;
+  --card-2: #181818;
+  --ink: #f4f4f4;
+  --ink-2: #c8c8c8;
+  --ink-3: #a0a0a0;
+  --line: #2a2a2a;
+  --line-2: #1f1f1f;
+  --accent: #f4f4f4;
+  --accent-2: #ffffff;
+  --accent-tint: #222222;
+  --accent-edge: #bdbdbd;
+  --rail-bg: #000000;
+  --rail-hover: #161616;
+  --rail-ink: #b5b5b5;
+  --rail-on-bg: #1c1c1c;
+  --on-accent: #0a0a0a;
+  --brass: #b8b8b8;
+  --brass-tint: #222222;
   --c-brilliant: #3fd2b4;
   --c-great: #8bb0d6;
   --c-best: #9bd05f;
@@ -189,11 +190,11 @@
   --ok-tint: #2a3a1a;
   --warn-tint: #403513;
   --bad-tint: #3f1d1a;
-  --tide-light: #f3f2ef;
-  --tide-dark: #161512;
-  --hi-last: rgba(255, 224, 51, 0.34);
-  --hi-select: rgba(255, 224, 51, 0.6);
-  --shadow-float: 0 12px 34px rgba(0, 0, 0, 0.55), 0 2px 6px rgba(0, 0, 0, 0.4);
-  --focus: 0 0 0 3px rgba(129, 182, 76, 0.65);
+  --tide-light: #f0f0f0;
+  --tide-dark: #141414;
+  --hi-last: rgba(255, 255, 255, 0.22);
+  --hi-select: rgba(255, 255, 255, 0.4);
+  --shadow-float: 0 14px 36px rgba(0, 0, 0, 0.7), 0 2px 6px rgba(0, 0, 0, 0.5);
+  --focus: 0 0 0 3px rgba(255, 255, 255, 0.7);
   color-scheme: dark;
 }

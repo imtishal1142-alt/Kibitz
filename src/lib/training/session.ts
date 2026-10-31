@@ -16,6 +16,8 @@ export interface SessionInput {
   unreviewed?: { id: string; title: string } | null;
   reflectedToday: boolean;
   today?: CalendarDay;
+  /** Local date (YYYY-MM-DD). When given, one rotating "something different" exercise is added each day. */
+  dateKey?: string;
 }
 
 export interface SessionStep {
@@ -63,6 +65,20 @@ export function weaknessRoute(c: Category): string {
   }
 }
 
+/** The exercises the daily rotation draws from: different skills on different days, so a session never becomes one routine. */
+export const VARIETY: { to: string; title: string; detail: string; minutes: number }[] = [
+  { to: '/train/guess', title: 'Guess the move', detail: 'Play through one of your games and guess each move before it is shown.', minutes: 6 },
+  { to: '/train/endgames', title: 'An endgame lesson', detail: 'One core endgame idea, checked by the engine.', minutes: 6 },
+  { to: '/train/candidates', title: 'Candidate moves', detail: 'Name your candidate moves before the engine shows its lines.', minutes: 5 },
+  { to: '/train/prevention', title: 'Blunder prevention', detail: 'Find the threat before choosing a move.', minutes: 5 },
+  { to: '/openings', title: 'Opening check', detail: 'Look at where you left your repertoire and fix one line.', minutes: 5 },
+];
+
+function dayNumber(key: string): number {
+  const [y, m, d] = key.split('-').map(Number);
+  return Math.floor(Date.UTC(y ?? 1970, (m ?? 1) - 1, d ?? 1) / 86_400_000);
+}
+
 const step = (id: string, title: string, detail: string, to: string, done: number, target: number, minutes: number): SessionStep => ({ id, title, detail, to, done: Math.min(done, target), target, minutes, complete: done >= target });
 
 export function buildSession(i: SessionInput): Session {
@@ -86,6 +102,13 @@ export function buildSession(i: SessionInput): Session {
     if (i.weakness) {
       const lessons = Math.max(0, (t?.lessons ?? 0) - (i.reflectedToday ? 1 : 0));
       steps.push(step('weakness', `Work on: ${i.weakness.label}`, 'Your most costly recurring mistake. This opens the exercise built for it.', weaknessRoute(i.weakness.category), lessons, 1, 5));
+    }
+    if (i.dateKey) {
+      const wRoute = i.weakness ? weaknessRoute(i.weakness.category) : null;
+      const pool = VARIETY.filter((v) => v.to !== wRoute);
+      const pick = pool[((dayNumber(i.dateKey) % pool.length) + pool.length) % pool.length]!;
+      const avail = Math.max(0, (t?.lessons ?? 0) - (i.reflectedToday ? 1 : 0) - (i.weakness ? 1 : 0));
+      steps.push(step('variety', `Something different: ${pick.title}`, pick.detail, pick.to, avail, 1, pick.minutes));
     }
     if (i.unreviewed) steps.push(step('reflect', 'Write a short reflection', 'Three questions about that game. It takes a few minutes and it sticks.', `/train/reflect/${i.unreviewed.id}`, i.reflectedToday ? 1 : 0, 1, 3));
   }

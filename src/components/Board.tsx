@@ -3,6 +3,7 @@ import type { Square } from 'chess.js';
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import { Chessboard, defaultPieces } from 'react-chessboard';
 import type { PieceRenderObject } from 'react-chessboard';
+import { BoardResizer } from './BoardResizer';
 import { BOARD_THEMES } from '../lib/storage/prefs';
 import { usePrefs } from '../hooks/usePrefs';
 import type { Color, MoveClass } from '../lib/types';
@@ -37,6 +38,8 @@ interface BoardProps {
   arrows?: BoardArrow[];
   marks?: Record<string, MarkKind>;
   ariaLabel?: string;
+  /** Show a corner handle to drag the board bigger or smaller. */
+  resizable?: boolean;
   /** Called when a square is clicked and no move was made (used by exercises that ask for a square). */
   onSquareClick?: (square: string) => void;
   /** Offer a "type a move" box under a movable board (the keyboard and screen-reader way to play). Default true. */
@@ -150,7 +153,7 @@ export function describePosition(chess: Chess): string {
   return `White: ${side('w')}. Black: ${side('b')}. ${chess.turn() === 'w' ? 'White' : 'Black'} to move.`;
 }
 
-export function Board({ fen, orientation = 'w', movable = null, onMove, lastMove, arrows, marks, ariaLabel, onSquareClick, typedMoves = true, badge }: BoardProps) {
+export function Board({ fen, orientation = 'w', movable = null, onMove, lastMove, arrows, marks, ariaLabel, onSquareClick, typedMoves = true, badge, resizable = false }: BoardProps) {
   const [prefs] = usePrefs();
   const reduced = useReducedMotion();
   const id = useId();
@@ -256,6 +259,8 @@ export function Board({ fen, orientation = 'w', movable = null, onMove, lastMove
             allowDrawingArrows: !movable,
             lightSquareStyle: { backgroundColor: theme.light },
             darkSquareStyle: { backgroundColor: theme.dark },
+            lightSquareNotationStyle: { color: theme.dark, fontWeight: 600 },
+            darkSquareNotationStyle: { color: theme.light, fontWeight: 600 },
             squareStyles,
             arrows: (arrows ?? []).map((a) => ({ startSquare: a.from, endSquare: a.to, color: a.color ?? ARROW_COLORS.best })),
             clearArrowsOnClick: true,
@@ -298,6 +303,7 @@ export function Board({ fen, orientation = 'w', movable = null, onMove, lastMove
             </div>
           </div>
         ) : null}
+        {resizable ? <BoardResizer /> : null}
       </div>
       {movable && typedMoves ? (
         <details className="typed-move" open={typedOpen} onToggle={(e) => (typedOpen = e.currentTarget.open)}>

@@ -671,7 +671,7 @@ kbd,
 }
 :root[data-theme='dark'] .toast-success,
 :root[data-theme='dark'] .toast-error {
-  color: #0d121e;
+  color: #000;
 }
 dialog.dialog {
   border: 1px solid var(--line);
@@ -1135,7 +1135,7 @@ table.table {
   font-weight: 800;
   line-height: 1;
   letter-spacing: -0.04em;
-  color: #1b1a18;
+  color: #0b0b0b;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
 }
 .gi-brilliant {
@@ -1233,12 +1233,12 @@ table.table {
   padding: 2px 6px;
   border-radius: 6px;
   background: var(--tide-light);
-  color: #131a2c;
+  color: #0b0b0b;
   border: 1px solid var(--line);
 }
 .score-pill-black {
   background: var(--tide-dark);
-  color: #f4f6fb;
+  color: #f4f4f4;
   border-color: transparent;
 }
 .ghost-input {
@@ -1264,7 +1264,7 @@ table.table {
   background: color-mix(in srgb, var(--accent) 28%, var(--paper-2));
 }
 .heat-2 {
-  background: color-mix(in srgb, var(--accent) 52%, var(--paper-2));
+  background: color-mix(in srgb, var(--accent) 38%, var(--paper-2));
 }
 .heat-3 {
   background: color-mix(in srgb, var(--accent) 76%, var(--paper-2));
@@ -1555,7 +1555,7 @@ svg[focusable='false'] {
   background: #fff;
 }
 .dot-b {
-  background: #262421;
+  background: #141414;
 }
 .review-acc {
   display: flex;
@@ -1813,7 +1813,7 @@ svg[focusable='false'] {
   color: var(--rail-ink);
 }
 .brand {
-  color: #fff;
+  color: var(--ink);
 }
 .rail-link {
   color: var(--rail-ink);
@@ -2155,7 +2155,7 @@ html[data-motion='off'] .shell {
 }
 .review-head {
   padding-block: 12px;
-  background: var(--rail-bg);
+  background: #0b0b0b;
   color: #fff;
   justify-content: center;
   position: relative;
@@ -2173,8 +2173,8 @@ html[data-motion='off'] .shell {
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background: var(--accent);
-  color: var(--on-accent);
+  background: #fff;
+  color: #0b0b0b;
 }
 .review-head .row {
   position: absolute;
@@ -2255,10 +2255,10 @@ html[data-motion='off'] .shell {
   padding: 4px 18px;
   border-radius: 8px;
   background: #fff;
-  color: #262421;
+  color: #141414;
 }
 .review-player:nth-child(2) .review-acc-num {
-  background: #3b3935;
+  background: #2e2e2e;
   color: #fff;
 }
 .review-table th[scope='row'] {
@@ -2296,23 +2296,23 @@ html[data-motion='off'] .shell {
   font-size: 1.25rem;
 }
 .strip-avatar-w {
-  background: #e9e7e3;
-  color: #3b3935;
+  background: #e8e8e8;
+  color: #2e2e2e;
 }
 .strip-avatar-b {
-  background: #4a4743;
-  color: #f3f2ef;
+  background: #3a3a3a;
+  color: #f4f4f4;
 }
 .clock {
-  background: #3b3935;
-  color: #c4c1bc;
+  background: #2e2e2e;
+  color: #c8c8c8;
   min-width: 6.2ch;
   padding: 6px 12px;
   font-size: 1.55rem;
 }
 .clock-run {
   background: #fff;
-  color: #262421;
+  color: #141414;
 }
 @keyframes pop-in {
   from {
@@ -2607,10 +2607,10 @@ html[data-motion='off'] .coach-bubble {
   background: #fff;
 }
 .bots-color-b {
-  background: #262421;
+  background: #141414;
 }
 .bots-color-r {
-  background: linear-gradient(135deg, #fff 50%, #262421 50%);
+  background: linear-gradient(135deg, #fff 50%, #141414 50%);
   color: #888;
 }
 @media (max-width: 1099px) {
@@ -2629,12 +2629,127 @@ html[data-motion='off'] .coach-bubble {
 .review-head .btn-quiet,
 .review-head .btn:not(.btn-primary) {
   background: transparent;
-  color: #e5e2dd;
-  border-color: #5a5650;
+  color: #e4e4e4;
+  border-color: #555555;
   box-shadow: none;
 }
 .review-head .btn-quiet:hover:not(:disabled),
 .review-head .btn:not(.btn-primary):hover:not(:disabled) {
-  background: #34312d;
+  background: #262626;
   color: #fff;
+}
+
+/* ---------------- 0.5: black-and-white look, board size, sleeker surfaces ---------------- */
+/* Board and its column follow the size slider (--bs, 1 = automatic). */
+.board-wrap {
+  max-width: min(100%, calc(max(100dvh - 290px, 380px) * var(--bs, 1)));
+}
+.analysis > :first-child {
+  max-width: calc(max(100dvh - 330px, 380px) * var(--bs, 1) + 38px);
+}
+.board-shell .board-wrap {
+  max-width: none;
+}
+@media (max-width: 1099px) {
+  .board-wrap {
+    max-width: min(100%, calc(100vw * var(--bs, 1)));
+  }
+  .analysis > :first-child {
+    max-width: 100%;
+  }
+}
+.board-frame {
+  border-radius: 4px;
+  box-shadow: 0 0 0 1px var(--ink), 0 18px 40px rgba(0, 0, 0, 0.16);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .board-frame {
+    box-shadow: 0 0 0 1px #555, 0 18px 40px rgba(0, 0, 0, 0.6);
+  }
+}
+:root[data-theme='dark'] .board-frame {
+  box-shadow: 0 0 0 1px #555, 0 18px 40px rgba(0, 0, 0, 0.6);
+}
+body {
+  background: var(--paper);
+  letter-spacing: -0.003em;
+}
+.sheet,
+.card {
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  box-shadow: none;
+}
+.btn {
+  border-radius: 999px;
+}
+.btn-primary {
+  box-shadow: none;
+  letter-spacing: 0.01em;
+}
+.btn-primary:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.22);
+}
+.btn-primary:active:not(:disabled) {
+  transform: none;
+  box-shadow: none;
+}
+.rail {
+  border-right: 1px solid var(--line);
+}
+.rail-link {
+  border-radius: 12px;
+}
+.rail-link[aria-current='page'] {
+  background: var(--ink);
+  color: var(--paper);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .rail-link[aria-current='page'] {
+    color: #0a0a0a;
+  }
+}
+:root[data-theme='dark'] .rail-link[aria-current='page'] {
+  color: #0a0a0a;
+}
+h1,
+h2,
+h3 {
+  letter-spacing: -0.02em;
+}
+.fix-first {
+  border-left: 4px solid var(--ink);
+}
+
+.board-resizer {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  z-index: 5;
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: end;
+  padding: 3px;
+  cursor: nwse-resize;
+  color: var(--ink);
+  background: linear-gradient(135deg, transparent 50%, rgba(255, 255, 255, 0.85) 50%);
+  opacity: 0.55;
+  touch-action: none;
+  transition: opacity 0.15s;
+}
+.board-resizer:hover,
+.board-resizer:focus-visible {
+  opacity: 1;
+}
+.board-resizer:focus-visible {
+  outline: 2px solid var(--ink);
+}
+:root[data-resizing='true'] {
+  cursor: nwse-resize;
+  user-select: none;
+}
+:root[data-resizing='true'] .board-wrap {
+  transition: none;
 }

@@ -418,7 +418,7 @@ function Workspace({ game, analysis, startFen, ucis, headers, initialPly, autoRe
             <EvalBar score={score ?? (analysis ? null : cp(0))} orientation={orientation} depth={live.depth || analysis?.depth} />
             <div className="board-col">
               <div className="board-wrap">
-                <Board fen={node.fen} orientation={orientation} movable="both" onMove={onMove} lastMove={node.uci ? sq(node.uci) : null} arrows={arrows} marks={marksMap} badge={badgeCls && node.uci ? { square: node.uci.slice(2, 4), cls: badgeCls } : null} ariaLabel={`Analysis board, position ${lastLabel}. ${node.fen.split(' ')[1] === 'w' ? 'White' : 'Black'} to move.`} />
+                <Board resizable fen={node.fen} orientation={orientation} movable="both" onMove={onMove} lastMove={node.uci ? sq(node.uci) : null} arrows={arrows} marks={marksMap} badge={badgeCls && node.uci ? { square: node.uci.slice(2, 4), cls: badgeCls } : null} ariaLabel={`Analysis board, position ${lastLabel}. ${node.fen.split(' ')[1] === 'w' ? 'White' : 'Black'} to move.`} />
               </div>
             </div>
           </div>

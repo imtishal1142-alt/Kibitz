@@ -156,6 +156,36 @@ await test('Maia bot: the network downloads, runs in a worker, and replies with 
   await context.close();
 });
 
+await test('board resizes by dragging its corner, stays inside the screen, and the size is remembered', async () => {
+  const { page, problems, context, go } = await session({ viewport: { width: 1440, height: 900 } });
+  await go('');
+  await page.getByRole('button', { name: /demo game/i }).first().click();
+  await page.getByRole('region', { name: 'Game review summary' }).waitFor({ timeout: 120000 });
+  const frame = page.locator('.board-frame').first();
+  const handle = page.locator('.board-resizer').first();
+  const before = await frame.boundingBox();
+  const h = await handle.boundingBox();
+  await page.mouse.move(h.x + h.width / 2, h.y + h.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(h.x - 100, h.y - 100, { steps: 6 });
+  await page.mouse.up();
+  const small = await frame.boundingBox();
+  assert(small.width < before.width - 40, 'dragging inward should shrink the board');
+  const h2 = await handle.boundingBox();
+  await page.mouse.move(h2.x + h2.width / 2, h2.y + h2.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(h2.x + 700, h2.y + 700, { steps: 6 });
+  await page.mouse.up();
+  const big = await frame.boundingBox();
+  assert(big.width > small.width + 40, 'dragging outward should enlarge the board');
+  assert(big.y + big.height <= 900, 'even the largest board fits the screen');
+  await page.reload();
+  await page.locator('.board-frame').first().waitFor();
+  assert(Math.abs((await page.locator('.board-frame').first().boundingBox()).width - big.width) < 3, 'the size should survive a reload');
+  noProblems(problems, 'resize');
+  await context.close();
+});
+
 await test('sidebar collapses to icons, keeps working for keyboard and screen readers, and stays collapsed after a reload', async () => {
   const { page, problems, context, go } = await session({ viewport: { width: 1440, height: 900 } });
   await go('');

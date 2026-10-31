@@ -387,7 +387,7 @@ function Game({ config, onExit, onRematch }: { config: Running; onExit: () => vo
         <div className="stack-sm">
           <PlayerStrip {...strip(top)} />
           <div className="board-wrap">
-            <Board fen={session.fen} typedMoves={false} orientation={orientation} movable={over || paused ? null : userColor} onMove={onMove} lastMove={session.lastMove} ariaLabel={`Game board. ${session.turn === 'w' ? 'White' : 'Black'} to move. ${status}`} />
+            <Board resizable fen={session.fen} typedMoves={false} orientation={orientation} movable={over || paused ? null : userColor} onMove={onMove} lastMove={session.lastMove} ariaLabel={`Game board. ${session.turn === 'w' ? 'White' : 'Black'} to move. ${status}`} />
           </div>
           <PlayerStrip {...strip(orientation)} />
           <div className="controls" role="group" aria-label="Game controls">
