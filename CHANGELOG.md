@@ -3,7 +3,7 @@
 ## 0.5.0
 
 - Black-and-white look: white-dominant in light mode, black-dominant in dark mode, black-and-white board by default (people on the old green default move to it once; other board colours are kept). Move-grade colours stay, because they carry meaning.
-- Board size: a slider with smaller/larger/reset under the board (Analysis, Play, Match) and in Settings; remembered, 60 to 140 percent.
+- Board size: drag the bottom-right corner of the board to make it bigger or smaller (Analysis, Play, Match, Puzzles). It never grows past what fits on screen, the page does not move, the size is remembered, double-click resets, and the arrow keys work on the handle. Settings has a reset button.
 - "Fix this first" card on the desk: your most important recurring weakness, how often it happens, and what to practise.
 - Rounder buttons, flatter cards, sharper board frame.
 - No further engines added: none of the other open-source engines found could be run in the browser with a compatible licence (see docs/LIMITATIONS.md).

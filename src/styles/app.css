@@ -2640,20 +2640,6 @@ html[data-motion='off'] .coach-bubble {
 }
 
 /* ---------------- 0.5: black-and-white look, board size, sleeker surfaces ---------------- */
-.board-size {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  justify-content: center;
-  color: var(--ink-3);
-}
-.board-size input[type='range'] {
-  width: min(180px, 40%);
-  accent-color: var(--ink);
-}
-.board-size .btn {
-  min-width: 34px;
-}
 /* Board and its column follow the size slider (--bs, 1 = automatic). */
 .board-wrap {
   max-width: min(100%, calc(max(100dvh - 290px, 380px) * var(--bs, 1)));
@@ -2676,7 +2662,12 @@ html[data-motion='off'] .coach-bubble {
   border-radius: 4px;
   box-shadow: 0 0 0 1px var(--ink), 0 18px 40px rgba(0, 0, 0, 0.16);
 }
-:root:not([data-theme='light']) .board-frame {
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .board-frame {
+    box-shadow: 0 0 0 1px #555, 0 18px 40px rgba(0, 0, 0, 0.6);
+  }
+}
+:root[data-theme='dark'] .board-frame {
   box-shadow: 0 0 0 1px #555, 0 18px 40px rgba(0, 0, 0, 0.6);
 }
 body {
@@ -2714,8 +2705,12 @@ body {
   background: var(--ink);
   color: var(--paper);
 }
-:root:not([data-theme='light']) .rail-link[aria-current='page'] {
-  background: var(--ink);
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .rail-link[aria-current='page'] {
+    color: #0a0a0a;
+  }
+}
+:root[data-theme='dark'] .rail-link[aria-current='page'] {
   color: #0a0a0a;
 }
 h1,
@@ -2725,4 +2720,36 @@ h3 {
 }
 .fix-first {
   border-left: 4px solid var(--ink);
+}
+
+.board-resizer {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  z-index: 5;
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: end;
+  padding: 3px;
+  cursor: nwse-resize;
+  color: var(--ink);
+  background: linear-gradient(135deg, transparent 50%, rgba(255, 255, 255, 0.85) 50%);
+  opacity: 0.55;
+  touch-action: none;
+  transition: opacity 0.15s;
+}
+.board-resizer:hover,
+.board-resizer:focus-visible {
+  opacity: 1;
+}
+.board-resizer:focus-visible {
+  outline: 2px solid var(--ink);
+}
+:root[data-resizing='true'] {
+  cursor: nwse-resize;
+  user-select: none;
+}
+:root[data-resizing='true'] .board-wrap {
+  transition: none;
 }
