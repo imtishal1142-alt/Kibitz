@@ -14,6 +14,7 @@ import { clearEvalCache } from '../lib/storage/repos';
 import { formatDateTime } from '../lib/ui/format';
 import { useQuery } from '../hooks/useQuery';
 import { usePrefs } from '../hooks/usePrefs';
+import { BoardSize } from '../components/BoardSize';
 import { engineStates, restartEngine, SLOT_IDS } from '../services/engines';
 import type { SlotId } from '../services/engines';
 import { playSound } from '../services/sound';
@@ -156,6 +157,8 @@ export default function Settings() {
           </div>
         </div>
         <div className="stack-sm">
+          <div className="label">Board size</div>
+          <BoardSize />
           <div className="label" id="set-board-l">Board colours</div>
           <div className="row" role="group" aria-labelledby="set-board-l">
             {Object.entries(BOARD_THEMES).map(([id, t]) => (

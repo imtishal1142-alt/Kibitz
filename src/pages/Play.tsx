@@ -26,6 +26,7 @@ import type { Engine } from '../lib/engine/engine';
 import { playSound, soundForSan } from '../services/sound';
 import { toast } from '../services/toast';
 import type { Color } from '../lib/types';
+import { BoardSize } from '../components/BoardSize';
 
 interface Setup {
   color: Color | 'random';
@@ -390,6 +391,7 @@ function Game({ config, onExit, onRematch }: { config: Running; onExit: () => vo
             <Board fen={session.fen} typedMoves={false} orientation={orientation} movable={over || paused ? null : userColor} onMove={onMove} lastMove={session.lastMove} ariaLabel={`Game board. ${session.turn === 'w' ? 'White' : 'Black'} to move. ${status}`} />
           </div>
           <PlayerStrip {...strip(orientation)} />
+          <BoardSize />
           <div className="controls" role="group" aria-label="Game controls">
             <button className="btn btn-icon" type="button" onClick={() => setOrientation((o) => (o === 'w' ? 'b' : 'w'))} aria-label="Flip the board" title="Flip the board (F)">
               <Icon name="flip" />

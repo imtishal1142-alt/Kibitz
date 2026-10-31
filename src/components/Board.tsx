@@ -256,6 +256,8 @@ export function Board({ fen, orientation = 'w', movable = null, onMove, lastMove
             allowDrawingArrows: !movable,
             lightSquareStyle: { backgroundColor: theme.light },
             darkSquareStyle: { backgroundColor: theme.dark },
+            lightSquareNotationStyle: { color: theme.dark, fontWeight: 600 },
+            darkSquareNotationStyle: { color: theme.light, fontWeight: 600 },
             squareStyles,
             arrows: (arrows ?? []).map((a) => ({ startSquare: a.from, endSquare: a.to, color: a.color ?? ARROW_COLORS.best })),
             clearArrowsOnClick: true,

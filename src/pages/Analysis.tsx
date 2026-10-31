@@ -37,6 +37,7 @@ import { ReviewCard, ReviewSummary } from './analysis/Review';
 import { reviewSteps } from '../lib/analysis/review';
 import type { RetryState } from './analysis/Review';
 import type { Color, GameAnalysis, GameRecord, MoveClass, Score } from '../lib/types';
+import { BoardSize } from '../components/BoardSize';
 
 type Tab = 'coach' | 'lines' | 'report';
 
@@ -423,6 +424,7 @@ function Workspace({ game, analysis, startFen, ucis, headers, initialPly, autoRe
             </div>
           </div>
           <PlayerStrip {...strip(bottom)} color={bottom} />
+          <BoardSize />
           <NavControls onFirst={first} onPrev={prev} onNext={next} onLast={last} onFlip={() => setOrientation((o) => (o === 'w' ? 'b' : 'w'))} canPrev={tree.prev(cur) !== null} canNext={tree.next(cur) !== null} />
           <div className="row" style={{ justifyContent: 'center' }}>
             <button className="btn btn-sm" type="button" aria-pressed={showArrows} onClick={() => setShowArrows((v) => !v)}>

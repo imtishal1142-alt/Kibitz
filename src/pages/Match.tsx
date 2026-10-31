@@ -24,6 +24,7 @@ import { releaseEngine, stopSearch } from '../services/engines';
 import { playSound, soundForSan } from '../services/sound';
 import { toast } from '../services/toast';
 import type { Color, GameResult } from '../lib/types';
+import { BoardSize } from '../components/BoardSize';
 
 const KEY = 'matches';
 const MAX_PLIES = 400;
@@ -331,6 +332,7 @@ function Lab({ series: initial, alternate, time, onExit, onRestart }: { series: 
             <Board fen={session?.fen ?? series.startFen} orientation="w" movable={null} lastMove={session?.lastMove ?? null} ariaLabel="Engine match board" />
           </div>
           <PlayerStrip {...strip('w')} />
+          <BoardSize />
           <div className="controls" role="group" aria-label="Series controls">
             {!finished ? (
               <>
