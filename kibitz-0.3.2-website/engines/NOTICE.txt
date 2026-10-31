@@ -1,4 +1,0 @@
-Stockfish.js 19.0.1 (c) Chess.com, LLC - https://github.com/nmrugg/stockfish.js
-Based on Stockfish (c) T. Romstad, M. Costalba, J. Kiiski, G. Linscott and other contributors.
-Licensed under the GNU General Public License v3.0 (see LICENSE-stockfish-GPL-3.0.txt).
-Source code: https://github.com/nmrugg/stockfish.js and https://github.com/official-stockfish/Stockfish

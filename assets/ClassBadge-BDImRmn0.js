@@ -1,1 +1,0 @@
-import{r as e}from"./board-C7rAH2D3.js";import{n as t,r as n}from"./classify-DvbGwiZC.js";import{t as r}from"./GradeIcon-CJbwqOPW.js";var i=e();function a({cls:e,short:a}){return(0,i.jsxs)(`span`,{className:`badge badge-${e}`,title:n[e],children:[(0,i.jsx)(r,{cls:e,size:a?16:18}),a?(0,i.jsx)(`span`,{className:`sr-only`,children:t[e]}):t[e]]})}export{a as t};
