@@ -12,6 +12,7 @@ import type { GameSession } from '../lib/play/session';
 import { addGames } from '../lib/storage/repos';
 import type { Color, GameRecord, GameSource } from '../lib/types';
 import { getEngine } from './engines';
+import { maiaMove } from './maia';
 import type { SlotId } from './engines';
 
 /** Apply the opponent's strength options and start a fresh game in the engine. */
@@ -24,6 +25,10 @@ export async function prepareEngine(slot: SlotId, cfg: OpponentConfig): Promise<
 
 /** The engine's move in the session's current position. Returns null if the search was cancelled. */
 export async function engineMove(engine: Engine, session: GameSession, cfg: OpponentConfig): Promise<string | null> {
+  if (cfg.mode === 'maia') {
+    const mv = await maiaMove(session, cfg.maia ?? 1500);
+    if (mv) return mv;
+  }
   const now = Date.now();
   const time = session.time;
   const clock = time ? { wtime: Math.max(1, Math.round(session.remaining('w', now) ?? 1)), btime: Math.max(1, Math.round(session.remaining('b', now) ?? 1)), winc: time.w.incMs, binc: time.b.incMs } : undefined;
@@ -63,6 +68,8 @@ export const engineName = (cfg: OpponentConfig): string => {
       return `Stockfish (Skill ${cfg.skill}, depth ${cfg.depthCap ?? 2})`;
     case 'human':
       return `Human-like opponent (carefulness ${cfg.skill})`;
+    case 'maia':
+      return `Maia ${cfg.maia ?? 1500}`;
   }
 };
 

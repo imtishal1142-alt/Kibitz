@@ -125,16 +125,64 @@ await test('multi-threaded Stockfish runs when the page is cross-origin isolated
   await context.close();
 });
 
-await test('bots: cards listed by tier; choosing a bot opens Play with its name and starts a game', async () => {
+await test('bots: choose a bot and a colour, Play starts the game against it straight away', async () => {
   const { page, problems, context, go } = await session();
   await go('bots');
   await page.getByRole('heading', { name: 'Bots', level: 1 }).waitFor();
-  assert((await page.getByRole('button', { name: /^Play / }).count()) >= 8, 'expected several bots');
+  assert((await page.locator('.bot-tile').count()) >= 8, 'expected several bots');
+  await page.getByRole('button', { name: 'Rex', exact: true }).click();
+  assert(/Rex/.test(await page.locator('.bots-selected').innerText()), 'the chosen bot should be described');
+  await page.getByRole('button', { name: 'Play as Black' }).click();
   await page.getByRole('button', { name: 'Play Rex' }).click();
-  await page.getByText(/Playing/).first().waitFor();
-  await page.getByRole('button', { name: /Start game/ }).click();
   await page.getByRole('heading', { name: /You vs Rex/ }).waitFor({ timeout: 20000 });
   noProblems(problems, 'bots');
+  await context.close();
+});
+
+await test('Maia bot: the network downloads, runs in a worker, and replies with a legal human-like move', async () => {
+  const { page, problems, context, go } = await session();
+  await go('bots');
+  await page.getByRole('heading', { name: 'Bots', level: 1 }).waitFor();
+  await page.getByRole('button', { name: 'Maia 1500', exact: true }).click();
+  assert(/Maia 1500/.test(await page.locator('.bots-selected').innerText()), 'the Maia bot should be described');
+  await page.getByRole('button', { name: 'Play Maia 1500' }).click();
+  await page.getByRole('heading', { name: /You vs Maia 1500/ }).waitFor({ timeout: 20000 });
+  const box = page.getByRole('textbox', { name: /Type a move/ });
+  await box.fill('e4');
+  await box.press('Enter');
+  await page.waitForFunction(() => document.querySelectorAll('[aria-label="Moves"] .mv, [aria-label="Moves"] button').length >= 2, null, { timeout: 60000 });
+  await page.getByText(/Engine played/).waitFor({ timeout: 30000 });
+  noProblems(problems, 'maia');
+  await context.close();
+});
+
+await test('sidebar collapses to icons, keeps working for keyboard and screen readers, and stays collapsed after a reload', async () => {
+  const { page, problems, context, go } = await session({ viewport: { width: 1440, height: 900 } });
+  await go('');
+  await page.getByRole('heading', { name: 'Your desk' }).waitFor();
+  const width = async () => (await page.locator('nav.rail').boundingBox()).width;
+  assert((await width()) > 150, 'the sidebar should start expanded');
+  await page.getByRole('button', { name: 'Collapse sidebar' }).click();
+  await page.waitForFunction(() => document.querySelector('nav.rail').getBoundingClientRect().width < 100);
+  assert(await page.locator('nav.rail').getByRole('link', { name: 'Play', exact: true }).isVisible(), 'the Play link should still be there');
+  await page.reload();
+  await page.getByRole('heading', { name: 'Your desk' }).waitFor();
+  assert((await width()) < 100, 'collapsed state should survive a reload');
+  await page.getByRole('button', { name: 'Expand sidebar' }).click();
+  await page.waitForFunction(() => document.querySelector('nav.rail').getBoundingClientRect().width > 150);
+  noProblems(problems, 'sidebar');
+  await context.close();
+});
+
+await test('a page file that fails to load once is retried and the page appears', async () => {
+  const { page, context, go } = await session();
+  let failed = 0;
+  await page.route('**/assets/Settings-*.js', (route) => (failed++ === 0 ? route.abort() : route.continue()));
+  await go('');
+  await page.getByRole('heading', { name: 'Your desk' }).waitFor();
+  await go('settings');
+  await page.getByRole('heading', { name: 'Settings' }).first().waitFor({ timeout: 20000 });
+  assert(failed >= 2, `the file should have been requested again (requests: ${failed})`);
   await context.close();
 });
 

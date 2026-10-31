@@ -1,4 +1,4 @@
-import { Suspense, lazy, useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { HashRouter, Link, Route, Routes, useLocation } from 'react-router-dom';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { Icon } from './components/Icon';
@@ -7,6 +7,7 @@ import { JobsBar } from './components/JobsBar';
 import { Toasts } from './components/Toasts';
 import { Dialog, Spinner } from './components/ui';
 import { usePrefs } from './hooks/usePrefs';
+import { lazyRetry as lazy } from './lib/lazyRetry';
 import { Onboarding } from './pages/Onboarding';
 
 const Home = lazy(() => import('./pages/Home'));
@@ -66,6 +67,8 @@ function useThemeEffects(): void {
 
 function Rail() {
   const [more, setMore] = useState(false);
+  const [prefs, setPrefs] = usePrefs();
+  const collapsed = prefs.railCollapsed;
   const loc = useLocation();
   useEffect(() => setMore(false), [loc.pathname]);
   const trainPaths = ['/train', '/puzzles', '/openings'];
@@ -81,10 +84,10 @@ function Rail() {
           <span className="brand-mark">
             <Icon name="knight" size={24} />
           </span>
-          Kibitz
+          <span className="brand-text">Kibitz</span>
         </Link>
         {NAV.map((n) => (
-          <Link key={n.to} to={n.to} className={`rail-link ${n.extra ? 'rail-extra' : ''}`} aria-current={active(n.to) ? 'page' : undefined}>
+          <Link key={n.to} to={n.to} className={`rail-link ${n.extra ? 'rail-extra' : ''}`} aria-current={active(n.to) ? 'page' : undefined} title={collapsed ? n.label : undefined}>
             <Icon name={n.icon} size={22} />
             <span>{n.label}</span>
           </Link>
@@ -94,6 +97,10 @@ function Rail() {
           <Icon name="info" size={22} />
           <span>Help</span>
         </Link>
+        <button type="button" className="rail-link rail-toggle" onClick={() => setPrefs({ railCollapsed: !collapsed })} aria-pressed={collapsed} title={collapsed ? 'Expand the sidebar' : 'Collapse the sidebar'}>
+          <Icon name={collapsed ? 'right' : 'left'} size={22} />
+          <span>{collapsed ? 'Expand sidebar' : 'Collapse sidebar'}</span>
+        </button>
         <button type="button" className="rail-link rail-more" onClick={() => setMore(true)} aria-haspopup="dialog">
           <Icon name="more" size={22} />
           <span>More</span>
@@ -205,7 +212,7 @@ export function App() {
       >
         Skip to content
       </a>
-      <div className="shell">
+      <div className="shell" data-collapsed={prefs.railCollapsed ? 'true' : 'false'}>
         <Rail />
         <main className="main" id="main" tabIndex={-1}>
           <div className="page">

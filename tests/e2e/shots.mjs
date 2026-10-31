@@ -10,7 +10,7 @@ const prefix = process.argv[4] ?? 's';
 const { server, url } = await serveDist();
 const browser = await launch();
 const { context } = await openContext(browser, { viewport: { width, height: width < 700 ? 860 : 900 }, colorScheme: theme });
-await context.addInitScript((t) => localStorage.setItem('kibitz.prefs.v1', JSON.stringify({ onboarded: true, autoAnalyse: false, theme: t, includeDemoInStats: true })), theme);
+await context.addInitScript(([t, extra]) => localStorage.setItem('kibitz.prefs.v1', JSON.stringify({ onboarded: true, autoAnalyse: false, theme: t, includeDemoInStats: true, ...extra })), [theme, JSON.parse(process.env.KIBITZ_PREFS ?? '{}')]);
 const page = await context.newPage();
 await page.goto(`${url}#/`);
 await page.getByRole('button', { name: /demo game/i }).first().click();

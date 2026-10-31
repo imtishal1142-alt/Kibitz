@@ -49,7 +49,7 @@ export default function Play() {
   const fenParam = sp.get('fen');
   const colorParam = sp.get('color');
   const bot = botById(sp.get('bot'));
-  const [setup, setSetup] = useState<Setup>({ color: colorParam === 'b' ? 'b' : 'w', opponent: bot ? { ...bot.config } : LEVELS[2]!.config, timeId: 'none', time: null, fen: fenParam && validateFen(fenParam).ok ? fenParam : '' });
+  const [setup, setSetup] = useState<Setup>({ color: colorParam === 'b' ? 'b' : colorParam === 'r' ? 'random' : 'w', opponent: bot ? { ...bot.config } : LEVELS[2]!.config, timeId: 'none', time: null, fen: fenParam && validateFen(fenParam).ok ? fenParam : '' });
   const [running, setRunning] = useState<Running | null>(null);
   const [fenError, setFenError] = useState('');
   const counter = useRef(0);
@@ -58,7 +58,7 @@ export default function Play() {
     void kvGet<Partial<Setup>>(SETUP_KEY).then((s) => {
       if (!s) return;
       setSetup((cur) => ({
-        color: colorParam === 'w' || colorParam === 'b' ? cur.color : (s.color ?? cur.color),
+        color: colorParam === 'w' || colorParam === 'b' || colorParam === 'r' ? cur.color : (s.color ?? cur.color),
         opponent: bot ? cur.opponent : { ...sanitizeConfig(s.opponent ?? cur.opponent), name: undefined },
         timeId: s.timeId ?? cur.timeId,
         time: s.time === undefined ? cur.time : s.time,
@@ -80,6 +80,16 @@ export default function Play() {
     const userColor: Color = s.color === 'random' ? (Math.random() < 0.5 ? 'w' : 'b') : s.color;
     setRunning({ userColor, opponent: sanitizeConfig(s.opponent), time: s.time, fen, n: ++counter.current });
   };
+
+  // Coming from the Bots page, the game starts straight away with the bot and colour chosen there.
+  const autoStarted = useRef(false);
+  const wantsAutoStart = sp.get('go') === '1' && !!bot;
+  useEffect(() => {
+    if (!wantsAutoStart || autoStarted.current) return;
+    autoStarted.current = true;
+    start();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [wantsAutoStart]);
 
   if (running) {
     return (

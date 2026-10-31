@@ -1,3 +1,4 @@
+import { reloadForNewVersion } from './lib/lazyRetry';
 import '@fontsource-variable/bricolage-grotesque/wdth.css';
 import '@fontsource/ibm-plex-sans/latin-400.css';
 import '@fontsource/ibm-plex-sans/latin-500.css';
@@ -20,3 +21,9 @@ if (import.meta.env.PROD && 'serviceWorker' in navigator && /^https?:$/.test(loc
     navigator.serviceWorker.register('./sw.js', { scope: './' }).catch(() => undefined);
   });
 }
+
+// Vite fires this when a file needed by a page cannot be fetched (typically after a new deploy replaced it).
+window.addEventListener('vite:preloadError', (event) => {
+  event.preventDefault();
+  void reloadForNewVersion();
+});

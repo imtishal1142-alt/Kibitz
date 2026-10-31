@@ -15,7 +15,8 @@ const files = [];
 })(dist);
 
 const skip = new Set(['sw.js']);
-const list = files.filter((f) => !skip.has(f) && !f.endsWith('.map'));
+// The Maia networks (6 MB) are fetched the first time a Maia bot is played and then kept by the worker's runtime cache.
+const list = files.filter((f) => !skip.has(f) && !f.endsWith('.map') && !f.startsWith('maia/'));
 const hash = createHash('sha256');
 for (const f of list) hash.update(f).update(readFileSync(join(dist, f)));
 const version = hash.digest('hex').slice(0, 12);

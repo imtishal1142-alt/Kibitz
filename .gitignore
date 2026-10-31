@@ -7,3 +7,4 @@ public/engines/
 tests/e2e/screens/
 tests/e2e/results.json
 .vitest/
+tsconfig.tsbuildinfo

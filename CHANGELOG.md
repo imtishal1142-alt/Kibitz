@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.4.1
+
+**Maia bots.** Five new opponents, Maia 1100, 1300, 1500, 1700 and 1900: neural networks trained on human Lichess games, so they play the openings and make the mistakes of people at that level. They also appear as an opponent type in Play and in the Match Lab. They run in a Web Worker with a small runner written for this project (no search; about a tenth of a second per move on a laptop). The networks (GPL-3.0, CSSLab) download the first time one is played. Lc0 itself could not be added; see `docs/LIMITATIONS.md`.
+
+## 0.4.0
+
+**Look, from your Chess.com screenshots (structure and feel only; no artwork, names or icons of theirs).** The game review panel has a dark title bar, a coach bubble ("There are 4 critical moments…"), white and dark accuracy chips, grade counts on either side of a centred icon, and a large Start review button pinned to the bottom. Player strips have an avatar tile and a bolder clock. The Desk opens with a hero: your name and streak, Start game, Play bots, Engine vs engine, Analysis board, and three board cards (puzzles from your games, today's training, your last game). Pages fade in; cards lift on hover; all motion obeys the reduced-motion setting.
+
+**Bots screen redone** as a board with a bot picker: choose a portrait (original drawn faces, not likenesses of anyone), choose a colour, press Play and the game starts at once.
+
+## 0.3.2
+
+**Pages that would not load.** After a new version is published, a tab that is still open can ask for page files that no longer exist. A page file that fails to load is now retried, then the stored copies of the app are cleared and the page reloads once (never in a loop), and if that fails a clear "reload the latest version" screen replaces the generic error.
+
+**Collapsible sidebar.** A button at the bottom of the navigation rail shrinks it to icons (wide screens) and the choice is remembered. Labels stay available to screen readers and as tooltips.
+
 ## 0.3.1
 
 **Faster analysis.** Games of yours that have no analysis are now analysed in the background by themselves (newest first, up to a limit you choose, off-switch in Settings; held back when the browser asks for data saving or the battery is low). The queue can analyse several games at once, each with its own engine (automatic from the number of cores, or 1 to 4). Positions analysed in any earlier game are reused when the saved result is deep enough, and the single- and multi-threaded Lite builds now share saved results. Measured on a 2-core test machine with 6 unrelated 60-move games at depth 14: 41 s per game one at a time, 18 s per game two at a time; a third engine gave no further gain on 2 cores. Your computer will differ.

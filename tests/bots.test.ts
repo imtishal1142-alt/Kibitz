@@ -87,3 +87,29 @@ describe('analysis workers', () => {
     expect(shareableEngineId('Stockfish 19#asm')).not.toBe(shareableEngineId('Stockfish 19#lite-wasm'));
   });
 });
+
+describe('maia bots', () => {
+  it('are in the list with a valid band and survive sanitising', async () => {
+    const maia = BOTS.filter((b) => b.tier === 'Maia');
+    expect(maia.map((b) => b.config.maia)).toEqual([1100, 1300, 1500, 1700, 1900]);
+    for (const b of maia) expect(sanitizeConfig(b.config).maia).toBe(b.config.maia);
+    expect(sanitizeConfig({ mode: 'maia', maia: 1450 }).maia).toBe(1500);
+  });
+  it('sampling never picks a move outside the likely ones and follows the probabilities', async () => {
+    const { sampleMove } = await import('../src/lib/engine/maia');
+    const pri = [
+      { uci: 'e2e4', p: 0.6 },
+      { uci: 'd2d4', p: 0.35 },
+      { uci: 'a2a3', p: 0.049 },
+      { uci: 'h2h4', p: 0.001 },
+    ];
+    const seen: Record<string, number> = {};
+    for (let i = 0; i < 4000; i++) {
+      const m = sampleMove(pri, Math.random)!;
+      seen[m] = (seen[m] ?? 0) + 1;
+    }
+    expect(seen.h2h4).toBeUndefined();
+    expect(seen.e2e4!).toBeGreaterThan(seen.d2d4!);
+    expect(sampleMove([])).toBeNull();
+  });
+});

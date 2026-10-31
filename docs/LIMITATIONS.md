@@ -65,7 +65,11 @@ Written to be read, not skimmed past. Items marked **Not verified** are things t
 ## Engines other than Stockfish (0.3)
 
 - **Torch** is Chess.com's proprietary engine and **AlphaZero/AlphaGo** were never released. They cannot be included.
-- **Lc0** and **Maia** are open source, but running them in a browser needs a neural-network runtime (WebGPU/ONNX) and network weight files of tens of megabytes, plus code for move encoding that has not been written or tested here. They are not included. The engine layer speaks plain UCI, so a UCI-compatible build could be added later as a new entry in `public/engines/manifest.json`.
+- **Lc0** (the full engine, with search) is not included. The only ready-made WebAssembly build I found (Lichess's `zerofish`, AGPL-3.0) crashes on its first search in a browser, and I could not rebuild it here. Small networks without search can be run, and that is what the Maia bots use (below).
+- **Maia** (1100, 1300, 1500, 1700, 1900; Lichess scale) is included as bots and as an opponent type. A network file is read and run by `src/lib/engine/lc0net.ts` in a Web Worker: one forward pass per move, no search. The input encoding and the policy-channel layout were reconstructed from the file format and checked against the shipped networks (known openings, the Black-side mirroring, a hanging queen), not against Lc0's own source or output, so some rare details (for example under-promotions, which Maia bots never play, and the 50-move counter scaling) may differ. Maia cannot evaluate a position, so it is not offered as a review engine.
+- Maia's ratings are those of the Lichess players it learned from. They do not translate to Chess.com ratings, and a bot is not guaranteed to score what its band suggests.
+- The Maia networks (6 MB) are downloaded the first time a Maia bot is played and then kept by the browser; they are not part of the offline copy until then.
+- Another open-source chess engine that runs in the browser as WebAssembly is Fairy-Stockfish (GPL-3.0, `fairy-stockfish-nnue.wasm` on npm). It is not included: for ordinary chess it is a Stockfish derivative with no clear benefit here.
 - Bot "styles" are a bias in move choice among Stockfish's top five moves, not a different engine. Bots have no rating.
 - Layout was checked in Chromium at 320, 390 and 1440 px and by automated accessibility scans; Firefox, Safari, Windows and a screen reader were not tested.
 

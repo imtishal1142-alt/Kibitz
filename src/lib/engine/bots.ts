@@ -9,7 +9,7 @@ export interface Bot {
   id: string;
   name: string;
   tagline: string;
-  tier: 'Beginner' | 'Intermediate' | 'Advanced' | 'Master';
+  tier: 'Beginner' | 'Intermediate' | 'Advanced' | 'Master' | 'Maia';
   /** Hue (0-360) for the avatar. */
   hue: number;
   config: OpponentConfig;
@@ -31,7 +31,23 @@ export const BOTS: Bot[] = [
   { id: 'full', name: 'Full engine', tagline: 'No limits at all.', tier: 'Master', hue: 120, config: cfg({ mode: 'full', elo: ELO_MAX, skill: 20, movetimeMs: 1500, useClock: true, name: 'Full engine' }) },
 ];
 
-export const BOT_TIERS: Bot['tier'][] = ['Beginner', 'Intermediate', 'Advanced', 'Master'];
+const maiaBot = (rating: number, hue: number, tagline: string): Bot => ({
+  id: `maia-${rating}`,
+  name: `Maia ${rating}`,
+  tagline,
+  tier: 'Maia',
+  hue,
+  config: cfg({ mode: 'maia', maia: rating, movetimeMs: 300, name: `Maia ${rating}` }),
+});
+BOTS.push(
+  maiaBot(1100, 150, 'Plays like Lichess players around 1100: sound ideas, regular oversights.'),
+  maiaBot(1300, 190, 'Plays like players around 1300. Develops, castles, and sometimes leaves a piece loose.'),
+  maiaBot(1500, 250, 'Plays like players around 1500: solid habits, the occasional tactical miss.'),
+  maiaBot(1700, 310, 'Plays like players around 1700. Fewer slips, and it knows the common openings.'),
+  maiaBot(1900, 20, 'Plays like players around 1900: strong instincts, rarely a blunder.'),
+);
+
+export const BOT_TIERS: Bot['tier'][] = ['Beginner', 'Intermediate', 'Advanced', 'Master', 'Maia'];
 export const botById = (id: string | null | undefined): Bot | undefined => BOTS.find((b) => b.id === id);
 
 /**

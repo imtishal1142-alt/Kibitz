@@ -73,6 +73,11 @@ export class GameSession {
     this.ended = this.terminalAfterMove(null);
   }
 
+  /** The latest positions of the game, most recent first (what a network that looks at move history needs). */
+  recentFens(n = 8): string[] {
+    return this.fens.slice(-n).reverse();
+  }
+
   get fen(): string {
     return this.chess.fen();
   }

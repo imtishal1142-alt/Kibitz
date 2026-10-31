@@ -1,5 +1,6 @@
 import { Component } from 'react';
 import type { ErrorInfo, ReactNode } from 'react';
+import { clearAppCaches, isChunkError } from '../lib/lazyRetry';
 
 interface State {
   error: Error | null;
@@ -19,6 +20,19 @@ export class ErrorBoundary extends Component<{ children: ReactNode; resetKey?: s
   }
   override render() {
     if (!this.state.error) return this.props.children;
+    if (isChunkError(this.state.error)) {
+      return (
+        <div className="sheet pad stack" role="alert" style={{ maxWidth: 640, margin: '40px auto' }}>
+          <h2>This page could not be loaded</h2>
+          <p className="muted">Kibitz was probably updated while this tab was open, or the connection dropped for a moment. Your games and training data are safe. Reloading fetches the current version.</p>
+          <div className="row">
+            <button className="btn btn-primary" onClick={() => void clearAppCaches().then(() => location.reload())} type="button">
+              Reload the latest version
+            </button>
+          </div>
+        </div>
+      );
+    }
     return (
       <div className="sheet pad stack" role="alert" style={{ maxWidth: 640, margin: '40px auto' }}>
         <h2>This screen hit a problem</h2>
