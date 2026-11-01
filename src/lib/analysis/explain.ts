@@ -181,7 +181,21 @@ export function threatAfter(fenAfter: string, mover: 'w' | 'b'): string | null {
   return `It threatens ${best.facts.san} next, which ${doing || RANK_WORD[best.kind]}.`;
 }
 
+const EXPLAIN_CACHE = new Map<string, Explanation>();
+const EXPLAIN_CACHE_MAX = 30_000;
+
+/** Explanations are pure functions of one analysed game, and the lists that need them are rebuilt on every page visit, so they are remembered. */
 export function explainMove(m: MoveAnalysis, a: GameAnalysis): Explanation {
+  const key = `${a.gameId}|${a.positions.length}|${m.ply}|${m.uci}|${m.winLoss}|${m.cls}`;
+  const hit = EXPLAIN_CACHE.get(key);
+  if (hit) return hit;
+  const out = explainMoveUncached(m, a);
+  if (EXPLAIN_CACHE.size >= EXPLAIN_CACHE_MAX) EXPLAIN_CACHE.clear();
+  EXPLAIN_CACHE.set(key, out);
+  return out;
+}
+
+function explainMoveUncached(m: MoveAnalysis, a: GameAnalysis): Explanation {
   const base = explainMoveCore(m, a);
   if (m.cls === 'forced') return { ...base, threat: null, reply: null };
   let threat: string | null = null;

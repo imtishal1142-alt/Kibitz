@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+import { useWarmReady } from '../services/warmExplain';
 import { analysedEntries } from '../lib/games/entries';
 import { isPersonal } from '../lib/games/records';
 import { detectWeaknesses, userMistakes } from '../lib/analysis/weaknesses';
@@ -26,9 +27,12 @@ export function useSessionView() {
   const retests = useQuery(loadRetests, ['kv']);
   const reviewed = useQuery(loadReviewed, ['kv']);
 
+  const warmEntries = useMemo(() => (games.data && analyses.data ? analysedEntries(games.data, analyses.data, prefs.includeDemoInStats) : undefined), [games.data, analyses.data, prefs.includeDemoInStats]);
+  const warm = useWarmReady(warmEntries);
+
   return useMemo(() => {
     const todayKey = localDateKey();
-    if (!games.data || !analyses.data || !srs.data || !calendar.data || !reflections.data || !retests.data || !reviewed.data) return { loading: true as const, session: null, streak: null, todayKey };
+    if (!warm || !games.data || !analyses.data || !srs.data || !calendar.data || !reflections.data || !retests.data || !reviewed.data) return { loading: true as const, session: null, streak: null, todayKey };
     const now = Date.now();
     const personal = games.data.filter((g) => isPersonal(g, prefs.includeDemoInStats));
     const entries = analysedEntries(games.data, analyses.data, prefs.includeDemoInStats);
@@ -56,5 +60,5 @@ export function useSessionView() {
       dateKey: todayKey,
     });
     return { loading: false as const, session, streak: streakInfo(calendar.data, todayKey), todayKey };
-  }, [games.data, analyses.data, srs.data, calendar.data, reflections.data, retests.data, reviewed.data, prefs.includeDemoInStats, prefs.dailyGoal]);
+  }, [games.data, analyses.data, srs.data, calendar.data, reflections.data, retests.data, reviewed.data, prefs.includeDemoInStats, prefs.dailyGoal, warm]);
 }

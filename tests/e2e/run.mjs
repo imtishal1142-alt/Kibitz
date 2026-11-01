@@ -257,6 +257,7 @@ await test('demo game: labelled as a demo, analysed in the browser, report and c
   await page.getByText(/built-in demo game/).waitFor();
   await page.waitForFunction(() => !/Analysing/.test(document.body.innerText) && document.querySelectorAll('[role=tab]').length >= 3, null, { timeout: 120000 });
   await page.getByRole('tab', { name: 'Game report' }).click();
+  await page.getByText(/Avg\. loss/).first().waitFor({ timeout: 20000 }).catch(() => undefined);
   const report = await page.locator('main').innerText();
   assert(/Philidor/.test(report), 'opening was not identified');
   assert(/Accuracy/.test(report) && /Avg\. loss/.test(report), 'report missing accuracy columns');
@@ -968,6 +969,7 @@ await test('grade stats: brilliant count opens the list of brilliant moves and l
   await tile.click();
   const list = page.getByRole('list', { name: 'Your brilliant moves' });
   await list.waitFor();
+  await page.waitForFunction(() => /16\.\s*Qb8\+/.test(document.querySelector('[aria-label="Your brilliant moves"]')?.textContent ?? ''), null, { timeout: 15000 }).catch(() => undefined);
   assert(/16\.\s*Qb8\+/.test(await list.innerText()), 'the Qb8+ sacrifice should be listed');
   await list.getByRole('link').first().click();
   await page.getByRole('region', { name: 'Game review summary' }).waitFor();

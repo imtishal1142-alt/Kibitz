@@ -5,6 +5,7 @@ import { fenKey } from '../chess/rules';
 import { moveLabel } from '../analysis/explain';
 import type { GameAnalysis, GameRecord } from '../types';
 import type { OpeningLesson } from './openingLibrary';
+import { sansOf } from './repertoire';
 
 export interface OpeningMistake {
   gameId: string;
@@ -32,15 +33,17 @@ export function lineKey(o: OpeningLesson): string {
 
 const MAX_PLY = 24;
 
-function reaches(pgn: string, key: string): boolean {
+function reaches(g: GameRecord, key: string): boolean {
   const c = new Chess();
-  try {
-    c.loadPgn(pgn);
-  } catch {
-    return false;
+  const sans = sansOf(g).slice(0, MAX_PLY);
+  for (const san of sans) {
+    try {
+      c.move(san);
+    } catch {
+      return false;
+    }
+    if (fenKey(c.fen()) === key) return true;
   }
-  const verbose = c.history({ verbose: true }).slice(0, MAX_PLY);
-  for (const m of verbose) if (fenKey(m.after) === key) return true;
   return false;
 }
 
@@ -50,7 +53,7 @@ export function openingStats(o: OpeningLesson, games: GameRecord[], analyses: Ga
   const out: OpeningStats = { games: 0, wins: 0, draws: 0, losses: 0, analysed: 0, mistakes: [] };
   for (const g of games) {
     if (!g.userColor || g.userColor !== o.side) continue;
-    if (!reaches(g.pgn, key)) continue;
+    if (!reaches(g, key)) continue;
     out.games++;
     if (g.userOutcome === 'win') out.wins++;
     else if (g.userOutcome === 'loss') out.losses++;

@@ -6,6 +6,7 @@ import type { IconName } from './components/Icon';
 import { JobsBar } from './components/JobsBar';
 import { Toasts } from './components/Toasts';
 import { Dialog, Spinner } from './components/ui';
+import { usePersonalEntries } from './hooks/data';
 import { usePrefs } from './hooks/usePrefs';
 import { lazyRetry as lazy } from './lib/lazyRetry';
 import { Onboarding } from './pages/Onboarding';
@@ -43,16 +44,19 @@ interface NavItem {
 const NAV: NavItem[] = [
   { to: '/', label: 'Desk', icon: 'desk' },
   { to: '/play', label: 'Play', icon: 'play' },
-  { to: '/bots', label: 'Bots', icon: 'bot' },
   { to: '/library', label: 'Games', icon: 'library' },
   { to: '/train', label: 'Train', icon: 'train' },
-  { to: '/analysis', label: 'Analysis', icon: 'board', extra: true },
-  { to: '/chesscom', label: 'Chess.com', icon: 'cloud', extra: true },
-  { to: '/session', label: 'Session', icon: 'target', extra: true },
-  { to: '/progress', label: 'Progress', icon: 'trophy', extra: true },
-  { to: '/insights', label: 'Insights', icon: 'insights', extra: true },
-  { to: '/settings', label: 'Settings', icon: 'settings', extra: true },
+  { to: '/insights', label: 'Insights', icon: 'insights' },
+  { to: '/settings', label: 'Settings', icon: 'settings' },
 ];
+
+/** Pages that belong under each main entry, so the sidebar stays short and the current section is still highlighted. */
+const SECTIONS: Record<string, string[]> = {
+  '/play': ['/play', '/bots', '/match'],
+  '/library': ['/library', '/chesscom', '/analysis'],
+  '/train': ['/train', '/puzzles', '/openings', '/session'],
+  '/insights': ['/insights', '/progress'],
+};
 
 function useThemeEffects(): void {
   const [prefs] = usePrefs();
@@ -72,11 +76,9 @@ function Rail() {
   const collapsed = prefs.railCollapsed;
   const loc = useLocation();
   useEffect(() => setMore(false), [loc.pathname]);
-  const trainPaths = ['/train', '/puzzles', '/openings'];
   const active = (to: string) => {
     if (to === '/') return loc.pathname === '/';
-    if (to === '/train') return trainPaths.some((p) => loc.pathname === p || loc.pathname.startsWith(`${p}/`));
-    return loc.pathname === to || loc.pathname.startsWith(`${to}/`);
+    return (SECTIONS[to] ?? [to]).some((p) => loc.pathname === p || loc.pathname.startsWith(`${p}/`));
   };
   return (
     <>
@@ -176,6 +178,25 @@ function Routed() {
   );
 }
 
+/** After the page has settled, warm the explanation cache in idle time (see services/warmExplain). */
+function Warm() {
+  const { entries } = usePersonalEntries();
+  useEffect(() => {
+    if (!entries?.length) return;
+    void import('./services/warmExplain').then((m) => m.warmExplanations(entries));
+  }, [entries]);
+  return null;
+}
+
+function WarmLater() {
+  const [on, setOn] = useState(false);
+  useEffect(() => {
+    const t = window.setTimeout(() => setOn(true), 4000);
+    return () => window.clearTimeout(t);
+  }, []);
+  return on ? <Warm /> : null;
+}
+
 export function App() {
   useThemeEffects();
   const [prefs, setPrefs] = usePrefs();
@@ -215,6 +236,7 @@ export function App() {
       </a>
       <div className="shell" data-collapsed={prefs.railCollapsed ? 'true' : 'false'}>
         <Rail />
+        <WarmLater />
         <main className="main" id="main" tabIndex={-1}>
           <div className="page">
             <JobsBar />

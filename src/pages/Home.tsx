@@ -19,6 +19,7 @@ import { useSessionView } from '../hooks/session';
 import { StreakCard } from '../components/StreakCard';
 import { usePrefs } from '../hooks/usePrefs';
 import { formatDate, gameSubtitle, gameTitle } from '../lib/ui/format';
+import { useWarmReady } from '../services/warmExplain';
 import { engineStates } from '../services/engines';
 import { useStore } from '../services/store';
 import { toast } from '../services/toast';
@@ -34,12 +35,14 @@ export default function Home() {
   const calendar = useQuery(listCalendar, ['calendar']);
   const engines = useStore(engineStates);
   const sv = useSessionView();
+  const warmEntries = useMemo(() => (games.data && analyses.data ? analysedEntries(games.data, analyses.data, prefs.includeDemoInStats) : undefined), [games.data, analyses.data, prefs.includeDemoInStats]);
+  const warm = useWarmReady(warmEntries);
 
   const view = useMemo(() => {
     if (!games.data || !analyses.data || !puzzles.data || !srs.data || !lines.data) return null;
     const personal = games.data.filter((g) => isPersonal(g, prefs.includeDemoInStats));
     const entries = analysedEntries(games.data, analyses.data, prefs.includeDemoInStats);
-    const weak = detectWeaknesses(entries);
+    const weak = warm ? detectWeaknesses(entries) : { weaknesses: [] as ReturnType<typeof detectWeaknesses>['weaknesses'] };
     const now = Date.now();
     const due = srs.data.filter((s) => isDue(s, now)).length;
     const fresh = srs.data.filter((s) => s.attempts === 0).length;
@@ -72,7 +75,7 @@ export default function Home() {
     const rank = { major: 3, moderate: 2, minor: 1 } as const;
     const fix = [...weak.weaknesses].sort((a, b) => (b.evidence === 'established' ? 1 : 0) - (a.evidence === 'established' ? 1 : 0) || rank[b.severity] - rank[a.severity] || b.share - a.share)[0] ?? null;
     return { personal, entries, plan, fix, due, last, today, puzzleCount: puzzles.data.length, duePuzzle, lastFen };
-  }, [games.data, analyses.data, puzzles.data, srs.data, lines.data, calendar.data, prefs.includeDemoInStats, prefs.dailyGoal]);
+  }, [games.data, analyses.data, puzzles.data, srs.data, lines.data, calendar.data, prefs.includeDemoInStats, prefs.dailyGoal, warm]);
 
   const loading = !view;
   const demo = games.data?.find((g) => g.source === 'demo');

@@ -108,7 +108,7 @@ export default function Play() {
 
   return (
     <div className="stack">
-      <PageHead title="Play" sub="A game against Stockfish, running entirely in your browser." />
+      <PageHead title="Play" sub="A game against Stockfish, running entirely in your browser." actions={<div className="row"><Link className="btn" to="/bots">Play a bot</Link><Link className="btn" to="/match">Engine vs engine</Link></div>} />
       {bot ? (
         <Banner kind="info" icon="bot">
           Playing <strong>{bot.name}</strong>: {bot.tagline} <Link to="/bots">Choose another bot</Link>
