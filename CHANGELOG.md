@@ -7,6 +7,8 @@
 - "Fix this first" card on the desk: your most important recurring weakness, how often it happens, and what to practise.
 - Review notes: each move now also says what it threatens next and what the opponent's best reply is (from the engine line), both checked for legality.
 - Today's session adds one rotating "something different" exercise (guess the move, endgame lesson, candidate moves, blunder prevention, opening check), changing daily and skipping the one already chosen for your weakness.
+- Opening library (Openings → Library): 13 main openings, each with the idea, plans for both sides, typical mistakes, a stepping board, classic traps (Légal's mate, Scholar's mate, Blackburne Shilling, Caro-Kann smothered mate, Elephant trap) and what your own games say: how often you reached it, your record, and your costliest mistakes in it with links. Trap lines are replayed in tests; checkmate claims are checked to end in mate and material claims are checked with the engine.
+- Endgame lab: new groups Bishop endgames and Queen endgames and four more lessons (hold the draw with the opposition, rook behind the passed pawn, the wrong-coloured bishop, queen against rook), each checked with Stockfish at depth 22.
 - Rounder buttons, flatter cards, sharper board frame.
 - No further engines added: none of the other open-source engines found could be run in the browser with a compatible licence (see docs/LIMITATIONS.md).
 

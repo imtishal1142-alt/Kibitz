@@ -186,6 +186,26 @@ await test('board resizes by dragging its corner, stays inside the screen, and t
   await context.close();
 });
 
+await test('opening library: learn an opening, step through a trap, see the plans; endgame lab lists the new lessons', async () => {
+  const { page, problems, context, go } = await session({ viewport: { width: 1440, height: 900 } });
+  await go('openings');
+  await page.getByRole('tab', { name: 'Library' }).click();
+  await page.getByRole('button', { name: /Italian Game/ }).click();
+  await page.getByRole('heading', { name: 'Italian Game', level: 2 }).waitFor();
+  await page.getByText('Your plans as White').waitFor();
+  assert((await page.getByRole('article', { name: /Légal/ }).count()) === 1, 'the Légal trap should be listed');
+  const trap = page.getByRole('article', { name: /Légal/ });
+  await trap.getByRole('button', { name: 'Back' }).click();
+  assert(/Move 12 of 13/.test(await trap.innerText()), 'Back steps the trap one move');
+  await page.getByRole('button', { name: 'All openings' }).click();
+  await page.getByRole('button', { name: /Nimzo-Indian/ }).waitFor();
+  await go('train/endgames');
+  await page.getByRole('heading', { name: 'Queen endgames' }).waitFor();
+  await page.getByRole('heading', { name: 'Bishop endgames' }).waitFor();
+  noProblems(problems, 'opening library');
+  await context.close();
+});
+
 await test('sidebar collapses to icons, keeps working for keyboard and screen readers, and stays collapsed after a reload', async () => {
   const { page, problems, context, go } = await session({ viewport: { width: 1440, height: 900 } });
   await go('');
