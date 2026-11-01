@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { Banner, Empty, Field, PageHead, Segmented, TabPanel, Tabs } from '../components/ui';
 import { Board } from '../components/Board';
 import { Icon } from '../components/Icon';
+import { OpeningLibrary } from './OpeningLibrary';
 import { loadOpenings, openingAt, searchOpenings, theoryContinuations } from '../lib/chess/openings';
 import { START_FEN } from '../lib/chess/rules';
 import { expectedMoves, findDeviations, formatLine, groupDeviations, suggestLines, toRepertoireLine, validateLine } from '../lib/training/repertoire';
@@ -15,7 +16,7 @@ import { playSound, soundForSan } from '../services/sound';
 import { toast } from '../services/toast';
 import type { Color, RepertoireLine } from '../lib/types';
 
-type Tab = 'drill' | 'repertoire' | 'games' | 'explore';
+type Tab = 'drill' | 'library' | 'repertoire' | 'games' | 'explore';
 
 const colorName = (c: Color) => (c === 'w' ? 'White' : 'Black');
 
@@ -42,7 +43,7 @@ export default function Openings() {
 
   return (
     <div className="stack">
-      <PageHead title="Openings" sub="Build a repertoire from the lines you actually play, then drill it." />
+      <PageHead title="Openings" sub="Learn the main openings, build a repertoire from the lines you play, then drill it." />
       <section className="sheet">
         <Tabs
           label="Opening tools"
@@ -50,6 +51,7 @@ export default function Openings() {
           onChange={setTab}
           tabs={[
             { id: 'drill', label: 'Drill' },
+            { id: 'library', label: 'Library' },
             { id: 'repertoire', label: `Repertoire (${lines.data?.length ?? 0})` },
             { id: 'games', label: 'From my games' },
             { id: 'explore', label: 'Explore theory' },
@@ -57,6 +59,9 @@ export default function Openings() {
         />
         <TabPanel id="drill" active={tab === 'drill'}>
           <Drill lines={lines.data ?? []} onAdd={() => setTab('repertoire')} />
+        </TabPanel>
+        <TabPanel id="library" active={tab === 'library'}>
+          <OpeningLibrary />
         </TabPanel>
         <TabPanel id="repertoire" active={tab === 'repertoire'}>
           <Repertoire lines={lines.data ?? []} ready={ready} />

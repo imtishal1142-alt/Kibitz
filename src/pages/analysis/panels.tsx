@@ -109,6 +109,8 @@ export function CoachPanel({
               {explanation.paragraphs.map((p) => (
                 <li key={p}>{p}</li>
               ))}
+              {explanation.threat ? <li><strong>Threat. </strong>{explanation.threat}</li> : null}
+              {explanation.reply ? <li><strong>Best reply. </strong>{explanation.reply}</li> : null}
               <li className="small muted">
                 Evaluation for the mover: {explanation.evidence.evalBefore} before, {explanation.evidence.evalAfter} after ({explanation.evidence.winLoss.toFixed(1)} win-percentage points lost).
               </li>

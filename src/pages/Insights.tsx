@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useWarmReady } from '../services/warmExplain';
 import { Banner, Empty, PageHead, Segmented, Spinner, StatBlock } from '../components/ui';
 import { Icon } from '../components/Icon';
 import { MoveGrades } from '../components/MoveGrades';
@@ -71,7 +72,10 @@ export default function Insights() {
   const [level, setLevel] = useState<'0.5' | '0.8' | '0.9' | '0.95'>('0.8');
 
   const personal = useMemo(() => (games.data ?? []).filter((g) => isPersonal(g, prefs.includeDemoInStats)), [games.data, prefs.includeDemoInStats]);
-  const entries = useMemo(() => (games.data && analyses.data ? analysedEntries(games.data, analyses.data, prefs.includeDemoInStats) : []), [games.data, analyses.data, prefs.includeDemoInStats]);
+  const allEntries = useMemo(() => (games.data && analyses.data ? analysedEntries(games.data, analyses.data, prefs.includeDemoInStats) : undefined), [games.data, analyses.data, prefs.includeDemoInStats]);
+  // The explanations behind these numbers are prepared in idle time first, so the page opens without freezing.
+  const ready = useWarmReady(allEntries);
+  const entries = useMemo(() => (ready && allEntries ? allEntries : []), [ready, allEntries]);
   const weak = useMemo(() => detectWeaknesses(entries), [entries]);
   const tally = useMemo(() => gradeTally(entries), [entries]);
   const times = useMemo(() => timeTally(entries), [entries]);
@@ -87,7 +91,7 @@ export default function Insights() {
   const analysisMap = useMemo(() => new Map((analyses.data ?? []).map((a) => [a.gameId, a])), [analyses.data]);
   const report = useMemo(() => (games.data ? buildStrengthReport(games.data, analysisMap, tc, official, { level: Number(level) as 0.5 | 0.8 | 0.9 | 0.95, includeDemo: prefs.includeDemoInStats }) : null), [games.data, analysisMap, tc, official, level, prefs.includeDemoInStats]);
 
-  if (games.loading || analyses.loading) return <Spinner label="Reading your games…" />;
+  if (!ready || games.loading || analyses.loading) return <Spinner label="Reading your games…" />;
   if (personal.length === 0)
     return (
       <div className="stack page-narrow">
@@ -101,7 +105,7 @@ export default function Insights() {
   const r = report?.results;
   return (
     <div className="stack">
-      <PageHead title="Insights" sub={`From ${entries.length} analysed of ${personal.length} games.`} />
+      <PageHead title="Insights" sub={`From ${entries.length} analysed of ${personal.length} games.`} actions={<Link className="btn" to="/progress">Progress over time</Link>} />
 
       {tally.moves > 0 ? <MoveGrades tally={tally} /> : null}
       {tally.moves > 0 ? <TimeInsights tally={times} /> : null}

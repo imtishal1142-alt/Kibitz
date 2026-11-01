@@ -156,6 +156,56 @@ await test('Maia bot: the network downloads, runs in a worker, and replies with 
   await context.close();
 });
 
+await test('board resizes by dragging its corner, stays inside the screen, and the size is remembered', async () => {
+  const { page, problems, context, go } = await session({ viewport: { width: 1440, height: 900 } });
+  await go('');
+  await page.getByRole('button', { name: /demo game/i }).first().click();
+  await page.getByRole('region', { name: 'Game review summary' }).waitFor({ timeout: 120000 });
+  const frame = page.locator('.board-frame').first();
+  const handle = page.locator('.board-resizer').first();
+  const before = await frame.boundingBox();
+  const h = await handle.boundingBox();
+  await page.mouse.move(h.x + h.width / 2, h.y + h.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(h.x - 100, h.y - 100, { steps: 6 });
+  await page.mouse.up();
+  const small = await frame.boundingBox();
+  assert(small.width < before.width - 40, 'dragging inward should shrink the board');
+  const h2 = await handle.boundingBox();
+  await page.mouse.move(h2.x + h2.width / 2, h2.y + h2.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(h2.x + 700, h2.y + 700, { steps: 6 });
+  await page.mouse.up();
+  const big = await frame.boundingBox();
+  assert(big.width > small.width + 40, 'dragging outward should enlarge the board');
+  assert(big.y + big.height <= 900, 'even the largest board fits the screen');
+  await page.reload();
+  await page.locator('.board-frame').first().waitFor();
+  assert(Math.abs((await page.locator('.board-frame').first().boundingBox()).width - big.width) < 3, 'the size should survive a reload');
+  noProblems(problems, 'resize');
+  await context.close();
+});
+
+await test('opening library: learn an opening, step through a trap, see the plans; endgame lab lists the new lessons', async () => {
+  const { page, problems, context, go } = await session({ viewport: { width: 1440, height: 900 } });
+  await go('openings');
+  await page.getByRole('tab', { name: 'Library' }).click();
+  await page.getByRole('button', { name: /Italian Game/ }).click();
+  await page.getByRole('heading', { name: 'Italian Game', level: 2 }).waitFor();
+  await page.getByText('Your plans as White').waitFor();
+  assert((await page.getByRole('article', { name: /Légal/ }).count()) === 1, 'the Légal trap should be listed');
+  const trap = page.getByRole('article', { name: /Légal/ });
+  await trap.getByRole('button', { name: 'Back' }).click();
+  assert(/Move 12 of 13/.test(await trap.innerText()), 'Back steps the trap one move');
+  await page.getByRole('button', { name: 'All openings' }).click();
+  await page.getByRole('button', { name: /Nimzo-Indian/ }).waitFor();
+  await go('train/endgames');
+  await page.getByRole('heading', { name: 'Queen endgames' }).waitFor();
+  await page.getByRole('heading', { name: 'Bishop endgames' }).waitFor();
+  noProblems(problems, 'opening library');
+  await context.close();
+});
+
 await test('sidebar collapses to icons, keeps working for keyboard and screen readers, and stays collapsed after a reload', async () => {
   const { page, problems, context, go } = await session({ viewport: { width: 1440, height: 900 } });
   await go('');
@@ -207,6 +257,7 @@ await test('demo game: labelled as a demo, analysed in the browser, report and c
   await page.getByText(/built-in demo game/).waitFor();
   await page.waitForFunction(() => !/Analysing/.test(document.body.innerText) && document.querySelectorAll('[role=tab]').length >= 3, null, { timeout: 120000 });
   await page.getByRole('tab', { name: 'Game report' }).click();
+  await page.getByText(/Avg\. loss/).first().waitFor({ timeout: 20000 }).catch(() => undefined);
   const report = await page.locator('main').innerText();
   assert(/Philidor/.test(report), 'opening was not identified');
   assert(/Accuracy/.test(report) && /Avg\. loss/.test(report), 'report missing accuracy columns');
@@ -918,6 +969,7 @@ await test('grade stats: brilliant count opens the list of brilliant moves and l
   await tile.click();
   const list = page.getByRole('list', { name: 'Your brilliant moves' });
   await list.waitFor();
+  await page.waitForFunction(() => /16\.\s*Qb8\+/.test(document.querySelector('[aria-label="Your brilliant moves"]')?.textContent ?? ''), null, { timeout: 15000 }).catch(() => undefined);
   assert(/16\.\s*Qb8\+/.test(await list.innerText()), 'the Qb8+ sacrifice should be listed');
   await list.getByRole('link').first().click();
   await page.getByRole('region', { name: 'Game review summary' }).waitFor();

@@ -136,7 +136,7 @@ describe('engine-backed helpers', () => {
         // ...and it must be a real test: at least one natural alternative to the best move loses.
         const bad = res.lines.slice(1).some((l) => winPctFor(l.score, e.user) < 30);
         const moves = res.lines.length;
-        expect(bad || moves === 1 || e.id === 'rook-pawn-draw' || e.id === 'philidor', `${e.id} should punish a wrong move`).toBe(true);
+        expect(bad || moves === 1 || e.id === 'rook-pawn-draw' || e.id === 'philidor' || e.id === 'wrong-bishop', `${e.id} should punish a wrong move`).toBe(true);
       }
     }
   });

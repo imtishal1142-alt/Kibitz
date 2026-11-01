@@ -108,7 +108,7 @@ export default function Play() {
 
   return (
     <div className="stack">
-      <PageHead title="Play" sub="A game against Stockfish, running entirely in your browser." />
+      <PageHead title="Play" sub="A game against Stockfish, running entirely in your browser." actions={<div className="row"><Link className="btn" to="/bots">Play a bot</Link><Link className="btn" to="/match">Engine vs engine</Link></div>} />
       {bot ? (
         <Banner kind="info" icon="bot">
           Playing <strong>{bot.name}</strong>: {bot.tagline} <Link to="/bots">Choose another bot</Link>
@@ -387,7 +387,7 @@ function Game({ config, onExit, onRematch }: { config: Running; onExit: () => vo
         <div className="stack-sm">
           <PlayerStrip {...strip(top)} />
           <div className="board-wrap">
-            <Board fen={session.fen} typedMoves={false} orientation={orientation} movable={over || paused ? null : userColor} onMove={onMove} lastMove={session.lastMove} ariaLabel={`Game board. ${session.turn === 'w' ? 'White' : 'Black'} to move. ${status}`} />
+            <Board resizable fen={session.fen} typedMoves={false} orientation={orientation} movable={over || paused ? null : userColor} onMove={onMove} lastMove={session.lastMove} ariaLabel={`Game board. ${session.turn === 'w' ? 'White' : 'Black'} to move. ${status}`} />
           </div>
           <PlayerStrip {...strip(orientation)} />
           <div className="controls" role="group" aria-label="Game controls">

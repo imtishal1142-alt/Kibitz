@@ -360,7 +360,7 @@ function PuzzleBoard({ puzzle, position, total, isReview, rating, gameLabel, onD
     <div className="analysis">
       <div className="stack-sm">
         <div className="board-wrap">
-          <Board fen={fen} orientation={color} movable={phase === 'solving' ? color : null} onMove={(m) => handleMove(m)} lastMove={last} arrows={arrows} marks={mark} ariaLabel={`Puzzle board. ${color === 'w' ? 'White' : 'Black'} to move.`} />
+          <Board resizable fen={fen} orientation={color} movable={phase === 'solving' ? color : null} onMove={(m) => handleMove(m)} lastMove={last} arrows={arrows} marks={mark} ariaLabel={`Puzzle board. ${color === 'w' ? 'White' : 'Black'} to move.`} />
         </div>
       </div>
       <div className="stack-sm">
