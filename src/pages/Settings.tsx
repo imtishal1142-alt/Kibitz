@@ -156,6 +156,11 @@ export default function Settings() {
           </div>
         </div>
         <div className="stack-sm">
+          <div className="label">Board size</div>
+          <div className="row">
+            <span className="muted small">Drag the bottom-right corner of the board to resize it. Now {prefs.boardScale}% of the largest size that fits the screen.</span>
+            <button type="button" className="btn btn-sm" onClick={() => set({ boardScale: 90 })} disabled={prefs.boardScale === 90}>Reset size</button>
+          </div>
           <div className="label" id="set-board-l">Board colours</div>
           <div className="row" role="group" aria-labelledby="set-board-l">
             {Object.entries(BOARD_THEMES).map(([id, t]) => (

@@ -42,12 +42,39 @@ const node = (san: string, ply: number): TreeNode => ({ san, ply, games: 0, wins
 
 export const scoreOf = (n: Pick<TreeNode, 'games' | 'wins' | 'draws'>): number => (n.games ? (n.wins + n.draws / 2) / n.games : 0);
 
-function sansOf(g: GameRecord): string[] {
-  try {
-    return parsePgn(g.pgn).moves.map((m) => m.san);
-  } catch {
-    return [];
+const SANS_CACHE = new Map<string, string[]>();
+const OPENING_PLIES = 60;
+
+/**
+ * The first moves of a game as SAN. Reading them straight from the move text is hundreds of times faster than replaying
+ * the whole game with a chess library, and these lists are rebuilt for every game on every visit to the Desk and the
+ * Openings page. Only the opening is needed, so the rest of the game is ignored. Falls back to the full parser.
+ */
+export function sansOf(g: GameRecord): string[] {
+  const key = `${g.id}:${g.pgn.length}`;
+  const hit = SANS_CACHE.get(key);
+  if (hit) return hit;
+  let out: string[] = [];
+  const body = g.pgn.replace(/^(\s*\[[^\n]*\]\s*\n)+/, '');
+  if (!/^\s*\[/.test(body)) {
+    out = body
+      .replace(/\{[^}]*\}|;[^\n]*\n|\([^)]*\)|\$\d+/g, ' ')
+      .replace(/\d+\s*\.(\.\.)?/g, ' ')
+      .split(/\s+/)
+      .map((t) => t.replace(/[!?]+$/, '').replace(/^0-0-0$/, 'O-O-O').replace(/^0-0$/, 'O-O'))
+      .filter((t) => t && !/^(1-0|0-1|1\/2-1\/2|\*|--)$/.test(t))
+      .slice(0, OPENING_PLIES);
   }
+  if (!out.length || out.some((t) => !/^([KQRBN]?[a-h]?[1-8]?x?[a-h][1-8](=[QRBN])?|O-O(-O)?)[+#]?$/.test(t))) {
+    try {
+      out = parsePgn(g.pgn).moves.map((m) => m.san).slice(0, OPENING_PLIES);
+    } catch {
+      out = [];
+    }
+  }
+  if (SANS_CACHE.size > 5000) SANS_CACHE.clear();
+  SANS_CACHE.set(key, out);
+  return out;
 }
 
 /** Opening tree of the games you played with `color` (first `maxPlies` plies). */

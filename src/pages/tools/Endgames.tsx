@@ -29,7 +29,7 @@ const MOVE_LIMIT = 60; // full moves allowed to achieve a "win" goal
 
 /** A position counts as "winning" for the learner at 85% winning chances or better (a clear, safe advantage). */
 const WINNING = 85;
-const GROUPS: EndgameLesson['group'][] = ['Basic mates', 'King and pawn', 'Rook endgames'];
+const GROUPS: EndgameLesson['group'][] = ['Basic mates', 'King and pawn', 'Rook endgames', 'Bishop endgames', 'Queen endgames'];
 
 export default function Endgames() {
   const [run, setRun] = useState<{ lesson: EndgameLesson; n: number } | null>(null);

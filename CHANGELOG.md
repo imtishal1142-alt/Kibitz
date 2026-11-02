@@ -1,5 +1,26 @@
 # Changelog
 
+## 1.0.0
+
+- **Positional play** (Train → Positional play): eight ideas (isolated, doubled, passed and backward pawns, outposts, rooks on open files, the bishop pair, the bad bishop) each with a diagram whose highlighted squares are checked by the same detector the app uses, what to do if you have it and if your opponent does, plus a "train your eye" quiz where you click the feature on the board.
+- **Quiet mistakes are explained**: where a move loses ground with no tactic involved, Review now compares the position after your move with the position after the engine's move and says what changed (bishop pair given up, pawns doubled or isolated, an outpost missed or granted, a passed pawn created for the opponent, king cover weakened, pieces left undeveloped). It replaces the old "could not verify a concrete tactic" line. When no listed feature explains it, it says so instead of guessing.
+- **Library puzzle pack** (Puzzles → Add the library pack): puzzles from engine self-play games started in the opening library, kept only when one move clearly stands out (Stockfish depth 13, two lines), with themes (mate, fork, pin, skewer, discovered attack, promotion, hanging piece, win material). They join your own puzzles: daily set, repetition, by-theme practice. The pack is small (51 puzzles, mostly level 1: 19 hanging-piece, 12 win-material, 8 other tactics, 5 forks, 3 pins, 2 skewers, 2 mates). A sample is re-checked at depth 16 in the tests.
+- Train hub lists Positional play; a duplicate Engine match tile is gone; puzzle changes now refresh open pages (a notification after saving puzzles was never sent).
+
+## 0.5.0
+
+- Black-and-white look: white-dominant in light mode, black-dominant in dark mode, black-and-white board by default (people on the old green default move to it once; other board colours are kept). Move-grade colours stay, because they carry meaning.
+- Board size: drag the bottom-right corner of the board to make it bigger or smaller (Analysis, Play, Match, Puzzles). It never grows past what fits on screen, the page does not move, the size is remembered, double-click resets, and the arrow keys work on the handle. Settings has a reset button.
+- "Fix this first" card on the desk: your most important recurring weakness, how often it happens, and what to practise.
+- Review notes: each move now also says what it threatens next and what the opponent's best reply is (from the engine line), both checked for legality.
+- Today's session adds one rotating "something different" exercise (guess the move, endgame lesson, candidate moves, blunder prevention, opening check), changing daily and skipping the one already chosen for your weakness.
+- Opening library (Openings → Library): 40 openings (the main e4 and d4 openings, plus Sicilian, Indian and gambit systems), each with the idea, plans for both sides, typical mistakes, a stepping board, classic traps (Légal's mate, Scholar's mate, Blackburne Shilling, Caro-Kann smothered mate, Elephant trap, Petrov queen trap, Kieninger trap) and what your own games say: how often you reached it, your record, and your costliest mistakes in it with links. Trap lines are replayed in tests; checkmate claims are checked to end in mate and material claims are checked with the engine.
+- Endgame lab: new groups Bishop endgames and Queen endgames and four more lessons (hold the draw with the opposition, rook behind the passed pawn, the wrong-coloured bishop, queen against rook), each checked with Stockfish at depth 22.
+- Faster: the Desk, Session, Insights and Progress pages no longer freeze while they work out your weaknesses (explanations are prepared in idle time and remembered; measured with 400 games: about 1.6 s of frozen page on every visit became under 0.1 s), opening lines are read directly from the move text instead of replaying every game, the games list shows 100 rows at a time, and background analysis no longer makes pages reload their data more than once a second.
+- Simpler: the sidebar has six entries (Desk, Play, Games, Train, Insights, Settings); Bots, Match, Chess.com, Analysis, Session and Progress are reached from those pages. The Train page is a picture-led hub with an animated session card.
+- Rounder buttons, flatter cards, sharper board frame.
+- No further engines added: none of the other open-source engines found could be run in the browser with a compatible licence (see docs/LIMITATIONS.md).
+
 ## 0.4.1
 
 **Maia bots.** Five new opponents, Maia 1100, 1300, 1500, 1700 and 1900: neural networks trained on human Lichess games, so they play the openings and make the mistakes of people at that level. They also appear as an opponent type in Play and in the Match Lab. They run in a Web Worker with a small runner written for this project (no search; about a tenth of a second per move on a laptop). The networks (GPL-3.0, CSSLab) download the first time one is played. Lc0 itself could not be added; see `docs/LIMITATIONS.md`.

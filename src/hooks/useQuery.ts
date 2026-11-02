@@ -13,7 +13,7 @@ export interface QueryState<T> {
  * Read from IndexedDB and refresh whenever one of `topics` changes (in this tab or another).
  * `fn` must be stable per `deps`.
  */
-export function useQuery<T>(fn: () => Promise<T>, topics: StoreName[], deps: unknown[] = []): QueryState<T> {
+export function useQuery<T>(fn: () => Promise<T>, topics: StoreName[], deps: unknown[] = [], opts: { batchMs?: number } = {}): QueryState<T> {
   const [data, setData] = useState<T | undefined>(undefined);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | undefined>();
@@ -49,13 +49,24 @@ export function useQuery<T>(fn: () => Promise<T>, topics: StoreName[], deps: unk
   }, [load, ...deps]);
 
   const key = topics.join(',');
-  useEffect(
-    () =>
-      subscribeChanges((changed) => {
-        if (topics.some((t) => changed.has(t))) load();
-      }),
+  // Reading every analysis is expensive, and the background queue changes them every few seconds: queries that ask
+  // for it (`batchMs`) are batched into one read per interval, so a long analysis run does not keep the page busy.
+  const heavy = (opts.batchMs ?? 0) > 0;
+  const batchMs = opts.batchMs ?? 0;
+  useEffect(() => {
+    let timer: number | undefined;
+    const off = subscribeChanges((changed) => {
+      if (!topics.some((t) => changed.has(t))) return;
+      if (!heavy) return load();
+      if (timer === undefined) timer = window.setTimeout(() => { timer = undefined; load(); }, batchMs);
+    });
+    return () => {
+      off();
+      window.clearTimeout(timer);
+    };
+  },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [load, key],
+    [load, key, heavy],
   );
   return { data, loading, error, reload: load };
 }

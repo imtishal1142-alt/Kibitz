@@ -19,6 +19,7 @@ import { useSessionView } from '../hooks/session';
 import { StreakCard } from '../components/StreakCard';
 import { usePrefs } from '../hooks/usePrefs';
 import { formatDate, gameSubtitle, gameTitle } from '../lib/ui/format';
+import { useWarmReady } from '../services/warmExplain';
 import { engineStates } from '../services/engines';
 import { useStore } from '../services/store';
 import { toast } from '../services/toast';
@@ -34,12 +35,14 @@ export default function Home() {
   const calendar = useQuery(listCalendar, ['calendar']);
   const engines = useStore(engineStates);
   const sv = useSessionView();
+  const warmEntries = useMemo(() => (games.data && analyses.data ? analysedEntries(games.data, analyses.data, prefs.includeDemoInStats) : undefined), [games.data, analyses.data, prefs.includeDemoInStats]);
+  const warm = useWarmReady(warmEntries);
 
   const view = useMemo(() => {
     if (!games.data || !analyses.data || !puzzles.data || !srs.data || !lines.data) return null;
     const personal = games.data.filter((g) => isPersonal(g, prefs.includeDemoInStats));
     const entries = analysedEntries(games.data, analyses.data, prefs.includeDemoInStats);
-    const weak = detectWeaknesses(entries);
+    const weak = warm ? detectWeaknesses(entries) : { weaknesses: [] as ReturnType<typeof detectWeaknesses>['weaknesses'] };
     const now = Date.now();
     const due = srs.data.filter((s) => isDue(s, now)).length;
     const fresh = srs.data.filter((s) => s.attempts === 0).length;
@@ -69,8 +72,10 @@ export default function Home() {
         /* a game that cannot be read keeps the start position */
       }
     }
-    return { personal, entries, plan, due, last, today, puzzleCount: puzzles.data.length, duePuzzle, lastFen };
-  }, [games.data, analyses.data, puzzles.data, srs.data, lines.data, calendar.data, prefs.includeDemoInStats, prefs.dailyGoal]);
+    const rank = { major: 3, moderate: 2, minor: 1 } as const;
+    const fix = [...weak.weaknesses].sort((a, b) => (b.evidence === 'established' ? 1 : 0) - (a.evidence === 'established' ? 1 : 0) || rank[b.severity] - rank[a.severity] || b.share - a.share)[0] ?? null;
+    return { personal, entries, plan, fix, due, last, today, puzzleCount: puzzles.data.length, duePuzzle, lastFen };
+  }, [games.data, analyses.data, puzzles.data, srs.data, lines.data, calendar.data, prefs.includeDemoInStats, prefs.dailyGoal, warm]);
 
   const loading = !view;
   const demo = games.data?.find((g) => g.source === 'demo');
@@ -174,6 +179,25 @@ export default function Home() {
             </Link>
           </div>
         </section>
+        {view.fix ? (
+          <section className="sheet pad stack fix-first" aria-labelledby="fix-h">
+            <div className="row" style={{ justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <div>
+                <div className="label">Fix this first</div>
+                <h2 id="fix-h" style={{ margin: '2px 0 0' }}>{view.fix.label}</h2>
+              </div>
+              <span className="chip">{view.fix.evidence === 'established' ? 'Recurs across games' : 'Early sign'}</span>
+            </div>
+            <p style={{ margin: 0 }}>
+              {view.fix.count} {view.fix.count === 1 ? 'time' : 'times'} in {view.fix.games} {view.fix.games === 1 ? 'game' : 'games'}, about {Math.round(view.fix.share * 100)}% of the points you lose to mistakes.
+            </p>
+            <p className="muted" style={{ margin: 0 }}>{view.fix.exercise}</p>
+            <div className="row">
+              <Link className="btn btn-primary" to="/insights">See the examples</Link>
+              <Link className="btn" to={view.fix.puzzleTheme ? '/puzzles' : '/train'}>Practise it</Link>
+            </div>
+          </section>
+        ) : null}
         {sv.loading ? null : (
           <section className="sheet pad stack" aria-labelledby="session-h">
             <div className="row" style={{ justifyContent: 'space-between' }}>

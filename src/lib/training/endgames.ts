@@ -9,7 +9,7 @@ import type { Color } from '../types';
 export interface EndgameLesson {
   id: string;
   title: string;
-  group: 'Basic mates' | 'King and pawn' | 'Rook endgames';
+  group: 'Basic mates' | 'King and pawn' | 'Rook endgames' | 'Bishop endgames' | 'Queen endgames';
   fen: string;
   /** The side the learner plays. */
   user: Color;
@@ -129,6 +129,54 @@ export const ENDGAMES: EndgameLesson[] = [
     summary: 'The classic way to draw a rook ending a pawn down: keep the rook on the third rank.',
     idea: 'Hold the rook on your sixth rank (the "third rank" from the defender\'s side) so the enemy king cannot advance. Once the pawn pushes to the sixth, switch the rook to the back to check from behind.',
     hint: 'Keep your rook on the rank in front of the pawn until the pawn moves.',
+    level: 3,
+  },
+  {
+    id: 'kpk-hold-opposition',
+    title: 'Hold the draw with the opposition',
+    group: 'King and pawn',
+    fen: '8/8/4k3/8/3PK3/8/8/8 b - - 0 1',
+    user: 'b',
+    goal: 'draw',
+    summary: 'You are Black, a pawn down, and White\'s king is already in front of your king. Only one move holds.',
+    idea: 'Step in front of the pawn and keep the kings face to face (the opposition): Kd6 holds. If you step aside with Ke7 or Kf7, White\'s king walks past and the pawn queens.',
+    hint: 'Put your king directly in front of the pawn, on its own file.',
+    level: 2,
+  },
+  {
+    id: 'rook-behind-pawn',
+    title: 'Rook behind the passed pawn',
+    group: 'Rook endgames',
+    fen: '8/8/3k4/3P4/8/3K4/8/3R4 w - - 0 1',
+    user: 'w',
+    goal: 'win',
+    summary: 'Your rook already stands behind your pawn. Use it and your king together.',
+    idea: 'A rook belongs behind a passed pawn: it protects the pawn from afar, and every step the pawn takes gives the rook more room. Walk the king up beside the pawn and let the rook do the long-range work.',
+    hint: 'Keep the rook on the pawn\'s file, behind it, and bring your king forward.',
+    level: 2,
+  },
+  {
+    id: 'wrong-bishop',
+    title: 'The wrong-coloured bishop',
+    group: 'Bishop endgames',
+    fen: '7k/7P/6K1/8/8/8/8/5B2 w - - 0 1',
+    user: 'b',
+    goal: 'draw',
+    summary: 'You are Black. White has a bishop and a rook pawn, yet cannot win.',
+    idea: 'The bishop does not control the pawn\'s promotion corner (h8 here), so Black\'s king can simply sit in that corner: the pawn can never promote and White must avoid stalemate. A rook pawn with the wrong bishop is a draw.',
+    hint: 'Keep your king in the corner (h8 or g8) and never leave it.',
+    level: 2,
+  },
+  {
+    id: 'queen-vs-rook',
+    title: 'Queen against rook',
+    group: 'Queen endgames',
+    fen: '8/8/8/8/4k3/8/r7/3QK3 w - - 0 1',
+    user: 'w',
+    goal: 'win',
+    summary: 'A long but winning ending. The engine defends with the rook as well as it can.',
+    idea: 'Win by forking the king and rook with queen checks, and by keeping your own king close so the rook cannot hide behind it. Patience matters: the win takes many moves and every careless check lets the rook escape.',
+    hint: 'Look for checks that also attack the rook (forks), and keep your king near your queen.',
     level: 3,
   },
 ];
