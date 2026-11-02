@@ -8,6 +8,7 @@ import { CLASS_GLYPH, CLASS_LABEL, lossClassOf } from '../chess/classify';
 import { forMover, formatScore, winPctFor } from '../chess/eval';
 import { formatClock, materialCount, normalizeFen, phaseOf, uciLineToSan } from '../chess/rules';
 import { settledMaterial } from './grades';
+import { positionalDifference } from './positional';
 import { describeMove, pawnStructure, PIECE_NAME, VAL, whatItDoes } from './tactics';
 import type { MoveFacts } from './tactics';
 
@@ -145,6 +146,18 @@ const nm = (p: keyof typeof PIECE_NAME): string => PIECE_NAME[p];
 const RANK_WORD = { mate: 'checkmate', fork: 'a fork', win: 'winning material', pin: 'a pin', skewer: 'a skewer', disc: 'a discovered attack' } as const;
 
 /** What the side that just moved threatens to do next, found by handing the move back to it (a "null move"). */
+/** Position after the engine's preferred move, or null when it cannot be played. */
+function bestAfterFen(m: MoveAnalysis): string | null {
+  if (!m.bestUci) return null;
+  try {
+    const c = new Chess(normalizeFen(m.fenBefore));
+    c.move({ from: m.bestUci.slice(0, 2), to: m.bestUci.slice(2, 4), promotion: m.bestUci[4] });
+    return c.fen();
+  } catch {
+    return null;
+  }
+}
+
 export function threatAfter(fenAfter: string, mover: 'w' | 'b'): string | null {
   let chess: Chess;
   try {
@@ -384,7 +397,12 @@ function explainMoveCore(m: MoveAnalysis, a: GameAnalysis): Omit<Explanation, 't
       why.push(`In this endgame the engine prefers ${m.bestSan ?? 'another move'}: there is no immediate tactic, so the difference is about king activity, pawn timing or piece placement.`);
     } else {
       category = 'positional';
-      why.push(`I could not verify a concrete tactic behind this evaluation drop. The engine simply rates ${m.bestSan ?? 'its choice'} higher, which usually means a positional difference (piece activity, structure or timing).`);
+      const diff = bestAfterFen(m) ? positionalDifference(m.fenAfter, bestAfterFen(m)!, m.color) : [];
+      if (diff.length) {
+        why.push(`No tactic is involved here; it is a positional slip. Compared with ${m.bestSan ?? 'the engine\'s move'}, ${m.san} ${diff.join('; it also ')}.`);
+      } else {
+        why.push(`No tactic is involved, and the board features I check (pawn structure, outposts, open files, bishops, king cover) do not explain it. The engine prefers ${m.bestSan ?? 'its choice'} for piece activity or timing.`);
+      }
     }
     themes.add(category);
   }

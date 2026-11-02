@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.0
+
+- **Positional play** (Train → Positional play): eight ideas (isolated, doubled, passed and backward pawns, outposts, rooks on open files, the bishop pair, the bad bishop) each with a diagram whose highlighted squares are checked by the same detector the app uses, what to do if you have it and if your opponent does, plus a "train your eye" quiz where you click the feature on the board.
+- **Quiet mistakes are explained**: where a move loses ground with no tactic involved, Review now compares the position after your move with the position after the engine's move and says what changed (bishop pair given up, pawns doubled or isolated, an outpost missed or granted, a passed pawn created for the opponent, king cover weakened, pieces left undeveloped). It replaces the old "could not verify a concrete tactic" line. When no listed feature explains it, it says so instead of guessing.
+- **Library puzzle pack** (Puzzles → Add the library pack): puzzles from engine self-play games started in the opening library, kept only when one move clearly stands out (Stockfish depth 13, two lines), with themes (mate, fork, pin, skewer, discovered attack, promotion, hanging piece, win material). They join your own puzzles: daily set, repetition, by-theme practice. The pack is small (51 puzzles, mostly level 1: 19 hanging-piece, 12 win-material, 8 other tactics, 5 forks, 3 pins, 2 skewers, 2 mates). A sample is re-checked at depth 16 in the tests.
+- Train hub lists Positional play; a duplicate Engine match tile is gone; puzzle changes now refresh open pages (a notification after saving puzzles was never sent).
+
 ## 0.5.0
 
 - Black-and-white look: white-dominant in light mode, black-dominant in dark mode, black-and-white board by default (people on the old green default move to it once; other board colours are kept). Move-grade colours stay, because they carry meaning.

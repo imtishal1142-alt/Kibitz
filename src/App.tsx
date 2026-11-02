@@ -27,6 +27,7 @@ const Guess = lazy(() => import('./pages/tools/Guess'));
 const MistakeReplay = lazy(() => import('./pages/tools/MistakeReplay'));
 const Prevention = lazy(() => import('./pages/tools/Prevention'));
 const Candidates = lazy(() => import('./pages/tools/Candidates'));
+const Positional = lazy(() => import('./pages/tools/Positional'));
 const Endgames = lazy(() => import('./pages/tools/Endgames'));
 const Notebook = lazy(() => import('./pages/tools/Notebook'));
 const Reflect = lazy(() => import('./pages/tools/Reflect'));
@@ -154,6 +155,7 @@ function Routed() {
           <Route path="/train/mistakes" element={<MistakeReplay />} />
           <Route path="/train/prevention" element={<Prevention />} />
           <Route path="/train/candidates" element={<Candidates />} />
+          <Route path="/train/positional" element={<Positional />} />
           <Route path="/train/endgames" element={<Endgames />} />
           <Route path="/train/notebook" element={<Notebook />} />
           <Route path="/train/reflect" element={<Reflect />} />

@@ -4,7 +4,7 @@
 // (the Chess.com tests intercept api.chess.com; see the label on those tests).
 import { readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { installChessComMock } from './chesscom-mock.mjs';
+import { installChessComMock, MONTHS } from './chesscom-mock.mjs';
 import { Chess } from 'chess.js';
 import { BLACK_BLUNDERS, LONG_GAME, MY_NAME } from './games.mjs';
 import { SEED_PUZZLE, restoreSeed } from './seed.mjs';
@@ -36,7 +36,7 @@ async function session(opts = {}) {
 }
 const noProblems = (problems, label) => assert(problems.length === 0, `${label}: ${problems.slice(0, 4).join(' | ')}`);
 
-const ROUTES = ['', 'play', 'bots', 'match', 'library', 'analysis', 'chesscom', 'insights', 'session', 'progress', 'train', 'puzzles', 'openings', 'train/guess', 'train/mistakes', 'train/prevention', 'train/candidates', 'train/endgames', 'train/notebook', 'train/reflect', 'train/calendar', 'settings', 'help'];
+const ROUTES = ['', 'play', 'bots', 'match', 'library', 'analysis', 'chesscom', 'insights', 'session', 'progress', 'train', 'puzzles', 'openings', 'train/guess', 'train/mistakes', 'train/prevention', 'train/candidates', 'train/positional', 'train/endgames', 'train/notebook', 'train/reflect', 'train/calendar', 'settings', 'help'];
 
 const OPERA = `[Event "Paris"]
 [Date "1858.??.??"]
@@ -183,6 +183,22 @@ await test('board resizes by dragging its corner, stays inside the screen, and t
   await page.locator('.board-frame').first().waitFor();
   assert(Math.abs((await page.locator('.board-frame').first().boundingBox()).width - big.width) < 3, 'the size should survive a reload');
   noProblems(problems, 'resize');
+  await context.close();
+});
+
+await test('positional play: lesson opens, quiz accepts a click; library puzzle pack can be added', async () => {
+  const { page, problems, context, go } = await session({ viewport: { width: 1440, height: 900 } });
+  await go('train/positional');
+  await page.getByRole('button', { name: /Isolated pawn/ }).click();
+  await page.getByRole('heading', { name: 'Isolated pawn', level: 2 }).waitFor();
+  await page.getByRole('button', { name: 'All ideas' }).click();
+  await page.getByRole('button', { name: /Train your eye/ }).click();
+  await page.getByText('Click a square on the board.').waitFor();
+  await page.getByRole('button', { name: 'Stop' }).click();
+  await go('puzzles');
+  await page.getByRole('button', { name: 'Add the library pack' }).click();
+  await page.getByRole('button', { name: /All puzzles/ }).waitFor();
+  noProblems(problems, 'positional play');
   await context.close();
 });
 
@@ -531,13 +547,13 @@ await test('Chess.com [MOCKED API]: import, profile card, duplicates, caching of
   // profile
   assert(/1520/.test(summary) && /Rapid/i.test(summary), 'profile ratings not shown');
   assert(/api\.chess\.com\/pub\/player\/testplayer/.test(summary), 'data source not shown');
-  const sep = mock.hits.filter((h) => h.endsWith('/2026/09')).length;
+  const sep = mock.hits.filter((h) => h.endsWith(`/${MONTHS.previous}`)).length;
   assert(sep === 1, `September archive fetched ${sep} times`);
   // sync again: nothing new, September is not downloaded again
   await page.getByRole('button', { name: 'Sync new games' }).click();
   await page.getByText(/0 new games added/).waitFor({ timeout: 30000 });
-  assert(mock.hits.filter((h) => h.endsWith('/2026/09')).length === 1, 'a complete month was downloaded again');
-  assert(mock.hits.filter((h) => h.endsWith('/2026/10')).length === 2, 'the current month should be re-checked each sync');
+  assert(mock.hits.filter((h) => h.endsWith(`/${MONTHS.previous}`)).length === 1, 'a complete month was downloaded again');
+  assert(mock.hits.filter((h) => h.endsWith(`/${MONTHS.current}`)).length === 2, 'the current month should be re-checked each sync');
   await go('library');
   await page.waitForSelector('table tbody tr');
   assert((await page.locator('table tbody tr').count()) === 4, 'library does not have 4 games');

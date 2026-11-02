@@ -16,12 +16,17 @@ const game = (n, month, white, black, wr, br, whiteResult, blackResult, moves, e
   pgn: `[Event "Live Chess"]\n[Site "Chess.com"]\n[Date "2026.${month}.10"]\n[Round "-"]\n[White "${white}"]\n[Black "${black}"]\n[Result "${whiteResult === 'win' ? '1-0' : blackResult === 'win' ? '0-1' : '1/2-1/2'}"]\n[WhiteElo "${wr}"]\n[BlackElo "${br}"]\n[TimeControl "600"]\n[EndTime "10:00:00 PDT"]\n[Termination "${white} won by resignation"]\n\n${moves} ${whiteResult === 'win' ? '1-0' : blackResult === 'win' ? '0-1' : '1/2-1/2'}`,
 });
 
+const NOW = new Date();
+const mk = (d) => `${d.getUTCFullYear()}/${String(d.getUTCMonth() + 1).padStart(2, '0')}`;
+/** The current month is re-checked on every sync and the one before it is complete, so these follow the real date. */
+export const MONTHS = { previous: mk(new Date(Date.UTC(NOW.getUTCFullYear(), NOW.getUTCMonth() - 1, 1))), current: mk(NOW) };
+
 export const ARCHIVE = {
-  '2026/09': [
+  [MONTHS.previous]: [
     game(1, '09', USER, 'rival_one', 1490, 1530, 'win', 'resigned', '1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O Be7 6. Re1 b5 7. Bb3 d6 8. c3 O-O', 1788000000),
     game(2, '09', 'rival_two', USER, 1480, 1500, 'win', 'checkmated', '1. d4 d5 2. c4 e6 3. Nc3 Nf6 4. Bg5 Be7 5. e3 O-O 6. Nf3 Nbd7 7. Rc1 c6 8. Bd3 dxc4', 1788100000),
   ],
-  '2026/10': [
+  [MONTHS.current]: [
     game(3, '10', USER, 'rival_three', 1510, 1555, 'resigned', 'win', '1. e4 c5 2. Nf3 d6 3. d4 cxd4 4. Nxd4 Nf6 5. Nc3 a6 6. Be3 e5 7. Nb3 Be6 8. f3 Be7', 1790000000),
     game(4, '10', 'rival_four', USER, 1600, 1520, 'agreed', 'agreed', '1. c4 e5 2. Nc3 Nf6 3. Nf3 Nc6 4. g3 d5 5. cxd5 Nxd5 6. Bg2 Nb6 7. O-O Be7 8. d3 O-O', 1790100000),
   ],

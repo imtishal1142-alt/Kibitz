@@ -5,6 +5,7 @@ import { MiniBoard } from '../components/MiniBoard';
 import { PageHead } from '../components/ui';
 import { usePuzzles, useRepertoire, useSrs } from '../hooks/data';
 import { useSessionView } from '../hooks/session';
+import { POSITIONAL } from '../lib/training/positionalLessons';
 import { ENDGAMES } from '../lib/training/endgames';
 import { OPENING_LIBRARY } from '../lib/training/openingLibrary';
 import { isDue } from '../lib/training/srs';
@@ -27,6 +28,7 @@ interface Small {
 
 const LEARN: Omit<Feature, 'badge'>[] = [
   { to: '/openings', title: 'Openings', text: 'Learn the ideas, traps and plans, and see where your own games go wrong.', fen: 'r1bqk1nr/pppp1ppp/2n5/2b1p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4' },
+  { to: '/train/positional', title: 'Positional play', text: 'Pawn structure, outposts, open files and bishops, with a quiz to train your eye.', fen: 'r1bq1rk1/pp3ppp/2n1pn2/3p4/2PP4/2N1PN2/PP3PPP/R1BQ1RK1 w - - 0 9' },
   { to: '/train/endgames', title: 'Endgames', text: 'Win the won positions and hold the drawn ones against the engine.', fen: '8/8/3k4/8/3K4/3P4/8/8 w - - 0 1' },
   { to: '/puzzles', title: 'Puzzles', text: 'Positions from your own games, repeated until you stop missing them.', fen: 'r1bqkb1r/pppp1Qpp/2n2n2/4p3/2B1P3/8/PPPP1PPP/RNB1K1NR b KQkq - 0 4', orientation: 'b' },
 ];
@@ -54,6 +56,7 @@ export default function Train() {
   const badge = (to: string): string | null => {
     if (to === '/puzzles' && puzzles.data) return puzzles.data.length ? `${due} due · ${puzzles.data.length} total` : 'None yet';
     if (to === '/openings') return lines.data?.length ? `${lines.data.length} in your repertoire` : `${OPENING_LIBRARY.length} to learn`;
+    if (to === '/train/positional') return `${POSITIONAL.length} ideas + quiz`;
     if (to === '/train/endgames') return `${ENDGAMES.length} lessons`;
     return null;
   };
