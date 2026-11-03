@@ -1,7 +1,9 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Chess } from 'chess.js';
 import { Link } from 'react-router-dom';
+import { Celebrate } from '../components/Celebrate';
 import { Board } from '../components/Board';
+import type { BoardArrow } from '../components/Board';
 import { MiniBoard } from '../components/MiniBoard';
 import { Segmented } from '../components/ui';
 import { MoveList } from '../components/MoveList';
@@ -15,6 +17,92 @@ function fenAfter(sans: string[], n: number): string {
   const c = new Chess();
   for (const s of sans.slice(0, n)) c.move(s);
   return c.fen();
+}
+
+const DRILL_KEY = 'kibitz.drills';
+function readDrills(): Record<string, number> {
+  try {
+    return JSON.parse(localStorage.getItem(DRILL_KEY) ?? '{}') as Record<string, number>;
+  } catch {
+    return {};
+  }
+}
+function bumpDrill(id: string): void {
+  try {
+    const d = readDrills();
+    d[id] = (d[id] ?? 0) + 1;
+    localStorage.setItem(DRILL_KEY, JSON.stringify(d));
+  } catch {
+    /* storage unavailable: the drill still works, it just is not counted */
+  }
+}
+
+/** Play the line yourself: you move for `side`, the opponent's book replies are played for you. */
+function Drill({ id, sans, side, label, why }: { id: string; sans: string[]; side: Color; label: string; why?: string }) {
+  const [n, setN] = useState(() => (side === 'w' ? 0 : 1));
+  const [misses, setMisses] = useState(0);
+  const [note, setNote] = useState<string | null>(null);
+  const [mistakes, setMistakes] = useState(0);
+  const [showHint, setShowHint] = useState(false);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => { if (timer.current) clearTimeout(timer.current); }, []);
+  const done = n >= sans.length;
+  const fen = useMemo(() => fenAfter(sans, n), [sans, n]);
+  const expected = sans[n];
+  const arrow = useMemo((): BoardArrow[] | undefined => {
+    if ((!showHint && misses < 2) || done || !expected) return undefined;
+    try {
+      const c = new Chess(fenAfter(sans, n));
+      const m = c.move(expected);
+      return [{ from: m.from, to: m.to }];
+    } catch {
+      return undefined;
+    }
+  }, [showHint, misses, done, expected, sans, n]);
+  const reset = () => { setN(side === 'w' ? 0 : 1); setMisses(0); setNote(null); setMistakes(0); setShowHint(false); };
+  // Black starts after White's first book move.
+  return (
+    <div className="stack-sm drill" style={{ maxWidth: 420 }}>
+      <div className="board-wrap" style={{ maxWidth: 420 }}>
+        <Board
+          fen={fen}
+          orientation={side}
+          movable={done ? null : side}
+          arrows={arrow}
+          ariaLabel={`${label}: play your moves`}
+          onMove={(m) => {
+            if (done || m.san !== expected) {
+              setMisses((x) => x + 1);
+              setMistakes((x) => x + 1);
+              setNote(`That is not the book move here. Try again${misses >= 1 ? ': the arrow shows it' : ' or press Hint'}.`);
+              return false;
+            }
+            setNote(null);
+            setMisses(0);
+            setShowHint(false);
+            const next = n + 1;
+            setN(next);
+            if (next >= sans.length) { bumpDrill(id); return true; }
+            timer.current = setTimeout(() => {
+              setN(next + 1);
+              if (next + 1 >= sans.length) bumpDrill(id);
+            }, 450);
+            return true;
+          }}
+        />
+      </div>
+      <div className="row" role="group" aria-label="Drill controls">
+        <button type="button" className="btn btn-sm" onClick={() => setShowHint(true)} disabled={done}>Hint</button>
+        <button type="button" className="btn btn-sm" onClick={reset}>Restart</button>
+        <span className="small muted" role="status">
+          {done ? `Line complete${mistakes ? ` with ${mistakes} wrong ${mistakes === 1 ? 'try' : 'tries'}` : ' with no mistakes'}.` : `Your move: ${Math.floor(n / 2) + 1}${side === 'w' ? '.' : '...'}`}
+        </span>
+      </div>
+      {done ? <Celebrate /> : null}
+      {note ? <p className="small" role="alert" style={{ margin: 0 }}>{note}</p> : null}
+      {done && why ? <p className="small muted" style={{ margin: 0 }}>{why}</p> : null}
+    </div>
+  );
 }
 
 /** A board that steps through a line one move at a time. */
@@ -38,11 +126,13 @@ function Stepper({ sans, orientation, label }: { sans: string[]; orientation: Co
 }
 
 function TrapCard({ trap, side }: { trap: Trap; side: Color }) {
+  const [mode, setMode] = useState<'watch' | 'play'>('watch');
   return (
     <article className="sheet pad stack-sm" aria-label={trap.name}>
       <h4 style={{ margin: 0 }}>{trap.name} <span className="chip">{trap.by === 'w' ? 'White springs it' : 'Black springs it'}</span></h4>
       <p style={{ margin: 0 }}>{trap.lesson}</p>
-      <Stepper sans={trap.line} orientation={side} label={trap.name} />
+      <Segmented<'watch' | 'play'> label={`${trap.name} mode`} value={mode} onChange={setMode} options={[{ value: 'watch', label: 'Watch' }, { value: 'play', label: 'Play the trap' }]} />
+      {mode === 'watch' ? <Stepper sans={trap.line} orientation={side} label={trap.name} /> : <Drill key={trap.id} id={`trap-${trap.id}`} sans={trap.line} side={trap.by} label={trap.name} why={trap.lesson} />}
     </article>
   );
 }
@@ -51,6 +141,8 @@ function Detail({ o, onBack }: { o: OpeningLesson; onBack: () => void }) {
   const { games, analyses, loading } = usePersonalEntries();
   const stats = useMemo(() => (games && analyses ? openingStats(o, games, analyses) : null), [o, games, analyses]);
   const side = o.side === 'w' ? 'White' : 'Black';
+  const [mode, setMode] = useState<'watch' | 'play'>('watch');
+  const drills = readDrills();
   return (
     <div className="stack">
       <div className="row" style={{ justifyContent: 'space-between' }}>
@@ -60,7 +152,11 @@ function Detail({ o, onBack }: { o: OpeningLesson; onBack: () => void }) {
       <h2 style={{ margin: 0 }}>{o.name}</h2>
       <p className="muted" style={{ margin: 0 }}>{o.gist}</p>
       <div className="grid-2" style={{ alignItems: 'start' }}>
-        <Stepper sans={o.line} orientation={o.side} label={`${o.name} main line`} />
+        <div className="stack-sm">
+          <Segmented<'watch' | 'play'> label="Line mode" value={mode} onChange={setMode} options={[{ value: 'watch', label: 'Watch' }, { value: 'play', label: 'Play it yourself' }]} />
+          {mode === 'watch' ? <Stepper sans={o.line} orientation={o.side} label={`${o.name} main line`} /> : <Drill key={o.id} id={o.id} sans={o.line} side={o.side} label={o.name} why={o.idea} />}
+          <span className="small muted">{(drills[o.id] ?? 0) ? `Completed ${drills[o.id]} ${drills[o.id] === 1 ? 'time' : 'times'}.` : 'Not played yet.'}</span>
+        </div>
         <div className="stack-sm">
           <h3 style={{ fontSize: '1.05rem' }}>The idea</h3>
           <p style={{ margin: 0 }}>{o.idea}</p>

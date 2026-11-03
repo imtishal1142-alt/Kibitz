@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { Celebrate } from '../../components/Celebrate';
 import { Banner, PageHead, Spinner } from '../../components/ui';
 import { Board } from '../../components/Board';
 import { ClassBadge } from '../../components/ClassBadge';
@@ -8,7 +9,7 @@ import { MoveList } from '../../components/MoveList';
 import { assessMove } from '../../lib/analysis/assess';
 import type { MoveAssessment } from '../../lib/analysis/assess';
 import { idbEvalCache } from '../../lib/analysis/gameAnalysis';
-import { fullmoveNumber, sideToMove } from '../../lib/chess/rules';
+import { fullmoveNumber, sideToMove, uciLineToSan } from '../../lib/chess/rules';
 import { winPctFor } from '../../lib/chess/eval';
 import type { OpponentConfig } from '../../lib/engine/strength';
 import { describeRecord, loadEndgames, recordEndgame } from '../../lib/training/endgameProgress';
@@ -23,13 +24,14 @@ import { getEngine, releaseEngine, stopSearch } from '../../services/engines';
 import type { Engine } from '../../lib/engine/engine';
 import { playSound, soundForSan } from '../../services/sound';
 import type { Color } from '../../lib/types';
+import type { BoardArrow } from '../../components/Board';
 
 const OPPONENT: OpponentConfig = { mode: 'full', elo: 3190, skill: 20, movetimeMs: 350, useClock: false };
 const MOVE_LIMIT = 60; // full moves allowed to achieve a "win" goal
 
 /** A position counts as "winning" for the learner at 85% winning chances or better (a clear, safe advantage). */
 const WINNING = 85;
-const GROUPS: EndgameLesson['group'][] = ['Basic mates', 'King and pawn', 'Rook endgames', 'Bishop endgames', 'Queen endgames'];
+const GROUPS: EndgameLesson['group'][] = ['Basic mates', 'King and pawn', 'Rook endgames', 'Bishop endgames', 'Knight endgames', 'Queen endgames', 'Studies and tricks'];
 
 export default function Endgames() {
   const [run, setRun] = useState<{ lesson: EndgameLesson; n: number } | null>(null);
@@ -78,6 +80,44 @@ interface Feedback {
   threwAway: boolean;
 }
 
+/** The engine's best line from the start, to step through before (or after) trying the ending yourself. */
+function Demo({ lesson }: { lesson: EndgameLesson }) {
+  const [line, setLine] = useState<{ fens: string[]; sans: string[]; ucis: string[] } | null>(null);
+  const [n, setN] = useState(0);
+  const [busy, setBusy] = useState(true);
+  useEffect(() => {
+    let live = true;
+    void (async () => {
+      try {
+        const e = await getEngine('live');
+        const r = await e.search({ fen: lesson.fen, depth: 20, multipv: 1 });
+        const pv = r.lines[0]?.pv ?? [];
+        const chk = uciLineToSan(lesson.fen, pv, 14);
+        if (live && chk.valid) setLine({ fens: [lesson.fen, ...chk.fens], sans: chk.sans, ucis: chk.ucis });
+      } catch {
+        /* the demo is a bonus */
+      } finally {
+        if (live) setBusy(false);
+      }
+    })();
+    return () => { live = false; };
+  }, [lesson.fen]);
+  if (busy) return <Spinner label="Finding the best line…" />;
+  if (!line || !line.sans.length) return <p className="small muted" style={{ margin: 0 }}>The engine could not produce a line just now.</p>;
+  const arrow: BoardArrow[] | undefined = n < line.ucis.length ? [{ from: line.ucis[n]!.slice(0, 2), to: line.ucis[n]!.slice(2, 4) }] : undefined;
+  return (
+    <div className="stack-sm" style={{ maxWidth: 360 }}>
+      <Board fen={line.fens[n]!} orientation={lesson.user} movable={null} arrows={arrow} ariaLabel={`Best line, after ${n} of ${line.sans.length} moves`} />
+      <div className="row" role="group" aria-label="Best line controls">
+        <button type="button" className="btn btn-sm" onClick={() => setN(0)} disabled={n === 0}>Start</button>
+        <button type="button" className="btn btn-sm" onClick={() => setN((v) => Math.max(0, v - 1))} disabled={n === 0}>Back</button>
+        <button type="button" className="btn btn-sm" onClick={() => setN((v) => Math.min(line.sans.length, v + 1))} disabled={n === line.sans.length}>Next</button>
+        <span className="small muted">{n === 0 ? 'Start' : `${line.sans.slice(0, n).join(' ')}`}</span>
+      </div>
+    </div>
+  );
+}
+
 function Lab({ lesson, onExit, onAgain }: { lesson: EndgameLesson; onExit: () => void; onAgain: () => void }) {
   const user: Color = lesson.user;
   const foe: Color = user === 'w' ? 'b' : 'w';
@@ -90,6 +130,7 @@ function Lab({ lesson, onExit, onAgain }: { lesson: EndgameLesson; onExit: () =>
   const [feedback, setFeedback] = useState<Feedback[]>([]);
   const [showIdea, setShowIdea] = useState(false);
   const [showHint, setShowHint] = useState(false);
+  const [showDemo, setShowDemo] = useState(false);
   const [error, setError] = useState('');
   const [record, setRecord] = useState<EndgameRecord | null>(null);
   const engine = useRef<Engine | null>(null);
@@ -193,6 +234,7 @@ function Lab({ lesson, onExit, onAgain }: { lesson: EndgameLesson; onExit: () =>
           </p>
           <div role="status" aria-live="polite">
             {thinking ? <Spinner label="The engine is defending…" /> : null}
+            {ended && outcome === 'achieved' ? <Celebrate /> : null}
             {ended ? (
               <Banner kind={outcome === 'achieved' ? 'ok' : 'warn'}>
                 <div>
@@ -214,6 +256,9 @@ function Lab({ lesson, onExit, onAgain }: { lesson: EndgameLesson; onExit: () =>
             <button className="btn btn-sm" type="button" onClick={() => setShowIdea((v) => !v)} aria-expanded={showIdea}>
               <Icon name="book" /> The idea
             </button>
+            <button className="btn btn-sm" type="button" onClick={() => setShowDemo((v) => !v)} aria-expanded={showDemo}>
+              <Icon name="eye" /> Watch the best line
+            </button>
             <button className="btn btn-sm" type="button" onClick={onExit}>
               {ended ? 'Choose another' : 'Leave'}
             </button>
@@ -225,6 +270,7 @@ function Lab({ lesson, onExit, onAgain }: { lesson: EndgameLesson; onExit: () =>
           </div>
           {showHint ? <p className="facts" style={{ margin: 0 }}>{lesson.hint}</p> : null}
           {showIdea ? <p className="facts" style={{ margin: 0 }}>{lesson.idea}</p> : null}
+          {showDemo ? <Demo lesson={lesson} /> : null}
         </section>
 
         {feedback.length ? (

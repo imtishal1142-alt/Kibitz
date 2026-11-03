@@ -559,4 +559,7 @@ export const OPENING_LIBRARY: OpeningLesson[] = [
   },
 ];
 
+import { MORE_OPENINGS } from './openingLibrary2';
+OPENING_LIBRARY.push(...MORE_OPENINGS);
+
 export const openingById = (id: string): OpeningLesson | undefined => OPENING_LIBRARY.find((o) => o.id === id);

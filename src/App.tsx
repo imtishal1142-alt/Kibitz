@@ -67,8 +67,10 @@ function useThemeEffects(): void {
     else el.dataset.theme = prefs.theme;
     if (prefs.reducedMotion === 'on') el.dataset.motion = 'off';
     else el.removeAttribute('data-motion');
+    if (prefs.palette && prefs.palette !== 'mono') el.dataset.palette = prefs.palette;
+    else el.removeAttribute('data-palette');
     el.style.setProperty('--bs', String(prefs.boardScale / 100));
-  }, [prefs.theme, prefs.reducedMotion, prefs.boardScale]);
+  }, [prefs.theme, prefs.reducedMotion, prefs.boardScale, prefs.palette]);
 }
 
 function Rail() {

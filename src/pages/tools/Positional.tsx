@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { Celebrate } from '../../components/Celebrate';
 import { Banner, PageHead } from '../../components/ui';
 import { Board } from '../../components/Board';
 import type { MarkKind } from '../../components/Board';
@@ -58,6 +59,7 @@ function Quiz({ onBack }: { onBack: () => void }) {
   if (!q) {
     return (
       <div className="stack">
+        {score === order.length ? <Celebrate /> : null}
         <h2>Quiz finished</h2>
         <p>You found {score} of {order.length}.</p>
         <div className="row">

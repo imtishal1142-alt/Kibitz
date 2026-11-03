@@ -202,6 +202,44 @@ await test('positional play: lesson opens, quiz accepts a click; library puzzle 
   await context.close();
 });
 
+await test('colour palettes: Settings switches the palette, and every palette passes the contrast scan in light and dark', async () => {
+  const { page, problems, context, go } = await session({ viewport: { width: 1440, height: 900 } });
+  await go('settings');
+  await page.getByRole('button', { name: 'Ocean' }).click();
+  assert((await page.evaluate(() => document.documentElement.dataset.palette)) === 'ocean', 'palette not applied');
+  const bad = [];
+  for (const pal of ['ocean', 'forest', 'sunset', 'violet', 'rose']) {
+    await page.evaluate((p) => (document.documentElement.dataset.palette = p), pal);
+    for (const route of ['train', 'train/positional', 'settings']) {
+      await go(route);
+      await page.evaluate((p) => (document.documentElement.dataset.palette = p), pal);
+      for (const th of ['light', 'dark']) {
+        await page.evaluate((t) => (document.documentElement.dataset.theme = t), th);
+        bad.push(...(await axeScan(page, `${pal} ${route} ${th}`)));
+      }
+    }
+  }
+  assert(bad.length === 0, bad.slice(0, 6).join('\n'));
+  noProblems(problems, 'palettes');
+  await context.close();
+});
+
+await test('opening drill: play the book move, the opponent replies, a wrong move is refused', async () => {
+  const { page, problems, context, go } = await session({ viewport: { width: 1440, height: 900 } });
+  await go('openings');
+  await page.getByRole('tab', { name: 'Library' }).click();
+  await page.getByRole('button', { name: /Italian Game/ }).click();
+  await page.getByRole('heading', { name: 'Italian Game', level: 2 }).waitFor();
+  await page.getByRole('radio', { name: 'Play it yourself' }).click().catch(async () => page.getByText('Play it yourself').click());
+  await typeMove(page, 'a3');
+  await page.getByText(/not the book move/).waitFor();
+  await typeMove(page, 'e4');
+  await page.waitForTimeout(900);
+  await page.getByText(/Your move: 2/).waitFor();
+  noProblems(problems, 'opening drill');
+  await context.close();
+});
+
 await test('opening library: learn an opening, step through a trap, see the plans; endgame lab lists the new lessons', async () => {
   const { page, problems, context, go } = await session({ viewport: { width: 1440, height: 900 } });
   await go('openings');

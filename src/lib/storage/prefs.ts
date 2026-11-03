@@ -1,9 +1,20 @@
 // Lightweight preferences in localStorage (with an in-memory fallback when storage is blocked).
 export type ThemeChoice = 'system' | 'light' | 'dark';
+export type PaletteId = 'mono' | 'ocean' | 'forest' | 'sunset' | 'violet' | 'rose';
+export const PALETTES: { id: PaletteId; label: string; swatch: string }[] = [
+  { id: 'mono', label: 'Black and white', swatch: '#0b0b0b' },
+  { id: 'ocean', label: 'Ocean', swatch: '#0b5fa5' },
+  { id: 'forest', label: 'Forest', swatch: '#1b6e3c' },
+  { id: 'sunset', label: 'Sunset', swatch: '#b4440b' },
+  { id: 'violet', label: 'Violet', swatch: '#6d3fc4' },
+  { id: 'rose', label: 'Rose', swatch: '#b0245a' },
+];
 export type PresetId = 'quick' | 'standard' | 'deep';
 
 export interface Prefs {
   theme: ThemeChoice;
+  /** Accent colours for the whole app. */
+  palette: PaletteId;
   boardTheme: string;
   /** Board size as a percentage of the automatic size (50 to 100, where 100 is the largest that fits the screen). */
   boardScale: number;
@@ -43,6 +54,7 @@ export interface Prefs {
 
 export const DEFAULT_PREFS: Prefs = {
   theme: 'system',
+  palette: 'mono',
   boardTheme: 'mono',
   boardScale: 90,
   look: 2,

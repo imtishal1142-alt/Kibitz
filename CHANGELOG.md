@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.1.0
+
+- **Interactive lessons.** Every opening in the library and every trap has a "Play it yourself" drill: you move for your side, the book replies are played for you, a wrong move is refused with a hint (the arrow appears after two misses), and the number of times you completed each line is remembered on your device. Endgame lessons gained "Watch the best line", which asks the engine for its best line from the start position and lets you step through it with arrows (on top of playing it out against the engine with graded moves, which was already there).
+- **Bigger opening library**: 81 openings (41 added: more Sicilians, Ruy Lopez, Italian, French, Caro-Kann, Queen's Gambit, Indian, Dutch, English and system openings, and gambits such as the Danish, Smith-Morra, Benko, Vienna and Latvian). Every line is replayed for legality in the tests. The new ones have no traps yet.
+- **Bigger endgame library**: 22 lessons (9 added: two bishops against king, king-in-front pawn endings, knight and pawn, a stalemate-trick draw, cutting the king off with a rook, saving a lost rook ending with perpetual check, queen against a pawn on the seventh, opposite-coloured bishops, and Reti's study). Each claim is checked with Stockfish at depth 22. A tenth, Saavedra's study, was dropped because the engine did not confirm the win at that depth.
+- **Colour palettes** (Settings): Ocean, Forest, Sunset, Violet and Rose, next to the default black and white. A palette changes the accent colour, the page tint and the Train hero card; every palette passes the automated contrast scan in light and dark.
+- **More motion**: cards rise in one after another, cards and buttons respond to hover and press, the brand mark tilts, Train icons float gently, and a confetti burst marks a finished drill, an achieved endgame goal and a perfect positional quiz. All of it stops with "Reduce motion" or the system setting.
+
 ## 1.0.0
 
 - **Positional play** (Train → Positional play): eight ideas (isolated, doubled, passed and backward pawns, outposts, rooks on open files, the bishop pair, the bad bishop) each with a diagram whose highlighted squares are checked by the same detector the app uses, what to do if you have it and if your opponent does, plus a "train your eye" quiz where you click the feature on the board.

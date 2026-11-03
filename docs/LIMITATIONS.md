@@ -84,3 +84,10 @@ Build with `npm run build` and deploy the `dist` folder. `dist/_headers` is hono
 - **Coaching is engine-driven**: it adapts to your own games (weaknesses, repetition), not to how you think, and there are no lessons written by a human coach beyond the opening, endgame and positional libraries.
 - **Opening library** has 40 openings with a main line each, not full move trees.
 - **Not tested**: Cloudflare deployment from this repository (the build failed in the dashboard and the log was not seen), Windows, Firefox, Safari, screen readers, live Chess.com import, and speed on a library of more than about 400 games (measured at 400).
+
+## Version 1.1
+
+- **Opening drills accept only the one book move** stored for each line. A different move can be perfectly good; the drill does not ask the engine, it just says it is not the book move. Only the original 40 openings have traps; the 41 added in 1.1 do not.
+- **Opening lines are one main line each**, written by hand, not a database. The prose is general chess knowledge, not checked by a titled player.
+- **The endgame demo** shows Stockfish's best line at depth 20, which is engine-checked, not a tablebase proof, and it can differ from the textbook line.
+- **Palettes** change accent colours only; the board colours are chosen separately.
