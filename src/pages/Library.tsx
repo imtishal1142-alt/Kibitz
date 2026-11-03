@@ -36,6 +36,7 @@ export default function Library() {
   const [state, setState] = useState<'all' | 'analysed' | 'pending'>('all');
   const [sort, setSort] = useState<Sort>({ key: 'date', dir: -1 });
   const [picked, setPicked] = useState<Set<string>>(new Set());
+  const [shown, setShown] = useState(100);
   const [confirmDelete, setConfirmDelete] = useState(false);
 
   const [importOpen, setImportOpen] = useState(false);
@@ -362,7 +363,7 @@ export default function Library() {
                   </tr>
                 </thead>
                 <tbody>
-                  {rows.map((g) => {
+                  {rows.slice(0, shown).map((g) => {
                     const acc = accuracy.get(g.id);
                     const mine = g.userColor;
                     return (
@@ -408,6 +409,13 @@ export default function Library() {
                   })}
                 </tbody>
               </table>
+              {rows.length > shown ? (
+                <div className="row" style={{ justifyContent: 'center', padding: 12 }}>
+                  <button type="button" className="btn" onClick={() => setShown((n) => n + 200)}>
+                    Show more ({rows.length - shown} more games)
+                  </button>
+                </div>
+              ) : null}
             </div>
           )}
           {all.some((g) => !isPersonal(g, prefs.includeDemoInStats)) ? <p className="hint">Demo games are shown here but left out of statistics, weaknesses and strength estimates unless you opt in under Settings.</p> : null}

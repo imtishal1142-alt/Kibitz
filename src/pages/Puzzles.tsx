@@ -8,6 +8,8 @@ import { Pv } from '../components/Pv';
 import { resolveMove, uciLineToSan, uciToSan } from '../lib/chess/rules';
 import { THEME_LABEL, checkPuzzleMove, puzzleHints } from '../lib/training/puzzles';
 import { buildDailySet, isDue, nextSrs, puzzleStats, updateRatings } from '../lib/training/srs';
+import { loadLibraryPuzzles, toRecord } from '../lib/training/libraryPuzzles';
+import { putPuzzles } from '../lib/storage/repos';
 import { addAttempt, bumpCalendar, getSrs, kvGet, kvSet, putSrs, updatePuzzle } from '../lib/storage/repos';
 import { gameDateText } from '../lib/ui/format';
 import { useAttempts, useGames, usePuzzles, useSrs } from '../hooks/data';
@@ -40,6 +42,19 @@ export default function Puzzles() {
   const [index, setIndex] = useState(0);
   const [rating, setRating] = useState(1200);
   const [session, setSession] = useState({ solved: 0, failed: 0 });
+  const [adding, setAdding] = useState(false);
+  const addPack = useCallback(async () => {
+    setAdding(true);
+    try {
+      const pack = await loadLibraryPuzzles();
+      const n = await putPuzzles(pack.map((p) => toRecord(p)));
+      if (n) toast.success(`Added ${n} library puzzles.`); else toast.info('The library pack is already added.');
+    } catch {
+      toast.error('Could not add the library pack.');
+    } finally {
+      setAdding(false);
+    }
+  }, []);
 
   useEffect(() => {
     void kvGet<number>(RATING_KEY).then((r) => typeof r === 'number' && setRating(r));
@@ -89,12 +104,17 @@ export default function Puzzles() {
         <Empty
           title="No puzzles yet"
           action={
-            <Link className="btn btn-primary" to="/library">
-              Analyse some games
-            </Link>
+            <span className="row">
+              <button type="button" className="btn btn-primary" disabled={adding} onClick={() => void addPack()}>
+                Add the library pack
+              </button>
+              <Link className="btn" to="/library">
+                Analyse some games
+              </Link>
+            </span>
           }
         >
-          Puzzles are made from the moments in your analysed games where you went wrong or missed something. Analyse a few games and they appear here automatically.
+          Puzzles are made from the moments in your analysed games where you went wrong or missed something. Analyse a few games and they appear here automatically, or start now with the library pack: positions found by engine self-play where one move clearly stands out.
         </Empty>
       </div>
     );
@@ -129,6 +149,11 @@ export default function Puzzles() {
           </>
         ) : null}
         <span className="grow" />
+        {(puzzles.data ?? []).some((p) => p.id.startsWith('lib-')) ? null : (
+          <button type="button" className="btn" disabled={adding} onClick={() => void addPack()}>
+            Add the library pack
+          </button>
+        )}
         <span className="chip" title="Your puzzle rating moves with each result. It starts at 1200 and is not a chess rating.">
           Puzzle rating {rating}
         </span>
@@ -360,7 +385,7 @@ function PuzzleBoard({ puzzle, position, total, isReview, rating, gameLabel, onD
     <div className="analysis">
       <div className="stack-sm">
         <div className="board-wrap">
-          <Board fen={fen} orientation={color} movable={phase === 'solving' ? color : null} onMove={(m) => handleMove(m)} lastMove={last} arrows={arrows} marks={mark} ariaLabel={`Puzzle board. ${color === 'w' ? 'White' : 'Black'} to move.`} />
+          <Board resizable fen={fen} orientation={color} movable={phase === 'solving' ? color : null} onMove={(m) => handleMove(m)} lastMove={last} arrows={arrows} marks={mark} ariaLabel={`Puzzle board. ${color === 'w' ? 'White' : 'Black'} to move.`} />
         </div>
       </div>
       <div className="stack-sm">
