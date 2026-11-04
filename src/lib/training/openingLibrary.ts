@@ -3,6 +3,7 @@
 // every trap that claims a checkmate is checked to end in checkmate, and every trap that claims to win material is
 // checked against the engine. The prose is general chess knowledge, not engine output.
 import type { Color } from '../types';
+import type { Profile, Variation } from './openingMeta';
 
 export interface Trap {
   id: string;
@@ -30,6 +31,10 @@ export interface OpeningLesson {
   plans: { you: string[]; opponent: string[] };
   mistakes: string[];
   traps: Trap[];
+  /** Other well-known lines (complete from the first move). */
+  variations?: Variation[];
+  /** How offensive, how heavy in theory, and which rating range it suits. */
+  profile?: Profile;
 }
 
 export const OPENING_LIBRARY: OpeningLesson[] = [
@@ -560,6 +565,15 @@ export const OPENING_LIBRARY: OpeningLesson[] = [
 ];
 
 import { MORE_OPENINGS } from './openingLibrary2';
+import { generatedTrapsFor } from './generatedTraps';
+import { EXTRA_TRAPS, PROFILES, VARIATIONS } from './openingMeta';
 OPENING_LIBRARY.push(...MORE_OPENINGS);
+for (const o of OPENING_LIBRARY) {
+  o.profile = PROFILES[o.id];
+  o.variations = VARIATIONS[o.id];
+  const extra = EXTRA_TRAPS[o.id];
+  if (extra) o.traps = [...o.traps, ...extra.filter((x) => !o.traps.some((y) => y.id === x.id))];
+  o.traps = [...o.traps, ...generatedTrapsFor(o.id)];
+}
 
 export const openingById = (id: string): OpeningLesson | undefined => OPENING_LIBRARY.find((o) => o.id === id);

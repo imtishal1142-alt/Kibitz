@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.2.0
+
+- **Opening guide** (Openings → Library → "Which opening?"): advice for four rating ranges (under 1000, 1000 to 1600, 1600 to 2000, over 2000) naming what to play as White, against 1.e4 and against 1.d4, and a list of every opening from most defensive to most offensive. Every opening has a character card: how offensive it is, its style (attacking, positional, solid, counter-attacking, gambit, system), how much theory it needs and which rating ranges it suits. The rating advice is common coaching guidance and is labelled as such; it is not statistics from this app.
+- **"What to play against..."**: answers to the most common moves (1.e4, 1.d4, 1.c4, 1.Nf3, the Italian, Ruy Lopez, King's Gambit, Open Sicilian and the usual anti-Sicilians, Queen's Gambit, Indian defences, London, Trompowsky, and White's choices against the French and Caro-Kann), each with the move, a short why, the rating ranges it suits and a link to study that opening.
+- **Filters and sorting** in the library: by side, style, rating range, and sort by most defensive, most offensive or least theory.
+- **Many more lines**: 130 named lines for 43 openings (Berlin, Marshall, Open Spanish, Winawer, Poisoned Pawn, Yugoslav Attack, Sveshnikov, Meran, Ragozin, Averbakh, Hedgehog and more). Each opening page has an "Other lines" section where every line can be watched or played yourself.
+- **More traps**: 61 traps found by engine search (marked as such) across 39 openings, plus the Budapest knight mate, Fool's mate and the Noah's Ark trap. The engine-found traps are positions where a natural-looking move loses to a real tactic; each is checked at depth 16. They are not from a book and have no names. Three new openings: Barnes Opening (Fool's mate), Blackmar-Diemer Gambit and Albin Countergambit (84 in all).
+
 ## 1.1.0
 
 - **Interactive lessons.** Every opening in the library and every trap has a "Play it yourself" drill: you move for your side, the book replies are played for you, a wrong move is refused with a hint (the arrow appears after two misses), and the number of times you completed each line is remembered on your device. Endgame lessons gained "Watch the best line", which asks the engine for its best line from the start position and lets you step through it with arrows (on top of playing it out against the engine with graded moves, which was already there).

@@ -11,6 +11,9 @@ import { usePersonalEntries } from '../hooks/data';
 import { OPENING_LIBRARY } from '../lib/training/openingLibrary';
 import type { OpeningLesson, Trap } from '../lib/training/openingLibrary';
 import { openingStats } from '../lib/training/openingStats';
+import { ANSWERS, BAND_PLANS } from '../lib/training/openingAnswers';
+import { AGGRESSION_LABEL, BAND_LABEL, STYLE_LABEL } from '../lib/training/openingMeta';
+import type { Band, Style } from '../lib/training/openingMeta';
 import type { Color } from '../lib/types';
 
 function fenAfter(sans: string[], n: number): string {
@@ -151,6 +154,7 @@ function Detail({ o, onBack }: { o: OpeningLesson; onBack: () => void }) {
       </div>
       <h2 style={{ margin: 0 }}>{o.name}</h2>
       <p className="muted" style={{ margin: 0 }}>{o.gist}</p>
+      {o.profile ? <ProfileBox o={o} /> : null}
       <div className="grid-2" style={{ alignItems: 'start' }}>
         <div className="stack-sm">
           <Segmented<'watch' | 'play'> label="Line mode" value={mode} onChange={setMode} options={[{ value: 'watch', label: 'Watch' }, { value: 'play', label: 'Play it yourself' }]} />
@@ -198,6 +202,7 @@ function Detail({ o, onBack }: { o: OpeningLesson; onBack: () => void }) {
           </>
         )}
       </section>
+      {o.variations?.length ? <Lines o={o} /> : null}
       {o.traps.length ? (
         <section className="stack-sm" aria-labelledby="traps">
           <h3 id="traps" style={{ margin: 0 }}>Traps to know</h3>
@@ -208,28 +213,180 @@ function Detail({ o, onBack }: { o: OpeningLesson; onBack: () => void }) {
   );
 }
 
-export function OpeningLibrary() {
-  const [open, setOpen] = useState<string | null>(null);
-  const [side, setSide] = useState<'all' | Color>('all');
-  const current = OPENING_LIBRARY.find((o) => o.id === open);
-  if (current) return <Detail o={current} onBack={() => setOpen(null)} />;
-  const shown = OPENING_LIBRARY.filter((o) => side === 'all' || o.side === side);
+function ProfileBox({ o }: { o: OpeningLesson }) {
+  const pr = o.profile!;
   return (
-    <div className="stack">
-      <p className="muted" style={{ margin: 0 }}>The main openings with the idea behind them, the plans for both sides, the usual mistakes, a few classic traps, and what your own games say about each one.</p>
-      <Segmented<'all' | Color> label="Played as" value={side} onChange={setSide} options={[{ value: 'all', label: 'All' }, { value: 'w', label: 'White' }, { value: 'b', label: 'Black' }]} />
-      <div className="grid-3">
-        {shown.map((o) => (
-          <button key={o.id} type="button" className="hero-card" style={{ textAlign: 'left', cursor: 'pointer', border: 0 }} onClick={() => setOpen(o.id)}>
-            <MiniBoard fen={fenAfter(o.line, o.line.length)} orientation={o.side} />
-            <span className="hero-card-meta">
-              <strong>{o.name}</strong>
-              <span className="muted small">{o.gist}</span>
-            </span>
-            <span className="btn btn-sm">{o.traps.length ? `Learn it · ${o.traps.length} ${o.traps.length === 1 ? 'trap' : 'traps'}` : 'Learn it'}</span>
-          </button>
+    <section className="sheet pad-sm stack-sm" aria-label="Character of this opening">
+      <div className="row" style={{ flexWrap: 'wrap' }}>
+        <span className="chip">{AGGRESSION_LABEL[pr.aggression]}</span>
+        {pr.styles.map((x) => <span key={x} className="chip">{STYLE_LABEL[x]}</span>)}
+        <span className="chip">{['', 'Little theory', 'Some theory', 'Heavy theory'][pr.theory]}</span>
+      </div>
+      <p style={{ margin: 0 }}>{pr.choose}</p>
+      <p className="small muted" style={{ margin: 0 }}>
+        Suits: {pr.bands.map((b) => BAND_LABEL[b]).join(', ')}. This is common coaching guidance, not a statistic from this app or a promise about results.
+      </p>
+    </section>
+  );
+}
+
+/** Other well-known lines of one opening, each with a stepper and a drill. */
+function Lines({ o }: { o: OpeningLesson }) {
+  const vs = o.variations ?? [];
+  const [i, setI] = useState(0);
+  const [mode, setMode] = useState<'watch' | 'play'>('watch');
+  const cur = vs[Math.min(i, vs.length - 1)]!;
+  return (
+    <section className="stack-sm" aria-labelledby="lines">
+      <h3 id="lines" style={{ margin: 0 }}>Other lines ({vs.length})</h3>
+      <div className="row" style={{ flexWrap: 'wrap' }} role="group" aria-label="Choose a line">
+        {vs.map((x, k) => (
+          <button key={x.name} type="button" className="btn btn-sm" aria-pressed={k === i} onClick={() => setI(k)} style={k === i ? { borderColor: 'var(--accent)', boxShadow: '0 0 0 2px var(--accent-tint)' } : undefined}>{x.name}</button>
         ))}
       </div>
+      <div className="grid-2" style={{ alignItems: 'start' }}>
+        <div className="stack-sm">
+          <Segmented<'watch' | 'play'> label="Line mode" value={mode} onChange={setMode} options={[{ value: 'watch', label: 'Watch' }, { value: 'play', label: 'Play it yourself' }]} />
+          {mode === 'watch' ? <Stepper key={cur.name} sans={cur.line} orientation={o.side} label={cur.name} /> : <Drill key={`${o.id}-${cur.name}`} id={`${o.id}:${cur.name}`} sans={cur.line} side={o.side} label={cur.name} why={cur.note} />}
+        </div>
+        <div className="stack-sm">
+          <h4 style={{ margin: 0 }}>{cur.name}</h4>
+          <p style={{ margin: 0 }}>{cur.note}</p>
+          <p className="small muted" style={{ margin: 0 }}>{cur.line.length} moves from the start. Other moves can be good; this is the standard line.</p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function Guide({ onOpen }: { onOpen: (id: string) => void }) {
+  const [band, setBand] = useState<Band>('club');
+  const plan = BAND_PLANS.find((b) => b.band === band)!;
+  const byId = (id: string) => OPENING_LIBRARY.find((o) => o.id === id);
+  const spectrum = [...OPENING_LIBRARY].filter((o) => o.profile).sort((a, b) => a.profile!.aggression - b.profile!.aggression || a.name.localeCompare(b.name));
+  const group = (n: number) => spectrum.filter((o) => o.profile!.aggression === n);
+  const Names = ({ ids }: { ids: string[] }) => (
+    <span>{ids.map((id, k) => { const op = byId(id); return op ? <span key={id}>{k ? ', ' : ''}<button type="button" className="link-btn" onClick={() => onOpen(id)}>{op.name}</button></span> : null; })}</span>
+  );
+  return (
+    <div className="stack">
+      <section className="sheet pad stack-sm" aria-labelledby="by-rating">
+        <h3 id="by-rating" style={{ margin: 0 }}>Which opening for my rating?</h3>
+        <Segmented<Band> label="Rating range" value={band} onChange={setBand} options={(['beginner', 'club', 'advanced', 'expert'] as Band[]).map((b) => ({ value: b, label: BAND_LABEL[b] }))} />
+        <p style={{ margin: 0 }}>{plan.advice}</p>
+        <ul className="list-plain stack-sm" style={{ margin: 0 }}>
+          <li><strong>As White:</strong> <Names ids={plan.white} /></li>
+          <li><strong>As Black against 1.e4:</strong> <Names ids={plan.vsE4} /></li>
+          <li><strong>As Black against 1.d4:</strong> <Names ids={plan.vsD4} /></li>
+        </ul>
+        <p className="small muted" style={{ margin: 0 }}>These are common coaching recommendations for each range, not statistics from this app. The best opening is one you understand and enjoy.</p>
+      </section>
+      <section className="sheet pad stack-sm" aria-labelledby="spectrum">
+        <h3 id="spectrum" style={{ margin: 0 }}>From most defensive to most offensive</h3>
+        {[1, 2, 3, 4, 5].map((n) => (
+          <div key={n} className="stack-sm">
+            <div className="label">{AGGRESSION_LABEL[n]} ({group(n).length})</div>
+            <div className="row" style={{ flexWrap: 'wrap' }}>
+              {group(n).map((o) => <button key={o.id} type="button" className="btn btn-sm" onClick={() => onOpen(o.id)}>{o.name}</button>)}
+            </div>
+          </div>
+        ))}
+        <p className="small muted" style={{ margin: 0 }}>Aggression is a rough 1 to 5 judgement of how sharp and attacking the typical positions are. System openings (London, Colle, King's Indian Attack, Torre, Stonewall Attack, Larsen, Bird) are listed with the "System" style filter in the library.</p>
+      </section>
+    </div>
+  );
+}
+
+function Answers({ onOpen }: { onOpen: (id: string) => void }) {
+  const [id, setId] = useState(ANSWERS[0]!.id);
+  const a = ANSWERS.find((x) => x.id === id)!;
+  return (
+    <div className="stack">
+      <div className="stack-sm">
+        <label className="label" htmlFor="ans-sel">What did your opponent play?</label>
+        <select id="ans-sel" className="select" value={id} onChange={(e) => setId(e.target.value)}>
+          {ANSWERS.map((x) => <option key={x.id} value={x.id}>{x.when}</option>)}
+        </select>
+      </div>
+      <h3 style={{ margin: 0 }}>{a.when}: your options as {a.chooser === 'w' ? 'White' : 'Black'}</h3>
+      <div className="grid-2" style={{ alignItems: 'start' }}>
+        {a.replies.map((r) => (
+          <article key={r.name} className="sheet pad stack-sm" aria-label={r.name}>
+            <h4 style={{ margin: 0 }}>{r.name}</h4>
+            <p style={{ margin: 0 }}>{r.why}</p>
+            <p className="small muted" style={{ margin: 0 }}>Good for: {r.bands.map((b) => BAND_LABEL[b]).join(', ')}.</p>
+            <Stepper sans={r.line} orientation={a.chooser} label={r.name} />
+            {r.opening ? <button type="button" className="btn btn-sm" style={{ alignSelf: 'flex-start' }} onClick={() => onOpen(r.opening!)}>Study this opening</button> : null}
+          </article>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export function OpeningLibrary() {
+  const [open, setOpen] = useState<string | null>(null);
+  const [view, setView] = useState<'list' | 'guide' | 'answers'>('list');
+  const [side, setSide] = useState<'all' | Color>('all');
+  const [style, setStyle] = useState<'all' | Style>('all');
+  const [band, setBand] = useState<'all' | Band>('all');
+  const [sort, setSort] = useState<'default' | 'defensive' | 'offensive' | 'theory'>('default');
+  const [q, setQ] = useState('');
+  const current = OPENING_LIBRARY.find((o) => o.id === open);
+  if (current) return <Detail o={current} onBack={() => setOpen(null)} />;
+  const text = q.trim().toLowerCase();
+  let shown = OPENING_LIBRARY.filter((o) => (side === 'all' || o.side === side) && (style === 'all' || o.profile?.styles.includes(style)) && (band === 'all' || o.profile?.bands.includes(band)) && (!text || o.name.toLowerCase().includes(text) || o.eco.toLowerCase().includes(text)));
+  if (sort === 'defensive') shown = [...shown].sort((a, b) => (a.profile?.aggression ?? 3) - (b.profile?.aggression ?? 3));
+  if (sort === 'offensive') shown = [...shown].sort((a, b) => (b.profile?.aggression ?? 3) - (a.profile?.aggression ?? 3));
+  if (sort === 'theory') shown = [...shown].sort((a, b) => (a.profile?.theory ?? 2) - (b.profile?.theory ?? 2));
+  const goto = (id: string) => { setOpen(id); };
+  const lines = OPENING_LIBRARY.reduce((n, o) => n + 1 + (o.variations?.length ?? 0), 0);
+  const traps = OPENING_LIBRARY.reduce((n, o) => n + o.traps.length, 0);
+  return (
+    <div className="stack">
+      <p className="muted" style={{ margin: 0 }}>{OPENING_LIBRARY.length} openings, {lines} lines and {traps} traps, with the idea, plans, mistakes and your own results for each.</p>
+      <Segmented<'list' | 'guide' | 'answers'> label="Library view" value={view} onChange={setView} options={[{ value: 'list', label: 'All openings' }, { value: 'guide', label: 'Which opening?' }, { value: 'answers', label: 'What to play against...' }]} />
+      {view === 'guide' ? <Guide onOpen={goto} /> : view === 'answers' ? <Answers onOpen={goto} /> : (
+        <>
+          <div className="row" style={{ flexWrap: 'wrap' }}>
+            <input className="input" type="search" placeholder="Search by name or code" aria-label="Search openings" value={q} onChange={(e) => setQ(e.target.value)} />
+            <Segmented<'all' | Color> label="Played as" value={side} onChange={setSide} options={[{ value: 'all', label: 'All' }, { value: 'w', label: 'White' }, { value: 'b', label: 'Black' }]} />
+          </div>
+          <div className="row" style={{ flexWrap: 'wrap' }}>
+            <label className="small muted" htmlFor="f-style">Style</label>
+            <select id="f-style" className="select" value={style} onChange={(e) => setStyle(e.target.value as 'all' | Style)}>
+              <option value="all">Any style</option>
+              {(Object.keys(STYLE_LABEL) as Style[]).map((x) => <option key={x} value={x}>{STYLE_LABEL[x]}</option>)}
+            </select>
+            <label className="small muted" htmlFor="f-band">Rating</label>
+            <select id="f-band" className="select" value={band} onChange={(e) => setBand(e.target.value as 'all' | Band)}>
+              <option value="all">Any rating</option>
+              {(Object.keys(BAND_LABEL) as Band[]).map((x) => <option key={x} value={x}>{BAND_LABEL[x]}</option>)}
+            </select>
+            <label className="small muted" htmlFor="f-sort">Sort</label>
+            <select id="f-sort" className="select" value={sort} onChange={(e) => setSort(e.target.value as typeof sort)}>
+              <option value="default">Library order</option>
+              <option value="defensive">Most defensive first</option>
+              <option value="offensive">Most offensive first</option>
+              <option value="theory">Least theory first</option>
+            </select>
+          </div>
+          {shown.length === 0 ? <p className="muted">No opening matches these filters.</p> : null}
+          <div className="grid-3">
+            {shown.map((o) => (
+              <button key={o.id} type="button" className="hero-card" style={{ textAlign: 'left', cursor: 'pointer', border: 0 }} onClick={() => setOpen(o.id)}>
+                <MiniBoard fen={fenAfter(o.line, o.line.length)} orientation={o.side} />
+                <span className="hero-card-meta">
+                  <strong>{o.name}</strong>
+                  <span className="muted small">{o.gist}</span>
+                  {o.profile ? <span className="small muted">{AGGRESSION_LABEL[o.profile.aggression]} · {o.profile.styles.map((x) => STYLE_LABEL[x]).join(', ')}</span> : null}
+                </span>
+                <span className="btn btn-sm">{`Learn it${(o.variations?.length ?? 0) ? ` · ${(o.variations?.length ?? 0) + 1} lines` : ''}${o.traps.length ? ` · ${o.traps.length} ${o.traps.length === 1 ? 'trap' : 'traps'}` : ''}`}</span>
+              </button>
+            ))}
+          </div>
+        </>
+      )}
     </div>
   );
 }

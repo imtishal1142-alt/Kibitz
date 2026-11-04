@@ -230,13 +230,38 @@ await test('opening drill: play the book move, the opponent replies, a wrong mov
   await page.getByRole('tab', { name: 'Library' }).click();
   await page.getByRole('button', { name: /Italian Game/ }).click();
   await page.getByRole('heading', { name: 'Italian Game', level: 2 }).waitFor();
-  await page.getByRole('radio', { name: 'Play it yourself' }).click().catch(async () => page.getByText('Play it yourself').click());
+  await page.getByRole('button', { name: 'Play it yourself' }).first().click();
   await typeMove(page, 'a3');
   await page.getByText(/not the book move/).waitFor();
   await typeMove(page, 'e4');
   await page.waitForTimeout(900);
   await page.getByText(/Your move: 2/).waitFor();
   noProblems(problems, 'opening drill');
+  await context.close();
+});
+
+await test('opening guide: rating advice, most defensive to most offensive, answers to common moves, extra lines, filters', async () => {
+  const { page, problems, context, go } = await session({ viewport: { width: 1440, height: 900 } });
+  await go('openings');
+  await page.getByRole('tab', { name: 'Library' }).click();
+  await page.getByRole('button', { name: 'Which opening?' }).click();
+  await page.getByRole('heading', { name: 'Which opening for my rating?' }).waitFor();
+  await page.getByRole('button', { name: 'Under 1000' }).click();
+  await page.getByText(/Pick openings with simple ideas/).waitFor();
+  await page.getByRole('heading', { name: 'From most defensive to most offensive' }).waitFor();
+  await page.getByRole('button', { name: /What to play against/ }).click();
+  await page.getByLabel('What did your opponent play?').selectOption({ label: 'White plays 1.e4' });
+  await page.getByRole('heading', { name: /1\.\.\.c6: the Caro-Kann/ }).waitFor();
+  await page.getByRole('button', { name: 'All openings' }).click();
+  await page.getByLabel('Style').selectOption('gambit');
+  await page.getByRole('button', { name: /Danish Gambit/ }).waitFor();
+  assert((await page.getByRole('button', { name: /Caro-Kann: Classical/ }).count()) === 0, 'style filter should hide solid openings');
+  await page.getByLabel('Style').selectOption('all');
+  await page.getByRole('button', { name: /Najdorf/ }).first().click();
+  await page.getByRole('heading', { name: /Other lines/ }).waitFor();
+  await page.getByRole('button', { name: 'Poisoned Pawn' }).click();
+  await page.getByText(/Black takes the b2 pawn/).waitFor();
+  noProblems(problems, 'opening guide');
   await context.close();
 });
 

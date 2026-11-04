@@ -91,3 +91,10 @@ Build with `npm run build` and deploy the `dist` folder. `dist/_headers` is hono
 - **Opening lines are one main line each**, written by hand, not a database. The prose is general chess knowledge, not checked by a titled player.
 - **The endgame demo** shows Stockfish's best line at depth 20, which is engine-checked, not a tablebase proof, and it can differ from the textbook line.
 - **Palettes** change accent colours only; the board colours are chosen separately.
+
+## Version 1.2
+
+- **Rating and style advice** is common coaching guidance written by hand, and the "aggression" number is my rough judgement. Neither comes from game statistics, and a different coach would disagree on some entries.
+- **Engine-found traps** (61) are real engine-checked tactics, but many are plain mistakes rather than famous traps, and some start from unusual move orders created by the search. They have no names and no book source.
+- **Hand-written traps** are still few. Several famous traps I tried (for example the Lasker trap in the Albin and a Blackmar-Diemer mate) failed the checks and were left out rather than shipped unverified.
+- **Lines** are one standard line per name, written from memory and checked only for legality, not for being the most-played or best move order.

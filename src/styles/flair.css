@@ -280,3 +280,14 @@ html[data-motion='off'] .grid-3 > *, html[data-motion='off'] .grid-2 > *, html[d
 html[data-motion='off'] .confetti { display: none; }
 html[data-motion='off'] .hero-card:hover, html[data-motion='off'] .nav-card:hover, html[data-motion='off'] .train-card:hover, html[data-motion='off'] .train-tile:hover { transform: none; }
 
+
+.link-btn {
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  color: var(--accent);
+  text-decoration: underline;
+  cursor: pointer;
+}
+.link-btn:hover { color: var(--accent-2, var(--accent)); }

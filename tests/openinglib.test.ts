@@ -19,6 +19,12 @@ describe('opening library', () => {
       for (const t of o.traps) expect(() => play(t.line), `${o.id}/${t.id}`).not.toThrow();
     }
   });
+  it('every opening has a profile, and every extra line is legal', () => {
+    for (const o of OPENING_LIBRARY) {
+      expect(o.profile, `${o.id} profile`).toBeDefined();
+      for (const v of o.variations ?? []) expect(() => play(v.line), `${o.id}/${v.name}`).not.toThrow();
+    }
+  });
   it('traps that claim checkmate end in checkmate by the right side', () => {
     for (const o of OPENING_LIBRARY) for (const t of o.traps.filter((x) => x.claim === 'mate')) {
       const c = play(t.line);
