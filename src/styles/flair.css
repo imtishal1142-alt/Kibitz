@@ -1,0 +1,293 @@
+/* Colour palettes and extra motion (1.1). The default is the black-and-white look; a palette only changes the accent, the page tint and a few decorative surfaces. Every accent is checked for contrast against its own text colour by the accessibility scan. */
+
+:root[data-palette='ocean'] {
+  --accent: #0b5fa5;
+  --accent-2: #08497f;
+  --accent-tint: #dbeafe;
+  --on-accent: #ffffff;
+  --accent-edge: #08497f;
+  --paper: #f2f7fc;
+  --paper-2: #e6eef7;
+  --rail-on: #0b5fa5;
+  --rail-on-bg: #dbeafe;
+  --hero-bg: #073a66;
+  --hero-bg-2: #0a2540;
+}
+
+:root[data-palette='forest'] {
+  --accent: #1b6e3c;
+  --accent-2: #14562e;
+  --accent-tint: #d8f0e0;
+  --on-accent: #ffffff;
+  --accent-edge: #14562e;
+  --paper: #f1f8f3;
+  --paper-2: #e3efe7;
+  --rail-on: #1b6e3c;
+  --rail-on-bg: #d8f0e0;
+  --hero-bg: #0f4a2a;
+  --hero-bg-2: #0a2e1a;
+}
+
+:root[data-palette='sunset'] {
+  --accent: #b4440b;
+  --accent-2: #8f3507;
+  --accent-tint: #fde6d6;
+  --on-accent: #ffffff;
+  --accent-edge: #8f3507;
+  --paper: #fcf6f1;
+  --paper-2: #f5ebe3;
+  --rail-on: #b4440b;
+  --rail-on-bg: #fde6d6;
+  --hero-bg: #7a2d06;
+  --hero-bg-2: #4a1a04;
+}
+
+:root[data-palette='violet'] {
+  --accent: #6d3fc4;
+  --accent-2: #5630a0;
+  --accent-tint: #e9defb;
+  --on-accent: #ffffff;
+  --accent-edge: #5630a0;
+  --paper: #f6f2fc;
+  --paper-2: #ece5f6;
+  --rail-on: #6d3fc4;
+  --rail-on-bg: #e9defb;
+  --hero-bg: #3f1f85;
+  --hero-bg-2: #25124f;
+}
+
+:root[data-palette='rose'] {
+  --accent: #b0245a;
+  --accent-2: #8c1b47;
+  --accent-tint: #fbdbe7;
+  --on-accent: #ffffff;
+  --accent-edge: #8c1b47;
+  --paper: #fcf2f6;
+  --paper-2: #f5e6ec;
+  --rail-on: #b0245a;
+  --rail-on-bg: #fbdbe7;
+  --hero-bg: #7a1740;
+  --hero-bg-2: #4a0d26;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root[data-palette='ocean']:not([data-theme='light']) {
+  --accent: #6cb6ff;
+  --accent-2: #9ccdff;
+  --accent-tint: #12283d;
+  --on-accent: #06121f;
+  --accent-edge: #6cb6ff;
+  --paper: #080f17;
+  --paper-2: #0f1a26;
+  --rail-on: #6cb6ff;
+  --rail-on-bg: #12283d;
+  --hero-bg: #0f1a26;
+  --hero-bg-2: #080f17;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root[data-palette='forest']:not([data-theme='light']) {
+  --accent: #5fd08a;
+  --accent-2: #8be0ab;
+  --accent-tint: #112b1c;
+  --on-accent: #04140a;
+  --accent-edge: #5fd08a;
+  --paper: #08100b;
+  --paper-2: #0f1b13;
+  --rail-on: #5fd08a;
+  --rail-on-bg: #112b1c;
+  --hero-bg: #0f1b13;
+  --hero-bg-2: #08100b;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root[data-palette='sunset']:not([data-theme='light']) {
+  --accent: #ff9a5c;
+  --accent-2: #ffb98a;
+  --accent-tint: #331c0f;
+  --on-accent: #1a0a02;
+  --accent-edge: #ff9a5c;
+  --paper: #110b07;
+  --paper-2: #1d130d;
+  --rail-on: #ff9a5c;
+  --rail-on-bg: #331c0f;
+  --hero-bg: #1d130d;
+  --hero-bg-2: #110b07;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root[data-palette='violet']:not([data-theme='light']) {
+  --accent: #b79cff;
+  --accent-2: #cdbaff;
+  --accent-tint: #241a3d;
+  --on-accent: #0e0720;
+  --accent-edge: #b79cff;
+  --paper: #0d0a14;
+  --paper-2: #161122;
+  --rail-on: #b79cff;
+  --rail-on-bg: #241a3d;
+  --hero-bg: #161122;
+  --hero-bg-2: #0d0a14;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root[data-palette='rose']:not([data-theme='light']) {
+  --accent: #ff7aa8;
+  --accent-2: #ff9bbf;
+  --accent-tint: #38141f;
+  --on-accent: #1c0409;
+  --accent-edge: #ff7aa8;
+  --paper: #130a0e;
+  --paper-2: #1f1217;
+  --rail-on: #ff7aa8;
+  --rail-on-bg: #38141f;
+  --hero-bg: #1f1217;
+  --hero-bg-2: #130a0e;
+  }
+}
+
+:root[data-palette='ocean'][data-theme='dark'] {
+  --accent: #6cb6ff;
+  --accent-2: #9ccdff;
+  --accent-tint: #12283d;
+  --on-accent: #06121f;
+  --accent-edge: #6cb6ff;
+  --paper: #080f17;
+  --paper-2: #0f1a26;
+  --rail-on: #6cb6ff;
+  --rail-on-bg: #12283d;
+  --hero-bg: #0f1a26;
+  --hero-bg-2: #080f17;
+}
+
+:root[data-palette='forest'][data-theme='dark'] {
+  --accent: #5fd08a;
+  --accent-2: #8be0ab;
+  --accent-tint: #112b1c;
+  --on-accent: #04140a;
+  --accent-edge: #5fd08a;
+  --paper: #08100b;
+  --paper-2: #0f1b13;
+  --rail-on: #5fd08a;
+  --rail-on-bg: #112b1c;
+  --hero-bg: #0f1b13;
+  --hero-bg-2: #08100b;
+}
+
+:root[data-palette='sunset'][data-theme='dark'] {
+  --accent: #ff9a5c;
+  --accent-2: #ffb98a;
+  --accent-tint: #331c0f;
+  --on-accent: #1a0a02;
+  --accent-edge: #ff9a5c;
+  --paper: #110b07;
+  --paper-2: #1d130d;
+  --rail-on: #ff9a5c;
+  --rail-on-bg: #331c0f;
+  --hero-bg: #1d130d;
+  --hero-bg-2: #110b07;
+}
+
+:root[data-palette='violet'][data-theme='dark'] {
+  --accent: #b79cff;
+  --accent-2: #cdbaff;
+  --accent-tint: #241a3d;
+  --on-accent: #0e0720;
+  --accent-edge: #b79cff;
+  --paper: #0d0a14;
+  --paper-2: #161122;
+  --rail-on: #b79cff;
+  --rail-on-bg: #241a3d;
+  --hero-bg: #161122;
+  --hero-bg-2: #0d0a14;
+}
+
+:root[data-palette='rose'][data-theme='dark'] {
+  --accent: #ff7aa8;
+  --accent-2: #ff9bbf;
+  --accent-tint: #38141f;
+  --on-accent: #1c0409;
+  --accent-edge: #ff7aa8;
+  --paper: #130a0e;
+  --paper-2: #1f1217;
+  --rail-on: #ff7aa8;
+  --rail-on-bg: #38141f;
+  --hero-bg: #1f1217;
+  --hero-bg-2: #130a0e;
+}
+
+
+.train-hero {
+  background: linear-gradient(135deg, var(--hero-bg, #0b0b0b), var(--hero-bg-2, #0b0b0b));
+}
+:root[data-palette] .btn-primary:hover:not(:disabled) {
+  background: var(--accent-2);
+}
+
+/* Motion. Transform-only unless noted, so text contrast never changes while something moves. */
+@keyframes lift-in { from { transform: translateY(10px) scale(0.985); } to { transform: none; } }
+@keyframes float-y { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+@keyframes confetti-fall {
+  0% { transform: translate3d(0, -10px, 0) rotate(0deg); opacity: 1; }
+  100% { transform: translate3d(var(--dx), 170px, 0) rotate(var(--rot)); opacity: 0; }
+}
+@keyframes pop-check { 0% { transform: scale(0.4); } 60% { transform: scale(1.18); } 100% { transform: scale(1); } }
+
+.grid-3 > *, .grid-2 > * { animation: lift-in 0.45s cubic-bezier(0.2, 0.7, 0.2, 1) both; }
+.grid-3 > :nth-child(2), .grid-2 > :nth-child(2) { animation-delay: 40ms; }
+.grid-3 > :nth-child(3) { animation-delay: 80ms; }
+.grid-3 > :nth-child(4) { animation-delay: 120ms; }
+.grid-3 > :nth-child(5) { animation-delay: 160ms; }
+.grid-3 > :nth-child(6) { animation-delay: 200ms; }
+.grid-3 > :nth-child(n + 7) { animation-delay: 240ms; }
+
+.hero-card, .nav-card, .train-card, .train-tile { transition: transform 0.18s ease, box-shadow 0.18s ease; }
+.hero-card:hover, .nav-card:hover, .train-card:hover, .train-tile:hover { transform: translateY(-3px); box-shadow: 0 10px 26px rgba(0, 0, 0, 0.14); }
+.btn { transition: transform 0.12s ease, background-color 0.15s ease, border-color 0.15s ease; }
+.btn:active:not(:disabled) { transform: scale(0.96); }
+.train-art, .hero-card .mini-board { transition: transform 0.4s cubic-bezier(0.2, 0.7, 0.2, 1); }
+.train-card:hover .train-art, .hero-card:hover .mini-board { transform: rotate(-2deg) scale(1.04); }
+.brand-mark { display: inline-block; transition: transform 0.4s cubic-bezier(0.3, 1.6, 0.4, 1); }
+.brand:hover .brand-mark { transform: rotate(-14deg) scale(1.12); }
+.chip-done, .banner-ok svg { animation: pop-check 0.4s ease-out both; }
+.train-icon { animation: float-y 5s ease-in-out infinite; }
+.train-tile:nth-child(2n) .train-icon { animation-delay: -1.5s; }
+.train-tile:nth-child(3n) .train-icon { animation-delay: -3s; }
+
+.confetti { position: relative; height: 0; overflow: visible; pointer-events: none; z-index: 5; }
+.confetti i {
+  position: absolute;
+  top: 0;
+  left: var(--x);
+  width: 8px;
+  height: 12px;
+  border-radius: 2px;
+  background: var(--c);
+  animation: confetti-fall 1.4s ease-out forwards;
+  animation-delay: var(--d);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .grid-3 > *, .grid-2 > *, .train-icon, .chip-done, .banner-ok svg { animation: none; }
+  .confetti { display: none; }
+  .hero-card:hover, .nav-card:hover, .train-card:hover, .train-tile:hover { transform: none; }
+}
+html[data-motion='off'] .grid-3 > *, html[data-motion='off'] .grid-2 > *, html[data-motion='off'] .train-icon { animation: none; }
+html[data-motion='off'] .confetti { display: none; }
+html[data-motion='off'] .hero-card:hover, html[data-motion='off'] .nav-card:hover, html[data-motion='off'] .train-card:hover, html[data-motion='off'] .train-tile:hover { transform: none; }
+
+
+.link-btn {
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  color: var(--accent);
+  text-decoration: underline;
+  cursor: pointer;
+}
+.link-btn:hover { color: var(--accent-2, var(--accent)); }

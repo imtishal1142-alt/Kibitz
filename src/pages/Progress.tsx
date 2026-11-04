@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
+import { useWarmReady } from '../services/warmExplain';
 import { Banner, Empty, PageHead, Spinner, StatBlock } from '../components/ui';
 import { MoveGrades } from '../components/MoveGrades';
 import { StreakCard } from '../components/StreakCard';
@@ -33,7 +34,10 @@ export default function Progress() {
   const puzzles = useQuery(listPuzzles, ['puzzles']);
   const retests = useQuery(loadRetests, ['kv']);
 
-  const entries = useMemo(() => (games.data && analyses.data ? analysedEntries(games.data, analyses.data, prefs.includeDemoInStats) : []), [games.data, analyses.data, prefs.includeDemoInStats]);
+  const allEntries = useMemo(() => (games.data && analyses.data ? analysedEntries(games.data, analyses.data, prefs.includeDemoInStats) : undefined), [games.data, analyses.data, prefs.includeDemoInStats]);
+  // The explanations behind these numbers are prepared in idle time first, so the page opens without freezing.
+  const ready = useWarmReady(allEntries);
+  const entries = useMemo(() => (ready && allEntries ? allEntries : []), [ready, allEntries]);
   const personal = useMemo(() => (games.data ?? []).filter((g) => isPersonal(g, prefs.includeDemoInStats)), [games.data, prefs.includeDemoInStats]);
   const history = useMemo(() => collectHistory(entries), [entries]);
   const buckets = useMemo(() => bucketByMonth(history.stats, history.mistakes), [history]);
@@ -53,7 +57,7 @@ export default function Progress() {
     return { total: items.length, learned: q.learned, due: q.due.length, later: q.later.length, fresh: q.fresh.length };
   }, [entries, retests.data]);
 
-  if (games.loading || analyses.loading || calendar.loading) return <Spinner label="Reading your history…" />;
+  if (!ready || games.loading || analyses.loading || calendar.loading) return <Spinner label="Reading your history…" />;
   if (personal.length === 0)
     return (
       <div className="stack page-narrow">
@@ -73,7 +77,7 @@ export default function Progress() {
 
   return (
     <div className="stack">
-      <PageHead title="Progress" sub={`From ${entries.length} analysed of ${personal.length} games.`} actions={<Link className="btn btn-primary" to="/session">Today&apos;s session</Link>} />
+      <PageHead title="Progress" sub={`From ${entries.length} analysed of ${personal.length} games.`} actions={<div className="row"><Link className="btn" to="/insights">Insights</Link><Link className="btn btn-primary" to="/session">Today&apos;s session</Link></div>} />
       <section className="sheet pad stack-sm" aria-label="Streak">
         <StreakCard streak={streak} />
       </section>

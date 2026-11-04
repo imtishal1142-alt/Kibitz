@@ -8,7 +8,8 @@ import { CLASS_GLYPH, CLASS_LABEL, lossClassOf } from '../chess/classify';
 import { forMover, formatScore, winPctFor } from '../chess/eval';
 import { formatClock, materialCount, normalizeFen, phaseOf, uciLineToSan } from '../chess/rules';
 import { settledMaterial } from './grades';
-import { describeMove, pawnStructure, PIECE_NAME, whatItDoes } from './tactics';
+import { positionalDifference } from './positional';
+import { describeMove, pawnStructure, PIECE_NAME, VAL, whatItDoes } from './tactics';
 import type { MoveFacts } from './tactics';
 
 export type Category =
@@ -94,6 +95,10 @@ export interface Explanation {
   };
   /** True when every quoted variation was replayed and found legal. */
   verified: boolean;
+  /** What the move threatens to do next (found by passing the move and looking for forcing ideas), or null. */
+  threat: string | null;
+  /** The opponent's best reply from the engine line, with what it does. */
+  reply: string | null;
 }
 
 export const moveLabel = (m: Pick<MoveAnalysis, 'ply' | 'color' | 'san'>): string => `${Math.ceil(m.ply / 2)}${m.color === 'w' ? '.' : '...'}${m.san}`;
@@ -138,7 +143,92 @@ function undevelopedMinors(fen: string, color: 'w' | 'b'): number {
 
 const nm = (p: keyof typeof PIECE_NAME): string => PIECE_NAME[p];
 
+const RANK_WORD = { mate: 'checkmate', fork: 'a fork', win: 'winning material', pin: 'a pin', skewer: 'a skewer', disc: 'a discovered attack' } as const;
+
+/** What the side that just moved threatens to do next, found by handing the move back to it (a "null move"). */
+/** Position after the engine's preferred move, or null when it cannot be played. */
+function bestAfterFen(m: MoveAnalysis): string | null {
+  if (!m.bestUci) return null;
+  try {
+    const c = new Chess(normalizeFen(m.fenBefore));
+    c.move({ from: m.bestUci.slice(0, 2), to: m.bestUci.slice(2, 4), promotion: m.bestUci[4] });
+    return c.fen();
+  } catch {
+    return null;
+  }
+}
+
+export function threatAfter(fenAfter: string, mover: 'w' | 'b'): string | null {
+  let chess: Chess;
+  try {
+    chess = new Chess(normalizeFen(fenAfter));
+  } catch {
+    return null;
+  }
+  if (chess.turn() === mover || chess.inCheck()) return null;
+  const parts = normalizeFen(fenAfter).split(' ');
+  parts[1] = mover;
+  parts[3] = '-';
+  let swapped: Chess;
+  try {
+    swapped = new Chess(parts.join(' '));
+  } catch {
+    return null;
+  }
+  let best: { score: number; kind: keyof typeof RANK_WORD; facts: MoveFacts } | null = null;
+  for (const mv of swapped.moves({ verbose: true })) {
+    const facts = describeMove(swapped.fen(), mv.from + mv.to + (mv.promotion ?? ''));
+    if (!facts) continue;
+    let score = 0;
+    let kind: keyof typeof RANK_WORD = 'win';
+    if (facts.mate) { score = 100; kind = 'mate'; }
+    else if (facts.fork) { score = 8; kind = 'fork'; }
+    else if (facts.capture && (!facts.capture.defended || facts.capture.gain >= 3) && !facts.movedPieceUnsafe) { score = 4 + facts.capture.gain; kind = 'win'; }
+    else if (facts.skewers.some((k) => VAL[k.front.piece] > VAL[k.behind.piece] && VAL[k.behind.piece] >= 3)) { score = 5; kind = 'skewer'; }
+    else if (facts.pins.some((k) => k.pinned.piece !== 'p' && VAL[k.behind.piece] > VAL[k.pinned.piece])) { score = 4; kind = 'pin'; }
+    else if (facts.discovered.length) { score = 4; kind = 'disc'; }
+    if (score > (best?.score ?? 0)) best = { score, kind, facts };
+  }
+  if (!best || best.score < 4) return null;
+  const doing = whatItDoes(best.facts).slice(0, 2).join(', and ');
+  return `It threatens ${best.facts.san} next, which ${doing || RANK_WORD[best.kind]}.`;
+}
+
+const EXPLAIN_CACHE = new Map<string, Explanation>();
+const EXPLAIN_CACHE_MAX = 30_000;
+
+/** Explanations are pure functions of one analysed game, and the lists that need them are rebuilt on every page visit, so they are remembered. */
 export function explainMove(m: MoveAnalysis, a: GameAnalysis): Explanation {
+  const key = `${a.gameId}|${a.positions.length}|${m.ply}|${m.uci}|${m.winLoss}|${m.cls}`;
+  const hit = EXPLAIN_CACHE.get(key);
+  if (hit) return hit;
+  const out = explainMoveUncached(m, a);
+  if (EXPLAIN_CACHE.size >= EXPLAIN_CACHE_MAX) EXPLAIN_CACHE.clear();
+  EXPLAIN_CACHE.set(key, out);
+  return out;
+}
+
+function explainMoveUncached(m: MoveAnalysis, a: GameAnalysis): Explanation {
+  const base = explainMoveCore(m, a);
+  if (m.cls === 'forced') return { ...base, threat: null, reply: null };
+  let threat: string | null = null;
+  let reply: string | null = null;
+  try {
+    threat = threatAfter(m.fenAfter, m.color);
+    const pv = a.positions[m.ply]?.lines[0]?.pv ?? [];
+    const chk = uciLineToSan(m.fenAfter, pv, 3);
+    if (chk.valid && chk.sans.length) {
+      const facts = describeMove(m.fenAfter, pv[0]!);
+      const does = facts ? whatItDoes(facts).slice(0, 2) : [];
+      reply = `${m.color === 'w' ? 'Black' : 'White'}'s best reply is ${chk.sans[0]}${does.length ? `, which ${does.join(', and ')}` : ''}.`;
+    }
+  } catch {
+    /* the extra notes are optional */
+  }
+  return { ...base, threat, reply };
+}
+
+function explainMoveCore(m: MoveAnalysis, a: GameAnalysis): Omit<Explanation, 'threat' | 'reply'> {
   const label = moveLabel(m);
   const evBefore = formatScore(forMover(m.evalBefore, m.color));
   const evAfter = formatScore(forMover(m.evalAfter, m.color));
@@ -307,7 +397,12 @@ export function explainMove(m: MoveAnalysis, a: GameAnalysis): Explanation {
       why.push(`In this endgame the engine prefers ${m.bestSan ?? 'another move'}: there is no immediate tactic, so the difference is about king activity, pawn timing or piece placement.`);
     } else {
       category = 'positional';
-      why.push(`I could not verify a concrete tactic behind this evaluation drop. The engine simply rates ${m.bestSan ?? 'its choice'} higher, which usually means a positional difference (piece activity, structure or timing).`);
+      const diff = bestAfterFen(m) ? positionalDifference(m.fenAfter, bestAfterFen(m)!, m.color) : [];
+      if (diff.length) {
+        why.push(`No tactic is involved here; it is a positional slip. Compared with ${m.bestSan ?? 'the engine\'s move'}, ${m.san} ${diff.join('; it also ')}.`);
+      } else {
+        why.push(`No tactic is involved, and the board features I check (pawn structure, outposts, open files, bishops, king cover) do not explain it. The engine prefers ${m.bestSan ?? 'its choice'} for piece activity or timing.`);
+      }
     }
     themes.add(category);
   }

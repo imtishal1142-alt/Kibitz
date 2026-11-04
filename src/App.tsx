@@ -6,6 +6,7 @@ import type { IconName } from './components/Icon';
 import { JobsBar } from './components/JobsBar';
 import { Toasts } from './components/Toasts';
 import { Dialog, Spinner } from './components/ui';
+import { usePersonalEntries } from './hooks/data';
 import { usePrefs } from './hooks/usePrefs';
 import { lazyRetry as lazy } from './lib/lazyRetry';
 import { Onboarding } from './pages/Onboarding';
@@ -26,6 +27,7 @@ const Guess = lazy(() => import('./pages/tools/Guess'));
 const MistakeReplay = lazy(() => import('./pages/tools/MistakeReplay'));
 const Prevention = lazy(() => import('./pages/tools/Prevention'));
 const Candidates = lazy(() => import('./pages/tools/Candidates'));
+const Positional = lazy(() => import('./pages/tools/Positional'));
 const Endgames = lazy(() => import('./pages/tools/Endgames'));
 const Notebook = lazy(() => import('./pages/tools/Notebook'));
 const Reflect = lazy(() => import('./pages/tools/Reflect'));
@@ -43,16 +45,19 @@ interface NavItem {
 const NAV: NavItem[] = [
   { to: '/', label: 'Desk', icon: 'desk' },
   { to: '/play', label: 'Play', icon: 'play' },
-  { to: '/bots', label: 'Bots', icon: 'bot' },
   { to: '/library', label: 'Games', icon: 'library' },
   { to: '/train', label: 'Train', icon: 'train' },
-  { to: '/analysis', label: 'Analysis', icon: 'board', extra: true },
-  { to: '/chesscom', label: 'Chess.com', icon: 'cloud', extra: true },
-  { to: '/session', label: 'Session', icon: 'target', extra: true },
-  { to: '/progress', label: 'Progress', icon: 'trophy', extra: true },
-  { to: '/insights', label: 'Insights', icon: 'insights', extra: true },
-  { to: '/settings', label: 'Settings', icon: 'settings', extra: true },
+  { to: '/insights', label: 'Insights', icon: 'insights' },
+  { to: '/settings', label: 'Settings', icon: 'settings' },
 ];
+
+/** Pages that belong under each main entry, so the sidebar stays short and the current section is still highlighted. */
+const SECTIONS: Record<string, string[]> = {
+  '/play': ['/play', '/bots', '/match'],
+  '/library': ['/library', '/chesscom', '/analysis'],
+  '/train': ['/train', '/puzzles', '/openings', '/session'],
+  '/insights': ['/insights', '/progress'],
+};
 
 function useThemeEffects(): void {
   const [prefs] = usePrefs();
@@ -62,7 +67,10 @@ function useThemeEffects(): void {
     else el.dataset.theme = prefs.theme;
     if (prefs.reducedMotion === 'on') el.dataset.motion = 'off';
     else el.removeAttribute('data-motion');
-  }, [prefs.theme, prefs.reducedMotion]);
+    if (prefs.palette && prefs.palette !== 'mono') el.dataset.palette = prefs.palette;
+    else el.removeAttribute('data-palette');
+    el.style.setProperty('--bs', String(prefs.boardScale / 100));
+  }, [prefs.theme, prefs.reducedMotion, prefs.boardScale, prefs.palette]);
 }
 
 function Rail() {
@@ -71,11 +79,9 @@ function Rail() {
   const collapsed = prefs.railCollapsed;
   const loc = useLocation();
   useEffect(() => setMore(false), [loc.pathname]);
-  const trainPaths = ['/train', '/puzzles', '/openings'];
   const active = (to: string) => {
     if (to === '/') return loc.pathname === '/';
-    if (to === '/train') return trainPaths.some((p) => loc.pathname === p || loc.pathname.startsWith(`${p}/`));
-    return loc.pathname === to || loc.pathname.startsWith(`${to}/`);
+    return (SECTIONS[to] ?? [to]).some((p) => loc.pathname === p || loc.pathname.startsWith(`${p}/`));
   };
   return (
     <>
@@ -151,6 +157,7 @@ function Routed() {
           <Route path="/train/mistakes" element={<MistakeReplay />} />
           <Route path="/train/prevention" element={<Prevention />} />
           <Route path="/train/candidates" element={<Candidates />} />
+          <Route path="/train/positional" element={<Positional />} />
           <Route path="/train/endgames" element={<Endgames />} />
           <Route path="/train/notebook" element={<Notebook />} />
           <Route path="/train/reflect" element={<Reflect />} />
@@ -173,6 +180,25 @@ function Routed() {
       </Suspense>
     </ErrorBoundary>
   );
+}
+
+/** After the page has settled, warm the explanation cache in idle time (see services/warmExplain). */
+function Warm() {
+  const { entries } = usePersonalEntries();
+  useEffect(() => {
+    if (!entries?.length) return;
+    void import('./services/warmExplain').then((m) => m.warmExplanations(entries));
+  }, [entries]);
+  return null;
+}
+
+function WarmLater() {
+  const [on, setOn] = useState(false);
+  useEffect(() => {
+    const t = window.setTimeout(() => setOn(true), 4000);
+    return () => window.clearTimeout(t);
+  }, []);
+  return on ? <Warm /> : null;
 }
 
 export function App() {
@@ -214,6 +240,7 @@ export function App() {
       </a>
       <div className="shell" data-collapsed={prefs.railCollapsed ? 'true' : 'false'}>
         <Rail />
+        <WarmLater />
         <main className="main" id="main" tabIndex={-1}>
           <div className="page">
             <JobsBar />

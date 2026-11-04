@@ -4,7 +4,7 @@ import { Banner, ConfirmDialog, Dialog, Field, PageHead, Segmented, Spinner, dow
 import { Icon } from '../components/Icon';
 import { cores, loadManifest, workerCount } from '../lib/engine/transport';
 import type { EngineManifest } from '../lib/engine/transport';
-import { PRESETS, BOARD_THEMES, DEFAULT_PREFS, resetPrefs } from '../lib/storage/prefs';
+import { PALETTES, PRESETS, BOARD_THEMES, DEFAULT_PREFS, resetPrefs } from '../lib/storage/prefs';
 import type { PresetId, ThemeChoice } from '../lib/storage/prefs';
 import { BackupError, clearAllData, exportBackup, importBackup, parseBackup, storageUsage } from '../lib/storage/backup';
 import type { BackupFile } from '../lib/storage/backup';
@@ -156,6 +156,19 @@ export default function Settings() {
           </div>
         </div>
         <div className="stack-sm">
+          <div className="label" id="set-pal-l">Colour palette</div>
+          <div className="row" role="group" aria-labelledby="set-pal-l">
+            {PALETTES.map((p) => (
+              <button key={p.id} type="button" className="btn btn-sm" aria-pressed={prefs.palette === p.id} onClick={() => set({ palette: p.id })} style={prefs.palette === p.id ? { borderColor: 'var(--accent)', boxShadow: '0 0 0 2px var(--accent-tint)' } : undefined}>
+                <span aria-hidden style={{ display: 'inline-block', width: 12, height: 12, borderRadius: 999, background: p.swatch, border: '1px solid var(--line)' }} /> {p.label}
+              </button>
+            ))}
+          </div>
+          <div className="label">Board size</div>
+          <div className="row">
+            <span className="muted small">Drag the bottom-right corner of the board to resize it. Now {prefs.boardScale}% of the largest size that fits the screen.</span>
+            <button type="button" className="btn btn-sm" onClick={() => set({ boardScale: 90 })} disabled={prefs.boardScale === 90}>Reset size</button>
+          </div>
           <div className="label" id="set-board-l">Board colours</div>
           <div className="row" role="group" aria-labelledby="set-board-l">
             {Object.entries(BOARD_THEMES).map(([id, t]) => (

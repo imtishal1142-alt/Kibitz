@@ -4,7 +4,7 @@
 // (the Chess.com tests intercept api.chess.com; see the label on those tests).
 import { readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { installChessComMock } from './chesscom-mock.mjs';
+import { installChessComMock, MONTHS } from './chesscom-mock.mjs';
 import { Chess } from 'chess.js';
 import { BLACK_BLUNDERS, LONG_GAME, MY_NAME } from './games.mjs';
 import { SEED_PUZZLE, restoreSeed } from './seed.mjs';
@@ -36,7 +36,7 @@ async function session(opts = {}) {
 }
 const noProblems = (problems, label) => assert(problems.length === 0, `${label}: ${problems.slice(0, 4).join(' | ')}`);
 
-const ROUTES = ['', 'play', 'bots', 'match', 'library', 'analysis', 'chesscom', 'insights', 'session', 'progress', 'train', 'puzzles', 'openings', 'train/guess', 'train/mistakes', 'train/prevention', 'train/candidates', 'train/endgames', 'train/notebook', 'train/reflect', 'train/calendar', 'settings', 'help'];
+const ROUTES = ['', 'play', 'bots', 'match', 'library', 'analysis', 'chesscom', 'insights', 'session', 'progress', 'train', 'puzzles', 'openings', 'train/guess', 'train/mistakes', 'train/prevention', 'train/candidates', 'train/positional', 'train/endgames', 'train/notebook', 'train/reflect', 'train/calendar', 'settings', 'help'];
 
 const OPERA = `[Event "Paris"]
 [Date "1858.??.??"]
@@ -156,6 +156,135 @@ await test('Maia bot: the network downloads, runs in a worker, and replies with 
   await context.close();
 });
 
+await test('board resizes by dragging its corner, stays inside the screen, and the size is remembered', async () => {
+  const { page, problems, context, go } = await session({ viewport: { width: 1440, height: 900 } });
+  await go('');
+  await page.getByRole('button', { name: /demo game/i }).first().click();
+  await page.getByRole('region', { name: 'Game review summary' }).waitFor({ timeout: 120000 });
+  const frame = page.locator('.board-frame').first();
+  const handle = page.locator('.board-resizer').first();
+  const before = await frame.boundingBox();
+  const h = await handle.boundingBox();
+  await page.mouse.move(h.x + h.width / 2, h.y + h.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(h.x - 100, h.y - 100, { steps: 6 });
+  await page.mouse.up();
+  const small = await frame.boundingBox();
+  assert(small.width < before.width - 40, 'dragging inward should shrink the board');
+  const h2 = await handle.boundingBox();
+  await page.mouse.move(h2.x + h2.width / 2, h2.y + h2.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(h2.x + 700, h2.y + 700, { steps: 6 });
+  await page.mouse.up();
+  const big = await frame.boundingBox();
+  assert(big.width > small.width + 40, 'dragging outward should enlarge the board');
+  assert(big.y + big.height <= 900, 'even the largest board fits the screen');
+  await page.reload();
+  await page.locator('.board-frame').first().waitFor();
+  assert(Math.abs((await page.locator('.board-frame').first().boundingBox()).width - big.width) < 3, 'the size should survive a reload');
+  noProblems(problems, 'resize');
+  await context.close();
+});
+
+await test('positional play: lesson opens, quiz accepts a click; library puzzle pack can be added', async () => {
+  const { page, problems, context, go } = await session({ viewport: { width: 1440, height: 900 } });
+  await go('train/positional');
+  await page.getByRole('button', { name: /Isolated pawn/ }).click();
+  await page.getByRole('heading', { name: 'Isolated pawn', level: 2 }).waitFor();
+  await page.getByRole('button', { name: 'All ideas' }).click();
+  await page.getByRole('button', { name: /Train your eye/ }).click();
+  await page.getByText('Click a square on the board.').waitFor();
+  await page.getByRole('button', { name: 'Stop' }).click();
+  await go('puzzles');
+  await page.getByRole('button', { name: 'Add the library pack' }).click();
+  await page.getByRole('button', { name: /All puzzles/ }).waitFor();
+  noProblems(problems, 'positional play');
+  await context.close();
+});
+
+await test('colour palettes: Settings switches the palette, and every palette passes the contrast scan in light and dark', async () => {
+  const { page, problems, context, go } = await session({ viewport: { width: 1440, height: 900 } });
+  await go('settings');
+  await page.getByRole('button', { name: 'Ocean' }).click();
+  assert((await page.evaluate(() => document.documentElement.dataset.palette)) === 'ocean', 'palette not applied');
+  const bad = [];
+  for (const pal of ['ocean', 'forest', 'sunset', 'violet', 'rose']) {
+    await page.evaluate((p) => (document.documentElement.dataset.palette = p), pal);
+    for (const route of ['train', 'train/positional', 'settings']) {
+      await go(route);
+      await page.evaluate((p) => (document.documentElement.dataset.palette = p), pal);
+      for (const th of ['light', 'dark']) {
+        await page.evaluate((t) => (document.documentElement.dataset.theme = t), th);
+        bad.push(...(await axeScan(page, `${pal} ${route} ${th}`)));
+      }
+    }
+  }
+  assert(bad.length === 0, bad.slice(0, 6).join('\n'));
+  noProblems(problems, 'palettes');
+  await context.close();
+});
+
+await test('opening drill: play the book move, the opponent replies, a wrong move is refused', async () => {
+  const { page, problems, context, go } = await session({ viewport: { width: 1440, height: 900 } });
+  await go('openings');
+  await page.getByRole('tab', { name: 'Library' }).click();
+  await page.getByRole('button', { name: /Italian Game/ }).click();
+  await page.getByRole('heading', { name: 'Italian Game', level: 2 }).waitFor();
+  await page.getByRole('button', { name: 'Play it yourself' }).first().click();
+  await typeMove(page, 'a3');
+  await page.getByText(/not the book move/).waitFor();
+  await typeMove(page, 'e4');
+  await page.waitForTimeout(900);
+  await page.getByText(/Your move: 2/).waitFor();
+  noProblems(problems, 'opening drill');
+  await context.close();
+});
+
+await test('opening guide: rating advice, most defensive to most offensive, answers to common moves, extra lines, filters', async () => {
+  const { page, problems, context, go } = await session({ viewport: { width: 1440, height: 900 } });
+  await go('openings');
+  await page.getByRole('tab', { name: 'Library' }).click();
+  await page.getByRole('button', { name: 'Which opening?' }).click();
+  await page.getByRole('heading', { name: 'Which opening for my rating?' }).waitFor();
+  await page.getByRole('button', { name: 'Under 1000' }).click();
+  await page.getByText(/Pick openings with simple ideas/).waitFor();
+  await page.getByRole('heading', { name: 'From most defensive to most offensive' }).waitFor();
+  await page.getByRole('button', { name: /What to play against/ }).click();
+  await page.getByLabel('What did your opponent play?').selectOption({ label: 'White plays 1.e4' });
+  await page.getByRole('heading', { name: /1\.\.\.c6: the Caro-Kann/ }).waitFor();
+  await page.getByRole('button', { name: 'All openings' }).click();
+  await page.getByLabel('Style').selectOption('gambit');
+  await page.getByRole('button', { name: /Danish Gambit/ }).waitFor();
+  assert((await page.getByRole('button', { name: /Caro-Kann: Classical/ }).count()) === 0, 'style filter should hide solid openings');
+  await page.getByLabel('Style').selectOption('all');
+  await page.getByRole('button', { name: /Najdorf/ }).first().click();
+  await page.getByRole('heading', { name: /Other lines/ }).waitFor();
+  await page.getByRole('button', { name: 'Poisoned Pawn' }).click();
+  await page.getByText(/Black takes the b2 pawn/).waitFor();
+  noProblems(problems, 'opening guide');
+  await context.close();
+});
+
+await test('opening library: learn an opening, step through a trap, see the plans; endgame lab lists the new lessons', async () => {
+  const { page, problems, context, go } = await session({ viewport: { width: 1440, height: 900 } });
+  await go('openings');
+  await page.getByRole('tab', { name: 'Library' }).click();
+  await page.getByRole('button', { name: /Italian Game/ }).click();
+  await page.getByRole('heading', { name: 'Italian Game', level: 2 }).waitFor();
+  await page.getByText('Your plans as White').waitFor();
+  assert((await page.getByRole('article', { name: /Légal/ }).count()) === 1, 'the Légal trap should be listed');
+  const trap = page.getByRole('article', { name: /Légal/ });
+  await trap.getByRole('button', { name: 'Back' }).click();
+  assert(/Move 12 of 13/.test(await trap.innerText()), 'Back steps the trap one move');
+  await page.getByRole('button', { name: 'All openings' }).click();
+  await page.getByRole('button', { name: /Nimzo-Indian/ }).waitFor();
+  await go('train/endgames');
+  await page.getByRole('heading', { name: 'Queen endgames' }).waitFor();
+  await page.getByRole('heading', { name: 'Bishop endgames' }).waitFor();
+  noProblems(problems, 'opening library');
+  await context.close();
+});
+
 await test('sidebar collapses to icons, keeps working for keyboard and screen readers, and stays collapsed after a reload', async () => {
   const { page, problems, context, go } = await session({ viewport: { width: 1440, height: 900 } });
   await go('');
@@ -207,6 +336,7 @@ await test('demo game: labelled as a demo, analysed in the browser, report and c
   await page.getByText(/built-in demo game/).waitFor();
   await page.waitForFunction(() => !/Analysing/.test(document.body.innerText) && document.querySelectorAll('[role=tab]').length >= 3, null, { timeout: 120000 });
   await page.getByRole('tab', { name: 'Game report' }).click();
+  await page.getByText(/Avg\. loss/).first().waitFor({ timeout: 20000 }).catch(() => undefined);
   const report = await page.locator('main').innerText();
   assert(/Philidor/.test(report), 'opening was not identified');
   assert(/Accuracy/.test(report) && /Avg\. loss/.test(report), 'report missing accuracy columns');
@@ -480,13 +610,13 @@ await test('Chess.com [MOCKED API]: import, profile card, duplicates, caching of
   // profile
   assert(/1520/.test(summary) && /Rapid/i.test(summary), 'profile ratings not shown');
   assert(/api\.chess\.com\/pub\/player\/testplayer/.test(summary), 'data source not shown');
-  const sep = mock.hits.filter((h) => h.endsWith('/2026/09')).length;
+  const sep = mock.hits.filter((h) => h.endsWith(`/${MONTHS.previous}`)).length;
   assert(sep === 1, `September archive fetched ${sep} times`);
   // sync again: nothing new, September is not downloaded again
   await page.getByRole('button', { name: 'Sync new games' }).click();
   await page.getByText(/0 new games added/).waitFor({ timeout: 30000 });
-  assert(mock.hits.filter((h) => h.endsWith('/2026/09')).length === 1, 'a complete month was downloaded again');
-  assert(mock.hits.filter((h) => h.endsWith('/2026/10')).length === 2, 'the current month should be re-checked each sync');
+  assert(mock.hits.filter((h) => h.endsWith(`/${MONTHS.previous}`)).length === 1, 'a complete month was downloaded again');
+  assert(mock.hits.filter((h) => h.endsWith(`/${MONTHS.current}`)).length === 2, 'the current month should be re-checked each sync');
   await go('library');
   await page.waitForSelector('table tbody tr');
   assert((await page.locator('table tbody tr').count()) === 4, 'library does not have 4 games');
@@ -918,6 +1048,7 @@ await test('grade stats: brilliant count opens the list of brilliant moves and l
   await tile.click();
   const list = page.getByRole('list', { name: 'Your brilliant moves' });
   await list.waitFor();
+  await page.waitForFunction(() => /16\.\s*Qb8\+/.test(document.querySelector('[aria-label="Your brilliant moves"]')?.textContent ?? ''), null, { timeout: 15000 }).catch(() => undefined);
   assert(/16\.\s*Qb8\+/.test(await list.innerText()), 'the Qb8+ sacrifice should be listed');
   await list.getByRole('link').first().click();
   await page.getByRole('region', { name: 'Game review summary' }).waitFor();

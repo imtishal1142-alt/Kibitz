@@ -222,8 +222,8 @@ export async function putPuzzles(puzzles: PuzzleRecord[]): Promise<number> {
     added++;
   }
   await tx.done;
-  return added;
   notify('puzzles', 'puzzleSrs');
+  return added;
 }
 
 export async function listPuzzles(): Promise<PuzzleRecord[]> {

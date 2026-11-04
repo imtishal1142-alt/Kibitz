@@ -186,6 +186,8 @@ export function ReviewCard({
         <span className="muted small">{mine ? 'your move' : "opponent's move"}</span>
       </div>
       {explanation ? <p style={{ margin: 0 }}>{explanation.paragraphs[0] ?? explanation.headline}</p> : null}
+      {explanation?.threat ? <p className="small" style={{ margin: 0 }}><strong>Threat. </strong>{explanation.threat}</p> : null}
+      {explanation?.reply ? <p className="small" style={{ margin: 0 }}><strong>Best reply. </strong>{explanation.reply}</p> : null}
       {!retry && lesson && move.bestSan ? (
         <p className="muted small" style={{ margin: 0 }}>
           Can you find something better than {move.san}? Press Try again to play from this position. Any move that loses at most {RETEST_OK_LOSS} win-chance points counts.
