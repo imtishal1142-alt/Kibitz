@@ -4,8 +4,8 @@ import { Banner, ConfirmDialog, Dialog, Field, PageHead, Segmented, Spinner, dow
 import { Icon } from '../components/Icon';
 import { cores, loadManifest, workerCount } from '../lib/engine/transport';
 import type { EngineManifest } from '../lib/engine/transport';
-import { PRESETS, BOARD_THEMES, DEFAULT_PREFS, resetPrefs } from '../lib/storage/prefs';
-import type { PresetId, ThemeChoice } from '../lib/storage/prefs';
+import { PALETTES, PRESETS, BOARD_THEMES, DEFAULT_PREFS, resetPrefs } from '../lib/storage/prefs';
+import type { Prefs, PresetId, ThemeChoice } from '../lib/storage/prefs';
 import { BackupError, clearAllData, exportBackup, importBackup, parseBackup, storageUsage } from '../lib/storage/backup';
 import type { BackupFile } from '../lib/storage/backup';
 import { AutoBackup } from '../components/AutoBackup';
@@ -156,6 +156,19 @@ export default function Settings() {
           </div>
         </div>
         <div className="stack-sm">
+          <div className="label" id="set-pal-l">Colour palette</div>
+          <div className="row" role="group" aria-labelledby="set-pal-l">
+            {PALETTES.map((p) => (
+              <button key={p.id} type="button" className="btn btn-sm" aria-pressed={prefs.palette === p.id} onClick={() => set({ palette: p.id })} style={prefs.palette === p.id ? { borderColor: 'var(--accent)', boxShadow: '0 0 0 2px var(--accent-tint)' } : undefined}>
+                <span aria-hidden style={{ display: 'inline-block', width: 12, height: 12, borderRadius: 999, background: p.swatch, border: '1px solid var(--line)' }} /> {p.label}
+              </button>
+            ))}
+          </div>
+          <div className="label">Board size</div>
+          <div className="row">
+            <span className="muted small">Drag the bottom-right corner of the board to resize it. Now {prefs.boardScale}% of the largest size that fits the screen.</span>
+            <button type="button" className="btn btn-sm" onClick={() => set({ boardScale: 90 })} disabled={prefs.boardScale === 90}>Reset size</button>
+          </div>
           <div className="label" id="set-board-l">Board colours</div>
           <div className="row" role="group" aria-labelledby="set-board-l">
             {Object.entries(BOARD_THEMES).map(([id, t]) => (
@@ -173,14 +186,16 @@ export default function Settings() {
         </div>
         <div className="stack-sm">
           <div className="label">Pieces</div>
-          <Segmented<'classic' | 'glyph'> label="Piece set" value={prefs.pieceSet} onChange={(pieceSet) => set({ pieceSet })} options={[{ value: 'classic', label: 'Classic' }, { value: 'glyph', label: 'Letter glyphs' }]} />
-          <p className="hint" style={{ margin: 0 }}>Letter glyphs are plain text symbols. They stay legible on very small screens and when colours are hard to tell apart.</p>
+          <Segmented<Prefs['pieceSet']> label="Piece set" value={prefs.pieceSet} onChange={(pieceSet) => set({ pieceSet })} options={[{ value: 'classic', label: 'Classic' }, { value: 'minimal', label: 'Minimal' }, { value: 'ink', label: 'Ink' }, { value: 'colour', label: 'Palette' }, { value: 'glyph', label: 'Figurines' }]} />
+          <p className="hint" style={{ margin: 0 }}>Minimal, Ink and Palette are drawn in the app. Palette tints the dark pieces with your accent colour. Figurines are plain text symbols that stay legible on very small screens.</p>
         </div>
         <div className="grid-2">
           <label className="check"><input type="checkbox" checked={prefs.coordinates} onChange={(e) => set({ coordinates: e.target.checked })} /> <span>Show file and rank letters on the board</span></label>
           <label className="check"><input type="checkbox" checked={prefs.highlightMoves} onChange={(e) => set({ highlightMoves: e.target.checked })} /> <span>Highlight the last move</span></label>
           <label className="check"><input type="checkbox" checked={prefs.legalMoveDots} onChange={(e) => set({ legalMoveDots: e.target.checked })} /> <span>Show legal-move dots when a piece is picked up</span></label>
           <label className="check"><input type="checkbox" checked={prefs.animations} onChange={(e) => set({ animations: e.target.checked })} /> <span>Animate piece movement</span></label>
+          <Segmented<Prefs['moveSpeed']> label="Piece speed" value={prefs.moveSpeed} onChange={(moveSpeed) => set({ moveSpeed })} options={[{ value: 'fast', label: 'Fast' }, { value: 'normal', label: 'Normal' }, { value: 'slow', label: 'Slow' }]} />
+          <label className="check"><input type="checkbox" checked={prefs.pieceEffects} onChange={(e) => set({ pieceEffects: e.target.checked })} /> <span>Piece effects: a lift on the selected piece, a ripple on captures and a pulse when a king is in check</span></label>
           <label className="check"><input type="checkbox" checked={prefs.autoQueen} onChange={(e) => set({ autoQueen: e.target.checked })} /> <span>Promote to a queen automatically (otherwise you choose)</span></label>
         </div>
         <div className="row">

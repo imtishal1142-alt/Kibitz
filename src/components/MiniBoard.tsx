@@ -1,14 +1,13 @@
-import { defaultPieces } from 'react-chessboard';
-import type { PieceRenderObject } from 'react-chessboard';
+import { pieceSetFor } from './pieceSets';
 import { BOARD_THEMES } from '../lib/storage/prefs';
 import { usePrefs } from '../hooks/usePrefs';
 import type { Color } from '../lib/types';
 
-const pieces = defaultPieces as PieceRenderObject;
 
 /** A small, still picture of a position (no interaction), used on cards. It is decorative: the card carries the text. */
 export function MiniBoard({ fen, orientation = 'w' }: { fen: string; orientation?: Color }) {
   const [prefs] = usePrefs();
+  const pieces = pieceSetFor(prefs.pieceSet);
   const theme = BOARD_THEMES[prefs.boardTheme] ?? BOARD_THEMES.green!;
   const rows = fen.split(' ')[0]!.split('/');
   const grid: (string | null)[][] = rows.map((r) => {

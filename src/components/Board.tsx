@@ -1,8 +1,10 @@
 import { Chess } from 'chess.js';
 import type { Square } from 'chess.js';
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
-import { Chessboard, defaultPieces } from 'react-chessboard';
+import { Chessboard } from 'react-chessboard';
 import type { PieceRenderObject } from 'react-chessboard';
+import { BoardResizer } from './BoardResizer';
+import { pieceSetFor } from './pieceSets';
 import { BOARD_THEMES } from '../lib/storage/prefs';
 import { usePrefs } from '../hooks/usePrefs';
 import type { Color, MoveClass } from '../lib/types';
@@ -37,6 +39,8 @@ interface BoardProps {
   arrows?: BoardArrow[];
   marks?: Record<string, MarkKind>;
   ariaLabel?: string;
+  /** Show a corner handle to drag the board bigger or smaller. */
+  resizable?: boolean;
   /** Called when a square is clicked and no move was made (used by exercises that ask for a square). */
   onSquareClick?: (square: string) => void;
   /** Offer a "type a move" box under a movable board (the keyboard and screen-reader way to play). Default true. */
@@ -53,23 +57,30 @@ const MARK_COLOR: Record<MarkKind, string> = {
 };
 export const ARROW_COLORS = { best: 'rgba(104, 160, 46, 0.9)', alt: 'rgba(31, 138, 112, 0.75)', bad: 'rgba(198, 40, 40, 0.8)', info: 'rgba(201, 138, 0, 0.85)' } as const;
 
-const GLYPH: Record<string, string> = { K: '♚', Q: '♛', R: '♜', B: '♝', N: '♞', P: '♟' };
-function makeGlyphPieces(): PieceRenderObject {
-  const out: PieceRenderObject = {};
-  for (const c of ['w', 'b']) {
-    for (const t of Object.keys(GLYPH)) {
-      out[`${c}${t}`] = () => (
-        <svg viewBox="0 0 50 50" width="100%" height="100%" style={{ display: 'block' }}>
-          <text x="25" y="27" textAnchor="middle" dominantBaseline="central" fontSize="42" fontFamily="'Segoe UI Symbol','Noto Sans Symbols 2','DejaVu Sans',sans-serif" fill={c === 'w' ? '#ffffff' : '#10151f'} stroke={c === 'w' ? '#10151f' : '#ffffff'} strokeWidth={c === 'w' ? 1.6 : 0.9} paintOrder="stroke">
-            {`${GLYPH[t]}︎`}
-          </text>
-        </svg>
-      );
-    }
-  }
-  return out;
+
+/** Decorative effects drawn over the board: a ripple where a piece was captured, a pulse on a king in check and a ring on the selected piece. */
+function BoardEffects({ fen, orientation, lastMove, king, selected }: { fen: string; orientation: Color; lastMove?: { from: string; to: string } | null; king: string | null; selected: string | null }) {
+  const count = (f: string) => (f.split(' ')[0] ?? '').replace(/[^a-zA-Z]/g, '').length;
+  const prev = useRef({ fen, pieces: count(fen) });
+  const [ripple, setRipple] = useState<{ square: string; key: string } | null>(null);
+  useEffect(() => {
+    const now = count(fen);
+    if (prev.current.fen !== fen && now < prev.current.pieces && lastMove?.to) setRipple({ square: lastMove.to, key: fen });
+    prev.current = { fen, pieces: now };
+  }, [fen, lastMove]);
+  const pos = (sq: string): React.CSSProperties => {
+    const file = sq.charCodeAt(0) - 97;
+    const rank = Number(sq[1]) - 1;
+    return { left: `${(orientation === 'w' ? file : 7 - file) * 12.5}%`, top: `${(orientation === 'w' ? 7 - rank : rank) * 12.5}%` };
+  };
+  return (
+    <div className="board-fx" aria-hidden="true">
+      {ripple ? <span key={ripple.key} className="fx-ripple" style={pos(ripple.square)} /> : null}
+      {king ? <span key={`k${king}`} className="fx-check" style={pos(king)} /> : null}
+      {selected ? <span key={`s${selected}`} className="fx-select" style={pos(selected)} /> : null}
+    </div>
+  );
 }
-const glyphPieces = makeGlyphPieces();
 
 function safeChess(fen: string): Chess {
   try {
@@ -150,7 +161,7 @@ export function describePosition(chess: Chess): string {
   return `White: ${side('w')}. Black: ${side('b')}. ${chess.turn() === 'w' ? 'White' : 'Black'} to move.`;
 }
 
-export function Board({ fen, orientation = 'w', movable = null, onMove, lastMove, arrows, marks, ariaLabel, onSquareClick, typedMoves = true, badge }: BoardProps) {
+export function Board({ fen, orientation = 'w', movable = null, onMove, lastMove, arrows, marks, ariaLabel, onSquareClick, typedMoves = true, badge, resizable = false }: BoardProps) {
   const [prefs] = usePrefs();
   const reduced = useReducedMotion();
   const id = useId();
@@ -235,7 +246,7 @@ export function Board({ fen, orientation = 'w', movable = null, onMove, lastMove
     return s;
   }, [prefs.highlightMoves, prefs.legalMoveDots, lastMove, king, marks, selected, legalFrom]);
 
-  const pieces = prefs.pieceSet === 'glyph' ? glyphPieces : (defaultPieces as PieceRenderObject);
+  const pieces: PieceRenderObject = pieceSetFor(prefs.pieceSet);
 
   return (
     <div className="board-frame" role="group" aria-label={ariaLabel ?? 'Chess board'} aria-describedby={`${id}-desc`}>
@@ -251,11 +262,13 @@ export function Board({ fen, orientation = 'w', movable = null, onMove, lastMove
             pieces,
             showNotation: prefs.coordinates,
             showAnimations: prefs.animations && !reduced,
-            animationDurationInMs: 160,
+            animationDurationInMs: prefs.moveSpeed === 'fast' ? 100 : prefs.moveSpeed === 'slow' ? 320 : 180,
             allowDragging: !!movable,
             allowDrawingArrows: !movable,
             lightSquareStyle: { backgroundColor: theme.light },
             darkSquareStyle: { backgroundColor: theme.dark },
+            lightSquareNotationStyle: { color: theme.dark, fontWeight: 600 },
+            darkSquareNotationStyle: { color: theme.light, fontWeight: 600 },
             squareStyles,
             arrows: (arrows ?? []).map((a) => ({ startSquare: a.from, endSquare: a.to, color: a.color ?? ARROW_COLORS.best })),
             clearArrowsOnClick: true,
@@ -274,6 +287,7 @@ export function Board({ fen, orientation = 'w', movable = null, onMove, lastMove
             },
           }}
         />
+        {prefs.pieceEffects && prefs.animations && !reduced ? <BoardEffects fen={fen} orientation={orientation} lastMove={lastMove} king={king ?? null} selected={selected ?? null} /> : null}
         {badge ? <SquareBadge square={badge.square} cls={badge.cls} orientation={orientation} /> : null}
         {promo ? (
           <div className="promo" role="dialog" aria-modal="true" aria-label="Choose the promotion piece">
@@ -298,6 +312,7 @@ export function Board({ fen, orientation = 'w', movable = null, onMove, lastMove
             </div>
           </div>
         ) : null}
+        {resizable ? <BoardResizer /> : null}
       </div>
       {movable && typedMoves ? (
         <details className="typed-move" open={typedOpen} onToggle={(e) => (typedOpen = e.currentTarget.open)}>
