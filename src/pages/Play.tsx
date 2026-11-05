@@ -109,18 +109,27 @@ export default function Play() {
   return (
     <div className="stack">
       <PageHead title="Play" sub="A game against Stockfish, running entirely in your browser." actions={<div className="row"><Link className="btn" to="/bots">Play a bot</Link><Link className="btn" to="/match">Engine vs engine</Link></div>} />
+      <div className="analysis">
+        <div className="stack-sm setup-preview" aria-hidden="true">
+          <div className="strip">
+            <span className="strip-avatar strip-avatar-b">{(setup.color === 'b' ? 'S' : 'Y').slice(0, 1)}</span>
+            <div className="strip-name">{setup.color === 'b' ? (bot ? bot.name : 'Opponent') : 'You'}</div>
+          </div>
+          <div className="board-wrap">
+            <Board fen={setup.fen && validateFen(setup.fen).ok ? setup.fen : START_FEN} orientation={setup.color === 'b' ? 'b' : 'w'} movable={null} lastMove={null} ariaLabel="Preview of the starting position" />
+          </div>
+          <div className="strip">
+            <span className="strip-avatar strip-avatar-b">{(setup.color === 'b' ? 'Y' : 'S').slice(0, 1)}</span>
+            <div className="strip-name">{setup.color === 'b' ? 'You' : bot ? bot.name : 'Opponent'}</div>
+          </div>
+        </div>
+        <div className="stack-sm">
       {bot ? (
         <Banner kind="info" icon="bot">
           Playing <strong>{bot.name}</strong>: {bot.tagline} <Link to="/bots">Choose another bot</Link>
         </Banner>
       ) : null}
       {fenParam ? <Banner kind="info">Starting from the position you were analysing. Clear the position field below to play from the standard start instead.</Banner> : null}
-      <div className="setup-grid">
-        <div className="setup-preview" aria-hidden="true">
-          <div className="board-wrap">
-            <Board fen={setup.fen && validateFen(setup.fen).ok ? setup.fen : START_FEN} orientation={setup.color === 'b' ? 'b' : 'w'} movable={null} lastMove={null} ariaLabel="Preview of the starting position" />
-          </div>
-        </div>
       <section className="sheet pad stack" aria-label="New game">
         <Field label="You play">
           <Segmented<Setup['color']>
@@ -164,6 +173,7 @@ export default function Play() {
           Finished games are saved to your Games library automatically and can be analysed from there. Leaving this page during a game ends it without saving (closing or reloading the tab asks first).
         </p>
       </section>
+        </div>
       </div>
     </div>
   );

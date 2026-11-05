@@ -2078,13 +2078,9 @@ html[data-motion='off'] .nav-card:hover {
   align-items: start;
 }
 .setup-preview .board-wrap {
-  max-width: min(100%, 560px);
   pointer-events: none;
 }
-@media (max-width: 1000px) {
-  .setup-grid {
-    grid-template-columns: minmax(0, 1fr);
-  }
+@media (max-width: 1099px) {
   .setup-preview {
     display: none;
   }

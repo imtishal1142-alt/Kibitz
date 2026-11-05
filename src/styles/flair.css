@@ -291,3 +291,17 @@ html[data-motion='off'] .hero-card:hover, html[data-motion='off'] .nav-card:hove
   cursor: pointer;
 }
 .link-btn:hover { color: var(--accent-2, var(--accent)); }
+
+/* Piece effects: decorative, transform and opacity only. */
+.board-fx { position: absolute; inset: 0; pointer-events: none; z-index: 3; }
+.board-fx > span { position: absolute; width: 12.5%; height: 12.5%; border-radius: 50%; }
+.fx-ripple { animation: fx-ripple 0.55s ease-out forwards; border: 3px solid var(--accent); }
+.fx-check { animation: fx-check 1.1s ease-in-out infinite; border: 3px solid #dc2626; }
+.fx-select { animation: fx-select 1.2s ease-in-out infinite; border: 2px solid var(--accent); }
+@keyframes fx-ripple { 0% { transform: scale(0.5); opacity: 0.9; } 100% { transform: scale(1.9); opacity: 0; } }
+@keyframes fx-check { 0%, 100% { transform: scale(0.85); opacity: 0.9; } 50% { transform: scale(1.25); opacity: 0.2; } }
+@keyframes fx-select { 0%, 100% { transform: scale(0.92); opacity: 0.8; } 50% { transform: scale(1.04); opacity: 0.35; } }
+.board-frame [data-piece] { transition: filter 0.15s ease; }
+.board-frame [data-piece]:hover { filter: drop-shadow(0 3px 4px rgba(0, 0, 0, 0.35)); }
+html[data-motion='off'] .board-fx { display: none; }
+@media (prefers-reduced-motion: reduce) { .board-fx { display: none; } }

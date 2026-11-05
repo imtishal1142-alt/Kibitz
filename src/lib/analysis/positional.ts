@@ -18,6 +18,16 @@ export interface SideFeatures {
   /** Pawns directly in front of the king (the king's file and its neighbours, up to two ranks ahead). */
   kingShield: number;
   kingInCentre: boolean;
+  /** Passed pawns that a friendly pawn guards. */
+  protectedPassed: Square[];
+  /** Passed pawns with a passed pawn of the same side on a neighbouring file. */
+  connectedPassed: Square[];
+  /** Rooks on the opponent's second rank (that side's seventh). */
+  seventhRank: Square[];
+  /** Knights on the a or h file. */
+  rimKnights: Square[];
+  /** Pawns that guard another pawn but are not guarded by a pawn themselves: the base of a chain. */
+  chainBases: Square[];
   /** Minor pieces still on their starting squares. */
   undeveloped: number;
   /** Own pawns on the fourth rank or beyond (counted from that side). */
@@ -85,6 +95,12 @@ export function positionFeatures(fen: string): PositionFeatures {
     const kingShield = mine.filter((m) => Math.abs(fileIx(m) - fileIx(king.square)) <= 1 && rel(rankOf(m), c) > kr && rel(rankOf(m), c) <= kr + 2).length;
     const queensOn = pieces.some((p) => p.type === 'q');
     const kingInCentre = queensOn && kr <= 2 && ['d', 'e'].includes(king.square[0]!) && pieces.filter((p) => p.color === c && p.type !== 'p' && p.type !== 'k').length >= 4;
+    const guardedBy = (list: string[], s: string): boolean => list.some((m) => Math.abs(fileIx(m) - fileIx(s)) === 1 && rel(rankOf(m), c) === rel(rankOf(s), c) - 1);
+    const protectedPassed = passed.filter((s) => guardedBy(mine, s));
+    const connectedPassed = passed.filter((s) => passed.some((o) => Math.abs(fileIx(o) - fileIx(s)) === 1));
+    const seventhRank = rooks.filter((r) => rel(rankOf(r.square), c) === 7).map((r) => r.square);
+    const rimKnights = pieces.filter((p) => p.color === c && p.type === 'n' && (p.square[0] === 'a' || p.square[0] === 'h')).map((p) => p.square);
+    const chainBases = mine.filter((s) => !guardedBy(mine, s) && mine.some((o) => Math.abs(fileIx(o) - fileIx(s)) === 1 && rel(rankOf(o), c) === rel(rankOf(s), c) + 1));
     const home = c === 'w' ? ['b1', 'g1', 'c1', 'f1'] : ['b8', 'g8', 'c8', 'f8'];
     const undeveloped = pieces.filter((p) => p.color === c && (p.type === 'n' || p.type === 'b') && home.includes(p.square)).length;
     return {
@@ -99,6 +115,11 @@ export function positionFeatures(fen: string): PositionFeatures {
       badBishops,
       kingShield,
       kingInCentre,
+      protectedPassed,
+      connectedPassed,
+      seventhRank,
+      rimKnights,
+      chainBases,
       undeveloped,
       advancedPawns: mine.filter((s) => rel(rankOf(s), c) >= 4).length,
     };

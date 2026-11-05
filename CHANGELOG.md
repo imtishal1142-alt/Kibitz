@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.3.0
+
+- **Playing board matches the Bots page.** The Bots page, the Play setup screen and the game itself now show the board at the same size and the same place on the page (checked by an automated test at 1440 px wide). On the Play setup screen the board is a preview beside the settings.
+- **Piece styles** (Settings): Classic, Minimal, Ink, Palette (the second colour follows your accent colour) and Figurines. They apply to the game boards and to the board on the Bots page. Under the default black-and-white theme Ink, Palette and Minimal look alike; the difference shows with a coloured palette.
+- **Piece animation**: a piece speed setting (Fast, Normal, Slow), a ripple on captures, a pulse on a king in check and a ring on the selected piece. "Piece effects" turns the extras off; Reduce motion turns all of it off.
+- **Endgames: 49 lessons** (26 added): pawn breakthrough, two connected pawns, the right bishop against the wrong-bishop draw, and 23 practice positions found by engine search (king and pawn, rook and pawn against rook, rook against a pawn, bishop and pawn). Each is a position where only the best move keeps the result and the next-best move already gives it up; the claims are re-checked at depth 22 in the tests.
+- **Positional trainer: 16 ideas** (8 added: protected passed pawn, connected passed pawns, rook on the seventh, knight on the rim, base of a pawn chain, king stuck in the centre, lead in development, pawn shield) and 34 diagrams in all. Each diagram is checked by the same detector the app uses. The quiz now draws twelve positions at a time from the whole set.
+- **Openings: 78 more named lines** (Colle-Zukertort, Chelyabinsk, Evans lines, Milner-Barry, Botvinnik Semi-Slav, Yugoslav Attack, Fried Liver, Traxler and more) and **77 more engine-found traps**, 138 in all across 49 openings. Same rule as before: the natural-looking move must lose clearly at depth 14, the reply must be a real tactic and the final position must stay clearly better for the trap-setter (depth 16).
+
 ## 1.2.0
 
 - **Opening guide** (Openings → Library → "Which opening?"): advice for four rating ranges (under 1000, 1000 to 1600, 1600 to 2000, over 2000) naming what to play as White, against 1.e4 and against 1.d4, and a list of every opening from most defensive to most offensive. Every opening has a character card: how offensive it is, its style (attacking, positional, solid, counter-attacking, gambit, system), how much theory it needs and which rating ranges it suits. The rating advice is common coaching guidance and is labelled as such; it is not statistics from this app.

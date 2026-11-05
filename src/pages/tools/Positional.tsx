@@ -7,16 +7,14 @@ import type { MarkKind } from '../../components/Board';
 import { POSITIONAL } from '../../lib/training/positionalLessons';
 import type { PositionalLesson } from '../../lib/training/positionalLessons';
 
-const ASK: Record<PositionalLesson['id'], string> = {
-  isolated: 'Click the isolated pawn.',
-  doubled: 'Click one of the doubled pawns.',
-  passed: 'Click White\'s passed pawn.',
-  backward: 'Click the backward pawn.',
-  outpost: 'Click the piece on an outpost.',
-  'open-file': 'Click the rook on the open file.',
-  'bishop-pair': 'Click one of the bishops that make up the pair.',
-  'bad-bishop': 'Click the bad bishop.',
-};
+interface Question {
+  id: string;
+  fen: string;
+  squares: string[];
+  ask: string;
+  what: string;
+}
+const QUESTIONS: Question[] = POSITIONAL.flatMap((l) => [{ id: l.id, fen: l.fen, squares: l.squares, ask: l.ask, what: l.what }, ...l.more.map((m) => ({ id: l.id, fen: m.fen, squares: m.squares, ask: l.ask, what: l.what }))]);
 
 function shuffle<T>(xs: T[], seed: number): T[] {
   const a = xs.slice();
@@ -51,7 +49,7 @@ function Lesson({ l, onBack }: { l: PositionalLesson; onBack: () => void }) {
 
 function Quiz({ onBack }: { onBack: () => void }) {
   const [round, setRound] = useState(0);
-  const order = useMemo(() => shuffle(POSITIONAL, 7 + round * 13), [round]);
+  const order = useMemo(() => shuffle(QUESTIONS, 7 + round * 13).slice(0, 12), [round]);
   const [i, setI] = useState(0);
   const [score, setScore] = useState(0);
   const [picked, setPicked] = useState<{ sq: string; ok: boolean } | null>(null);
@@ -94,7 +92,7 @@ function Quiz({ onBack }: { onBack: () => void }) {
           }}
         />
         <div className="stack-sm">
-          <h2>{ASK[q.id]}</h2>
+          <h2>{q.ask}</h2>
           {picked ? (
             <>
               <Banner kind={picked.ok ? 'ok' : 'warn'} role="status">
@@ -127,7 +125,7 @@ export default function Positional() {
           </Banner>
           <button type="button" className="nav-card" style={{ textAlign: 'left', cursor: 'pointer' }} onClick={() => setMode({ kind: 'quiz' })}>
             <strong>Train your eye</strong>
-            <span>Find the feature on the board. {POSITIONAL.length} questions.</span>
+            <span>Find the feature on the board. {QUESTIONS.length} positions, twelve at a time.</span>
           </button>
           <div className="grid-3">
             {POSITIONAL.map((l) => (

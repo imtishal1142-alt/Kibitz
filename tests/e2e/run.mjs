@@ -139,6 +139,46 @@ await test('bots: choose a bot and a colour, Play starts the game against it str
   await context.close();
 });
 
+await test('bots page, play setup and the game itself show the board at the same size and place; every piece style renders and passes axe', async () => {
+  const { page, problems, context, go } = await session({ viewport: { width: 1440, height: 900 } });
+  const rect = async () => {
+    await page.waitForTimeout(900);
+    return page.evaluate(() => {
+      const r = document.querySelector('.board-wrap')?.getBoundingClientRect();
+      return r ? [Math.round(r.x), Math.round(r.y), Math.round(r.width), Math.round(r.height)] : null;
+    });
+  };
+  await go('bots');
+  await page.getByRole('heading', { name: 'Bots', level: 1 }).waitFor();
+  const a = await rect();
+  await go('play');
+  await page.waitForSelector('.setup-preview .board-wrap');
+  const b = await rect();
+  await go('play?bot=dara&color=w&go=1');
+  await page.getByRole('heading', { name: /You vs/ }).waitFor({ timeout: 20000 });
+  const c = await rect();
+  assert(a && b && c, 'a board should be found on each page');
+  assert(JSON.stringify(a) === JSON.stringify(b), `bots ${a} vs setup ${b}`);
+  assert(JSON.stringify(a) === JSON.stringify(c), `bots ${a} vs game ${c}`);
+  for (const set of ['classic', 'minimal', 'ink', 'colour', 'glyph']) {
+    await page.evaluate((id) => {
+      const k = 'kibitz.prefs.v1';
+      localStorage.setItem(k, JSON.stringify({ ...JSON.parse(localStorage.getItem(k) || '{}'), pieceSet: id }));
+    }, set);
+    await go('bots');
+    await page.reload();
+    await page.getByRole('heading', { name: 'Bots', level: 1 }).waitFor();
+    await page.waitForTimeout(700);
+    const n = await page.locator('.board-wrap .mini-sq svg').count();
+    assert(n === 32, `${set}: expected 32 pieces, saw ${n}`);
+    await page.evaluate(AXE);
+    const res = await page.evaluate(() => globalThis.axe.run({ runOnly: ['wcag2a', 'wcag2aa'] }));
+    assert(res.violations.length === 0, `${set}: ${res.violations.map((v) => v.id).join(',')}`);
+  }
+  noProblems(problems, 'board alignment');
+  await context.close();
+});
+
 await test('Maia bot: the network downloads, runs in a worker, and replies with a legal human-like move', async () => {
   const { page, problems, context, go } = await session();
   await go('bots');
@@ -534,6 +574,7 @@ await test('engine vs engine match lab: a 1-game series runs to the end, is save
   await page.getByRole('link', { name: 'Replay' }).first().click();
   await page.waitForFunction(() => location.hash.startsWith('#/analysis/'));
   await page.getByRole('list', { name: 'Moves' }).waitFor();
+  await page.waitForFunction(() => document.querySelectorAll('[aria-label="Moves"] button').length > 10, null, { timeout: 15000 }).catch(() => {});
   const moves = await page.locator('[aria-label="Moves"] button').count();
   assert(moves > 10, `replayed game has only ${moves} moves`);
   // series is remembered

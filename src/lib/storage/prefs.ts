@@ -20,7 +20,10 @@ export interface Prefs {
   boardScale: number;
   /** Look version: lets a new default look replace the old board colours once. */
   look: number;
-  pieceSet: 'classic' | 'glyph';
+  pieceSet: 'classic' | 'minimal' | 'ink' | 'colour' | 'glyph';
+  /** How quickly pieces glide, and the extra effects on captures, checks and the selected piece. */
+  moveSpeed: 'fast' | 'normal' | 'slow';
+  pieceEffects: boolean;
   coordinates: boolean;
   highlightMoves: boolean;
   legalMoveDots: boolean;
@@ -59,6 +62,8 @@ export const DEFAULT_PREFS: Prefs = {
   boardScale: 90,
   look: 2,
   pieceSet: 'classic',
+  moveSpeed: 'normal',
+  pieceEffects: true,
   coordinates: true,
   highlightMoves: true,
   legalMoveDots: true,

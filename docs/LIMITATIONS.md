@@ -98,3 +98,12 @@ Build with `npm run build` and deploy the `dist` folder. `dist/_headers` is hono
 - **Engine-found traps** (61) are real engine-checked tactics, but many are plain mistakes rather than famous traps, and some start from unusual move orders created by the search. They have no names and no book source.
 - **Hand-written traps** are still few. Several famous traps I tried (for example the Lasker trap in the Albin and a Blackmar-Diemer mate) failed the checks and were left out rather than shipped unverified.
 - **Lines** are one standard line per name, written from memory and checked only for legality, not for being the most-played or best move order.
+
+## Version 1.3
+
+- **Practice endgames** (23) are generated: positions where the engine, at depth 20 and then 22, finds one move that keeps the result. Their explanations are general to the type of ending, not written for each position, and a tablebase would be stronger proof than depth 22.
+- **Piece styles** are simple drawn shapes, not a designer's sets, and three of them look alike in the black-and-white theme. They were checked in a browser for piece count and contrast, not for every board colour.
+- **Piece effects** (ripple, check pulse, selection ring) were checked in a browser for the game board only; they are not shown on the small Bots board.
+- **Quiz positions** in the positional trainer are hand-built diagrams (34), reused across sessions, so a regular user will see repeats.
+- **Engine-found traps** now number 138. Many are plain mistakes rather than famous traps, the best were not hand-picked beyond the four largest losses per opening, and none has a name or a book source.
+- **New lines** (78) were written from memory and checked for legality only.
