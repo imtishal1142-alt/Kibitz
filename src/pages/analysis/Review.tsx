@@ -7,6 +7,8 @@ import { CLASS_LABEL, CLASS_MEANING, CLASS_ORDER, isLesson } from '../../lib/che
 import { RETEST_OK_LOSS } from '../../lib/training/retest';
 import { moveLabel } from '../../lib/analysis/explain';
 import type { Explanation } from '../../lib/analysis/explain';
+import { Coach } from '../../components/Coach';
+import { gradeLine } from '../../lib/coach/lines';
 import type { MoveAssessment } from '../../lib/analysis/assess';
 import type { Color, GameAnalysis, GameRecord, MoveAnalysis } from '../../lib/types';
 
@@ -185,7 +187,7 @@ export function ReviewCard({
         <strong>{moveLabel(move)}</strong>
         <span className="muted small">{mine ? 'your move' : "opponent's move"}</span>
       </div>
-      {explanation ? <p style={{ margin: 0 }}>{explanation.paragraphs[0] ?? explanation.headline}</p> : null}
+      {explanation ? <Coach compact autoSpeak mood={gradeLine(move.cls, '', move.ply).mood} text={gradeLine(move.cls, explanation.paragraphs[0] ?? explanation.headline, move.ply).text} /> : null}
       {explanation?.threat ? <p className="small" style={{ margin: 0 }}><strong>Threat. </strong>{explanation.threat}</p> : null}
       {explanation?.reply ? <p className="small" style={{ margin: 0 }}><strong>Best reply. </strong>{explanation.reply}</p> : null}
       {!retry && lesson && move.bestSan ? (

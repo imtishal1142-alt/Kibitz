@@ -1,3 +1,5 @@
+import { Coach } from '../components/Coach';
+import { drillLine } from '../lib/coach/lines';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Chess } from 'chess.js';
 import { Link } from 'react-router-dom';
@@ -102,6 +104,10 @@ function Drill({ id, sans, side, label, why }: { id: string; sans: string[]; sid
         </span>
       </div>
       {done ? <Celebrate /> : null}
+      {(() => {
+        const l = done ? drillLine('done', { times: readDrills()[id] }, mistakes) : note ? drillLine('wrong', {}, misses) : n > (side === 'w' ? 0 : 1) ? drillLine('right', {}, n) : drillLine('start', { name: label }, 0);
+        return <Coach compact autoSpeak={false} mood={l.mood} text={l.text} />;
+      })()}
       {note ? <p className="small" role="alert" style={{ margin: 0 }}>{note}</p> : null}
       {done && why ? <p className="small muted" style={{ margin: 0 }}>{why}</p> : null}
     </div>

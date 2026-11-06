@@ -24,6 +24,10 @@ export const THEME_LABEL: Record<string, string> = {
   defense: 'Defence',
   endgame: 'Endgame',
   tactic: 'Tactic',
+  'hanging-piece': 'Hanging piece',
+  'quiet-move': 'Quiet move',
+  sacrifice: 'Sacrifice',
+  'back-rank': 'Back-rank mate',
 };
 
 export interface PuzzleOptions {

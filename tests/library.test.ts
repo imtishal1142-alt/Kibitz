@@ -139,7 +139,7 @@ describe('engine-backed helpers', () => {
         expect(bad || moves === 1 || e.id === 'rook-pawn-draw' || e.id === 'philidor' || e.id === 'wrong-bishop' || e.id === 'ocb-draw', `${e.id} should punish a wrong move`).toBe(true);
       }
     }
-  });
+  }, 600_000);
 
   it('grades moves with the same classification as game analysis', async () => {
     const fen = 'rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2';

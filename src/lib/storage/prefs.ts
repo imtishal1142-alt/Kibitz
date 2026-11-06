@@ -53,6 +53,14 @@ export interface Prefs {
   dailyGoal: number; // puzzles per day
   includeDemoInStats: boolean;
   reducedMotion: 'system' | 'on' | 'off';
+  /** The coach character (Kibi) shown on pages and next to feedback. */
+  coach: boolean;
+  /** The coach reads its lines aloud with the browser's own speech voices. */
+  coachVoice: boolean;
+  /** The coach comments on each of your moves during a game, using a quick engine check. */
+  coachLive: boolean;
+  coachVoiceName: string;
+  coachRate: number;
 }
 
 export const DEFAULT_PREFS: Prefs = {
@@ -87,6 +95,11 @@ export const DEFAULT_PREFS: Prefs = {
   dailyGoal: 10,
   includeDemoInStats: false,
   reducedMotion: 'system',
+  coach: true,
+  coachVoice: false,
+  coachLive: true,
+  coachVoiceName: '',
+  coachRate: 1,
 };
 
 export const PRESETS: Record<PresetId, { label: string; depth: number; multipv: number; hint: string }> = {

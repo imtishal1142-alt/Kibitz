@@ -1,3 +1,5 @@
+import { Coach } from '../../components/Coach';
+import { endgameLine } from '../../lib/coach/lines';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Celebrate } from '../../components/Celebrate';
@@ -51,7 +53,7 @@ export default function Endgames() {
           </Banner>
           {GROUPS.map((g) => (
             <section key={g} className="stack-sm" aria-label={g}>
-              <h2 style={{ fontSize: '1.1rem' }}>{g}</h2>
+              <h2 className="train-h">{g}</h2>
               <div className="grid-3">
                 {ENDGAMES.filter((e) => e.group === g).map((e) => (
                   <button key={e.id} type="button" className="nav-card" style={{ textAlign: 'left', cursor: 'pointer' }} onClick={() => setRun({ lesson: e, n: 0 })}>
@@ -273,6 +275,11 @@ function Lab({ lesson, onExit, onAgain }: { lesson: EndgameLesson; onExit: () =>
           {showDemo ? <Demo lesson={lesson} /> : null}
         </section>
 
+        {(() => {
+          const last = feedback.at(-1);
+          const l = outcome === 'achieved' ? endgameLine(lesson.goal === 'win' ? 'win' : 'draw') : outcome === 'missed' ? endgameLine('lost') : last ? endgameLine(last.threwAway || last.a.winLoss >= 8 ? 'bad' : 'good', {}, feedback.length) : endgameLine('start', { goal: lesson.goal === 'win' ? 'win the game' : 'hold the draw' });
+          return <Coach compact autoSpeak={!!outcome} mood={l.mood} text={l.text} />;
+        })()}
         {feedback.length ? (
           <section className="sheet pad-sm stack-sm" aria-label="Move feedback">
             <div className="label">Your moves, graded by the engine</div>

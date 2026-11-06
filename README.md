@@ -41,7 +41,7 @@ npm install
 npm run desktop:dist      # run this on the system you want an installer for
 ```
 
-- **On Windows** this makes `release/Kibitz Setup 1.3.0.exe` (installer) and a portable `.exe`. Building the installer needs a Windows machine (or Linux with Wine).
+- **On Windows** this makes `release/Kibitz Setup 1.4.0.exe` (installer) and a portable `.exe`. Building the installer needs a Windows machine (or Linux with Wine).
 - The packages were also built once from Linux (a Windows portable `.exe` and `.zip`, a Linux AppImage and `.deb`; about 100 to 160 MB each, too large to attach to the delivery, so build your own as above). Only the Linux builds were run and tested; **the Windows files have never been run on Windows**. None of the builds is code-signed, so Windows SmartScreen or macOS Gatekeeper will warn the first time (on Windows: "More info", then "Run anyway"). See [docs/LIMITATIONS.md](docs/LIMITATIONS.md).
 - Your data lives in the app's own data folder (on Windows `%APPDATA%\chess-coach`). Use **Settings, Automatic backup** to have a backup file written daily to a folder you choose.
 - Desktop tests: `npm run build`, then `xvfb-run -a node tests/e2e/desktop.mjs` on Linux without a screen, or `node tests/e2e/desktop.mjs` with one. `KIBITZ_APP=release/linux-unpacked/kibitz` tests the packaged build.
@@ -54,9 +54,10 @@ npm run desktop:dist      # run this on the system you want an installer for
 - **Chess.com.** The official public Published-Data API only: profile and ratings, archive import with progress, cancel, retry and backoff, incremental sync, duplicate prevention. See [docs/CHESSCOM.md](docs/CHESSCOM.md).
 - **Library.** Search, filter, sort, import PGN (paste or file), import FEN, export, delete.
 - **Insights.** Recurring weaknesses (with an honest "tentative" label when the evidence is thin), move-quality statistics, and a strength estimate whose range is never narrower than the data supports. See [docs/STRENGTH.md](docs/STRENGTH.md).
+- **Kibi, the coach.** An animated drawn character who greets you, comments on each of your moves during a game (a quick engine check), reacts to puzzles, drills, endgames and quizzes, and can read its lines aloud with your device's own voices. Its words come from a fixed phrase pool plus facts the engine verified; it is not an AI model. See Help.
 - **Review like a coach.** Grades with icons (brilliant, great, best, excellent, good, book, inaccuracy, miss, mistake, blunder), accuracy for both players, a guided review with retry, and counts of every grade. Rules in [docs/ANALYSIS.md](docs/ANALYSIS.md); they are this app's own, not Chess.com's.
 - **Daily practice.** Today's session, streak, retests of old mistakes, a Progress page with an honest practice check, time-use analysis, opponent and theory notes, games from your own mistake positions, a human-like opponent.
-- **Training.** Personalised puzzles checked by the engine, with hints and spaced repetition; opening repertoire trainer; Guess the Move; Mistake Replay; Blunder Prevention; Candidate Moves; Endgame Lab; Position Notebook; Post-Game Reflection; Training Calendar.
+- **Training.** Personalised puzzles checked by the engine, with hints and spaced repetition; opening repertoire trainer; Guess the Move; Mistake Replay; Blunder Prevention; Candidate Moves; Endgame Lab (49 lessons); Tactic patterns with themed puzzle sets; Positional trainer (16 ideas); Position Notebook; Post-Game Reflection; Training Calendar.
 - **Offline and backup.** Installable, works offline, optional automatic backup to a folder. See Desktop app and [docs/DATA.md](docs/DATA.md).
 - **Privacy.** Local only; backup, restore and "delete all my data" in Settings. See [docs/DATA.md](docs/DATA.md).
 - **Accessibility and polish.** Light and dark themes, responsive down to 320 px, keyboard operation (including playing moves by typing), reduced-motion option, onboarding, a clearly labelled demo game.

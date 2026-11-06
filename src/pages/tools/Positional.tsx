@@ -1,3 +1,5 @@
+import { Coach } from '../../components/Coach';
+import { quizLine } from '../../lib/coach/lines';
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Celebrate } from '../../components/Celebrate';
@@ -95,6 +97,7 @@ function Quiz({ onBack }: { onBack: () => void }) {
           <h2>{q.ask}</h2>
           {picked ? (
             <>
+              <Coach compact autoSpeak={false} mood={quizLine(picked.ok, i).mood} text={quizLine(picked.ok, i).text} />
               <Banner kind={picked.ok ? 'ok' : 'warn'} role="status">
                 {picked.ok ? 'Correct.' : `Not that square. It is ${q.squares.join(' or ')}.`} {q.what}
               </Banner>

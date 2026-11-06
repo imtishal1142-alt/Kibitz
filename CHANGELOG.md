@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.4.0
+
+- **Kibi, a coach with a face.** A drawn, animated character (blinks, bobs, nine expressions, mouth moves while speaking) now greets you on the Desk, comments on each of your moves during a game, reacts to puzzles, opening drills, endgame lessons and positional quizzes, explains graded moves in Review, and sits in every empty state. It can read its lines aloud with your device's speech voices (off by default). Settings, Coach: show or hide it, live comments, voice, voice choice and speed. Its words are a fixed phrase pool plus facts the engine verified; it is not an AI model.
+- **Tactic patterns** (Train): eleven patterns (hanging pieces, winning material, forks, pins, skewers, discovered attacks, checkmate, back-rank mates, quiet moves, sacrifices, promotion), each with how to spot it, an example board and a button that opens a practice set of that pattern.
+- **683 puzzles**, up from 51, with themes and three levels, found by engine self-play and re-checked at depth 14.
+- **One look across the app.** A shared stylesheet unifies cards, hover and press states, section labels, buttons and empty states; the Train hub fits all five learning cards in one row; endgame practice positions now have unique, descriptive titles.
+- Fixes: the engine-match replay end-to-end test no longer races the move list.
+
 ## 1.3.0
 
 - **Playing board matches the Bots page.** The Bots page, the Play setup screen and the game itself now show the board at the same size and the same place on the page (checked by an automated test at 1440 px wide). On the Play setup screen the board is a preview beside the settings.

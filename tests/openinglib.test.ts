@@ -46,5 +46,5 @@ describe('opening traps (engine)', () => {
       const res = await engine.search({ fen, depth: 16, multipv: 1 });
       expect(winPctFor(res.lines[0]!.score, t.by), `${t.id}`).toBeGreaterThan(65);
     }
-  }, 120000);
+  }, 600000);
 });

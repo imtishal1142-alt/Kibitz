@@ -105,7 +105,7 @@ await test('Stockfish WebAssembly runs in a worker and answers (depth, score, pr
   assert(/[+\-−]\d\.\d\d|#\d/.test(text), 'no evaluation shown');
   await go('settings');
   await page.getByRole('list', { name: 'Engine status' }).getByText(/WebAssembly/).first().waitFor({ timeout: 8000 });
-  const status = await page.getByRole('list', { name: 'Engine status' }).innerText();
+  const status = await page.getByRole('list', { name: 'Engine status' }).textContent();
   assert(/Stockfish/.test(status) && /WebAssembly/.test(status), `engine status: ${status}`);
   noProblems(problems, 'engine');
   await context.close();
@@ -176,6 +176,40 @@ await test('bots page, play setup and the game itself show the board at the same
     assert(res.violations.length === 0, `${set}: ${res.violations.map((v) => v.id).join(',')}`);
   }
   noProblems(problems, 'board alignment');
+  await context.close();
+});
+
+await test('coach Kibi: greets on the desk, comments on a played move, can be switched off, voice setting is offered, tactic page leads to a themed puzzle set', async () => {
+  const { page, problems, context, go } = await session();
+  await go('');
+  await page.getByRole('region', { name: 'Coach Kibi' }).first().waitFor();
+  await page.locator('.kibi-av').first().waitFor();
+  // live comment on a move in a game
+  await go('play');
+  await page.locator('select').first().selectOption({ label: 'Beginner' });
+  await page.getByRole('button', { name: 'Start game' }).click();
+  const box = page.getByRole('textbox', { name: /Type a move/ });
+  await box.fill('e4');
+  await box.press('Enter');
+  await page.waitForFunction(() => /e4: /.test(document.querySelector('.kibi-text')?.textContent ?? ''), null, { timeout: 40000 });
+  // settings: switch off, then the coach is gone
+  await go('settings');
+  await page.getByRole('heading', { name: 'Coach', level: 2 }).waitFor();
+  assert(await page.getByLabel(/Read the coach/).count() === 1, 'voice option missing');
+  await page.getByLabel('Show the coach').uncheck();
+  await go('');
+  await page.waitForTimeout(600);
+  assert((await page.locator('.kibi').count()) === 0, 'the coach should be hidden');
+  await page.getByLabel('Show the coach').count();
+  // tactic patterns page and a themed set
+  await go('train/tactics');
+  await page.getByRole('heading', { name: 'Tactic patterns', level: 1 }).waitFor();
+  await page.locator('.tactic-card').first().waitFor();
+  assert((await page.locator('.tactic-card').count()) >= 8, 'tactic cards missing');
+  await page.getByRole('button', { name: 'Practise' }).first().click();
+  await page.waitForFunction(() => location.hash.startsWith('#/puzzles?theme='), null, { timeout: 10000 });
+  await page.getByText(/to move/).first().waitFor({ timeout: 15000 });
+  noProblems(problems, 'coach');
   await context.close();
 });
 
@@ -910,7 +944,7 @@ await test('auto-analysis: imported games are analysed in the background without
   await page.waitForFunction((n) => !/not analysed/.test(document.body.innerText) && document.querySelectorAll('table tbody tr').length === n, games.length, { timeout: 240000, polling: 500 });
   await go('settings');
   await page.getByRole('heading', { name: 'Settings' }).first().waitFor();
-  const status = await page.getByRole('list', { name: 'Engine status' }).innerText();
+  const status = await page.getByRole('list', { name: 'Engine status' }).textContent();
   assert(/second engine/.test(status), 'two analysis engines should have been started');
   noProblems(problems, 'auto-analysis');
   await context.close();

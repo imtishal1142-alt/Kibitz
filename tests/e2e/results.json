@@ -1,12 +1,12 @@
 {
-  "at": "2026-11-05T20:09:27.703Z",
+  "at": "2026-11-06T07:17:47.462Z",
   "passed": 1,
   "failed": 0,
   "results": [
     {
-      "name": "engine vs engine match lab: a 1-game series runs to the end, is saved, and can be replayed in analysis",
+      "name": "auto-analysis: imported games are analysed in the background without being asked, two at a time",
       "ok": true,
-      "ms": 4510
+      "ms": 10828
     }
   ]
 }

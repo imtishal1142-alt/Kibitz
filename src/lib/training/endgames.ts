@@ -325,7 +325,7 @@ export const ENDGAMES: EndgameLesson[] = [
   },
   {
     id: "drill-kpk-1",
-    title: "King and pawn: find the winning move",
+    title: "King and pawn: White to win, pawn on e6",
     group: "King and pawn",
     fen: "7k/8/4P3/8/8/8/3K4/8 w - - 0 1",
     user: "w",
@@ -337,7 +337,7 @@ export const ENDGAMES: EndgameLesson[] = [
   },
   {
     id: "drill-kpk-2",
-    title: "King and pawn: find the winning move",
+    title: "King and pawn: White to win, pawn on g5",
     group: "King and pawn",
     fen: "8/8/8/6P1/6k1/8/8/4K3 w - - 0 1",
     user: "w",
@@ -349,7 +349,7 @@ export const ENDGAMES: EndgameLesson[] = [
   },
   {
     id: "drill-kpk-3",
-    title: "King and pawn: find the winning move",
+    title: "King and pawn: White to win, pawn on h6",
     group: "King and pawn",
     fen: "8/8/7P/7k/8/4K3/8/8 w - - 0 1",
     user: "w",
@@ -361,7 +361,7 @@ export const ENDGAMES: EndgameLesson[] = [
   },
   {
     id: "drill-kpk-4",
-    title: "Defend against the pawn on c3",
+    title: "King and pawn: Black to hold, pawn on c3",
     group: "King and pawn",
     fen: "8/8/1K6/3k4/8/2P5/8/8 b - - 0 1",
     user: "b",
@@ -373,7 +373,7 @@ export const ENDGAMES: EndgameLesson[] = [
   },
   {
     id: "drill-kpk-5",
-    title: "Defend against the pawn on a4",
+    title: "King and pawn: Black to hold, pawn on a4",
     group: "King and pawn",
     fen: "8/8/8/8/P7/5k2/7K/8 b - - 0 1",
     user: "b",
@@ -385,7 +385,7 @@ export const ENDGAMES: EndgameLesson[] = [
   },
   {
     id: "drill-kpk-6",
-    title: "Defend against the pawn on b5",
+    title: "King and pawn: Black to hold, pawn on b5",
     group: "King and pawn",
     fen: "8/5K2/8/1P3k2/8/8/8/8 b - - 0 1",
     user: "b",
@@ -397,7 +397,7 @@ export const ENDGAMES: EndgameLesson[] = [
   },
   {
     id: "drill-kpk-7",
-    title: "Defend against the pawn on h4",
+    title: "King and pawn: Black to hold, pawn on h4",
     group: "King and pawn",
     fen: "8/8/8/8/K6P/2k5/8/8 b - - 0 1",
     user: "b",
@@ -409,7 +409,7 @@ export const ENDGAMES: EndgameLesson[] = [
   },
   {
     id: "drill-kpk-8",
-    title: "Defend against the pawn on d6",
+    title: "King and pawn: Black to hold, pawn on d6",
     group: "King and pawn",
     fen: "8/8/K2P4/5k2/8/8/8/8 b - - 0 1",
     user: "b",
@@ -421,7 +421,7 @@ export const ENDGAMES: EndgameLesson[] = [
   },
   {
     id: "drill-kpk-9",
-    title: "Defend against the pawn on g4",
+    title: "King and pawn: Black to hold, pawn on g4",
     group: "King and pawn",
     fen: "6k1/8/8/5K2/6P1/8/8/8 b - - 0 1",
     user: "b",
@@ -433,7 +433,7 @@ export const ENDGAMES: EndgameLesson[] = [
   },
   {
     id: "drill-krpkr-1",
-    title: "Rook and pawn against rook: find the winning move",
+    title: "Rook and pawn v rook: White to win, pawn on a5",
     group: "Rook endgames",
     fen: "8/8/8/P7/8/3K3R/rk6/8 w - - 0 1",
     user: "w",
@@ -445,7 +445,7 @@ export const ENDGAMES: EndgameLesson[] = [
   },
   {
     id: "drill-krpkr-2",
-    title: "Rook and pawn against rook: hold the draw",
+    title: "Rook and pawn v rook: Black to hold, pawn on f7",
     group: "Rook endgames",
     fen: "6r1/5P2/K7/8/6k1/8/8/5R2 b - - 0 1",
     user: "b",
@@ -457,7 +457,7 @@ export const ENDGAMES: EndgameLesson[] = [
   },
   {
     id: "drill-krpkr-3",
-    title: "Rook and pawn against rook: hold the draw",
+    title: "Rook and pawn v rook: Black to hold, pawn on h7",
     group: "Rook endgames",
     fen: "6R1/7P/2k5/4r3/8/7K/8/8 b - - 0 1",
     user: "b",
@@ -469,7 +469,7 @@ export const ENDGAMES: EndgameLesson[] = [
   },
   {
     id: "drill-krpkr-4",
-    title: "Rook and pawn against rook: hold the draw",
+    title: "Rook and pawn v rook: Black to hold, pawn on g4",
     group: "Rook endgames",
     fen: "7k/R7/6K1/8/6P1/8/5r2/8 b - - 0 1",
     user: "b",
@@ -481,7 +481,7 @@ export const ENDGAMES: EndgameLesson[] = [
   },
   {
     id: "drill-krpkr-5",
-    title: "Rook and pawn against rook: hold the draw",
+    title: "Rook and pawn v rook: Black to hold, pawn on a7",
     group: "Rook endgames",
     fen: "8/P4k1r/8/8/8/8/1R6/5K2 b - - 0 1",
     user: "b",
@@ -493,7 +493,7 @@ export const ENDGAMES: EndgameLesson[] = [
   },
   {
     id: "drill-krpkr-6",
-    title: "Rook and pawn against rook: hold the draw",
+    title: "Rook and pawn v rook: Black to hold, pawn on b7",
     group: "Rook endgames",
     fen: "2r5/1P2k1K1/8/7R/8/8/8/8 b - - 0 1",
     user: "b",
@@ -505,7 +505,7 @@ export const ENDGAMES: EndgameLesson[] = [
   },
   {
     id: "drill-krpkr-7",
-    title: "Rook and pawn against rook: hold the draw",
+    title: "Rook and pawn v rook: Black to hold, pawn on c5",
     group: "Rook endgames",
     fen: "5R2/4K3/3r4/2P5/8/4k3/8/8 b - - 0 1",
     user: "b",
@@ -517,7 +517,7 @@ export const ENDGAMES: EndgameLesson[] = [
   },
   {
     id: "drill-krkp-1",
-    title: "Rook against a pawn on a2",
+    title: "Rook v pawn: White to win, pawn on a2",
     group: "Rook endgames",
     fen: "8/8/8/3k1K2/5R2/8/p7/8 w - - 0 1",
     user: "w",
@@ -529,7 +529,7 @@ export const ENDGAMES: EndgameLesson[] = [
   },
   {
     id: "drill-krkp-2",
-    title: "Rook against a pawn on b2",
+    title: "Rook v pawn: White to win, pawn on b2",
     group: "Rook endgames",
     fen: "8/2K5/6R1/3k4/8/8/1p6/8 w - - 0 1",
     user: "w",
@@ -541,7 +541,7 @@ export const ENDGAMES: EndgameLesson[] = [
   },
   {
     id: "drill-krkp-3",
-    title: "Rook against a pawn on e2",
+    title: "Rook v pawn: White to win, pawn on e2",
     group: "Rook endgames",
     fen: "1K6/8/8/8/3R4/1k6/4p3/8 w - - 0 1",
     user: "w",
@@ -553,7 +553,7 @@ export const ENDGAMES: EndgameLesson[] = [
   },
   {
     id: "drill-kbpk-1",
-    title: "Bishop and pawn: find the winning move",
+    title: "Bishop and pawn: White to win, pawn on b6",
     group: "Bishop endgames",
     fen: "8/8/1P3KB1/2k5/8/8/8/8 w - - 0 1",
     user: "w",
@@ -565,7 +565,7 @@ export const ENDGAMES: EndgameLesson[] = [
   },
   {
     id: "drill-kbpk-2",
-    title: "Bishop and pawn: find the winning move",
+    title: "Bishop and pawn: White to win, pawn on a6",
     group: "Bishop endgames",
     fen: "3K2B1/k7/P7/8/8/8/8/8 w - - 0 1",
     user: "w",
@@ -577,7 +577,7 @@ export const ENDGAMES: EndgameLesson[] = [
   },
   {
     id: "drill-kbpk-3",
-    title: "Bishop and pawn: find the winning move",
+    title: "Bishop and pawn: White to win, pawn on e4",
     group: "Bishop endgames",
     fen: "1B1K4/8/8/8/4P3/4k3/8/8 w - - 0 1",
     user: "w",
@@ -589,7 +589,7 @@ export const ENDGAMES: EndgameLesson[] = [
   },
   {
     id: "drill-kbpk-4",
-    title: "Bishop and pawn: find the winning move",
+    title: "Bishop and pawn: White to win, pawn on g4",
     group: "Bishop endgames",
     fen: "7K/4B3/8/8/6P1/7k/8/8 w - - 0 1",
     user: "w",

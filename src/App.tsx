@@ -12,6 +12,7 @@ import { lazyRetry as lazy } from './lib/lazyRetry';
 import { Onboarding } from './pages/Onboarding';
 
 const Home = lazy(() => import('./pages/Home'));
+const Tactics = lazy(() => import('./pages/tools/Tactics'));
 const Play = lazy(() => import('./pages/Play'));
 const Match = lazy(() => import('./pages/Match'));
 const Library = lazy(() => import('./pages/Library'));
@@ -157,6 +158,7 @@ function Routed() {
           <Route path="/train/mistakes" element={<MistakeReplay />} />
           <Route path="/train/prevention" element={<Prevention />} />
           <Route path="/train/candidates" element={<Candidates />} />
+          <Route path="/train/tactics" element={<Tactics />} />
           <Route path="/train/positional" element={<Positional />} />
           <Route path="/train/endgames" element={<Endgames />} />
           <Route path="/train/notebook" element={<Notebook />} />

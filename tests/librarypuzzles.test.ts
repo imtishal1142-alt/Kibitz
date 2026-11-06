@@ -18,11 +18,11 @@ describe('library puzzle pack', () => {
       expect(toRecord(p).solutionSan.length).toBe(p.solution.length);
     }
   });
-  it('the engine still picks the listed first move in a sample (depth 16)', async () => {
+  it('the engine still picks the listed first move in a sample (depth 16, 40 of the pack)', async () => {
     const pack = await loadLibraryPuzzles();
     const engine = await Engine.start(nodeStockfishFactory());
     try {
-      const sample = pack.filter((_, i) => i % Math.max(1, Math.floor(pack.length / 6)) === 0).slice(0, 6);
+      const sample = pack.filter((_, i) => i % Math.max(1, Math.floor(pack.length / 40)) === 0).slice(0, 40);
       for (const p of sample) {
         const r = await engine.search({ fen: p.fen, depth: 16, multipv: 1 });
         expect(r.lines[0]!.pv[0]).toBe(p.solution[0]);
@@ -30,5 +30,5 @@ describe('library puzzle pack', () => {
     } finally {
       engine.dispose();
     }
-  }, 240_000);
+  }, 600_000);
 });

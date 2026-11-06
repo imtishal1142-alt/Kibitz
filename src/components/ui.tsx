@@ -1,6 +1,9 @@
 import { useEffect, useId, useRef } from 'react';
 import type { ReactNode } from 'react';
 import { Icon } from './Icon';
+import { CoachAvatar } from './CoachAvatar';
+import type { Mood } from './CoachAvatar';
+import { usePrefs } from '../hooks/usePrefs';
 import type { IconName } from './Icon';
 
 export function PageHead({ title, sub, actions }: { title: string; sub?: ReactNode; actions?: ReactNode }) {
@@ -25,9 +28,11 @@ export function Banner({ kind = 'info', icon, children, role }: { kind?: 'info' 
   );
 }
 
-export function Empty({ title, children, action }: { title: string; children?: ReactNode; action?: ReactNode }) {
+export function Empty({ title, children, action, mood = 'thinking' }: { title: string; children?: ReactNode; action?: ReactNode; mood?: Mood }) {
+  const [prefs] = usePrefs();
   return (
     <div className="empty">
+      {prefs.coach ? <CoachAvatar mood={mood} size={84} /> : null}
       <h2>{title}</h2>
       {children ? <p>{children}</p> : null}
       {action ? <div className="row" style={{ justifyContent: 'center' }}>{action}</div> : null}

@@ -17,6 +17,8 @@ import { useAnalyses, useGames, usePuzzles, useRepertoire, useSrs } from '../hoo
 import { useQuery } from '../hooks/useQuery';
 import { useSessionView } from '../hooks/session';
 import { StreakCard } from '../components/StreakCard';
+import { Coach } from '../components/Coach';
+import { greeting } from '../lib/coach/lines';
 import { usePrefs } from '../hooks/usePrefs';
 import { formatDate, gameSubtitle, gameTitle } from '../lib/ui/format';
 import { useWarmReady } from '../services/warmExplain';
@@ -78,6 +80,11 @@ export default function Home() {
   }, [games.data, analyses.data, puzzles.data, srs.data, lines.data, calendar.data, prefs.includeDemoInStats, prefs.dailyGoal, warm]);
 
   const loading = !view;
+  const hello = useMemo(() => {
+    if (!view) return null;
+    const now = new Date();
+    return greeting({ hour: now.getHours(), games: view.personal.length, analysed: view.personal.filter((g) => g.analyzed).length, due: view.due, streak: sv.loading ? 0 : sv.streak.current, name: prefs.chesscomUser.trim() || undefined }, Math.floor(now.getTime() / 86400000));
+  }, [view, sv.loading, sv.streak, prefs.chesscomUser]);
   const demo = games.data?.find((g) => g.source === 'demo');
   const engineReady = Object.values(engines).some((e) => e.status === 'ready');
 
@@ -85,6 +92,7 @@ export default function Home() {
     <div className="stack">
       <PageHead title="Your desk" sub="What to work on today, built from your own games." />
       <BackupReminder />
+      {hello ? <Coach mood={hello.mood} text={hello.text} /> : null}
       {loading ? null : view.personal.length === 0 ? (
         <section className="sheet pad stack" aria-labelledby="start">
           <h2 id="start">Start with something real</h2>
@@ -239,7 +247,7 @@ export default function Home() {
             </ul>
           </section>
           <section className="sheet pad stack" aria-labelledby="numbers">
-            <h2 id="numbers">At a glance</h2>
+            <h2 id="numbers" className="train-h">At a glance</h2>
             <div className="grid-3" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))' }}>
               <StatBlock label="Games" value={view.personal.length} sub={`${view.entries.length} analysed`} />
               <StatBlock label="Puzzles due" value={view.due} sub={`${view.puzzleCount} in your set`} />
@@ -264,7 +272,7 @@ export default function Home() {
       ) : null}
 
       <section aria-labelledby="tools">
-        <h2 id="tools" style={{ marginBottom: 10 }}>
+        <h2 id="tools" className="train-h" style={{ marginBottom: 10 }}>
           Jump in
         </h2>
         <div className="grid-3">

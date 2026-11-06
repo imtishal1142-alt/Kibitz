@@ -1,5 +1,7 @@
+import { Coach } from '../components/Coach';
+import { puzzleLine } from '../lib/coach/lines';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { Banner, Empty, PageHead, Segmented, Spinner, StatBlock } from '../components/ui';
 import { Board, ARROW_COLORS } from '../components/Board';
 import type { BoardArrow, MarkKind } from '../components/Board';
@@ -36,8 +38,10 @@ export default function Puzzles() {
   const srs = useSrs();
   const attempts = useAttempts();
   const games = useGames();
-  const [mode, setMode] = useState<Mode>('daily');
-  const [theme, setTheme] = useState('');
+  const [search] = useSearchParams();
+  const startTheme = search.get('theme') ?? '';
+  const [mode, setMode] = useState<Mode>(startTheme ? 'theme' : 'daily');
+  const [theme, setTheme] = useState(startTheme);
   const [queue, setQueue] = useState<string[] | null>(null);
   const [index, setIndex] = useState(0);
   const [rating, setRating] = useState(1200);
@@ -407,6 +411,11 @@ function PuzzleBoard({ puzzle, position, total, isReview, rating, gameLabel, onD
           <div role="status" aria-live="polite" style={{ minHeight: 24 }}>
             {phase === 'checking' && msg ? <Spinner label={msg} /> : msg ? <strong>{msg}</strong> : null}
           </div>
+          {(() => {
+            const seed = hints + puzzle.id.length + msg.length;
+            const l = phase === 'solved' ? puzzleLine('solved', {}, seed) : phase === 'wrong' ? puzzleLine('wrong', {}, seed) : phase === 'revealed' ? puzzleLine('revealed', {}, seed) : phase === 'checking' ? { mood: 'thinking' as const, text: 'Let me check that with the engine…' } : puzzleLine('start', {}, seed);
+            return <Coach compact autoSpeak={phase === 'solved' || phase === 'wrong'} mood={l.mood} text={l.text} />;
+          })()}
           {phase === 'solving' && hints > 0 ? (
             <ul className="list-plain stack-sm" style={{ margin: 0 }}>
               {hintTexts.slice(0, hints).map((h) => (

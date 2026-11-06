@@ -152,6 +152,10 @@ export default function Help() {
           <p>
             The <strong>threat check</strong> asks what the opponent would do if it were their turn again. The app passes the move in a copy of the position and lets the engine search it; if the opponent&apos;s winning chances would jump by 10 points or more, it reports a real threat and shows the engine&apos;s line. It is unavailable when you are in check, because passing is illegal then.
           </p>
+          <h3>Kibi, the coach</h3>
+          <p>
+            Kibi is a drawn character, not an AI model. Its lines are short fixed phrases chosen by what happened (a graded move, a solved puzzle, a finished drill), and anything specific it says, such as &quot;Nf3 was better here&quot;, is filled in from the engine check above. During a game it grades each of your moves with a quick depth-11 search, so its comments are less deep than a full review. It will not invent reasons: if the app has no verified reason, Kibi only gives the grade. It can read lines aloud using your device&apos;s own speech voices (Settings, Coach); nothing is sent anywhere, and how it sounds depends on your device. Everything can be switched off.
+          </p>
         </section>
 
         <section aria-labelledby="training">
