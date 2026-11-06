@@ -1,3 +1,9 @@
+import { Coach } from '../components/Coach';
+import type { Mood } from '../components/CoachAvatar';
+import { assessMove } from '../lib/analysis/assess';
+import { idbEvalCache } from '../lib/analysis/gameAnalysis';
+import { getEngine } from '../services/engines';
+import { gameEndLine, gradeLine } from '../lib/coach/lines';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Banner, ConfirmDialog, Field, PageHead, Segmented, Spinner, copyText, downloadText } from '../components/ui';
@@ -108,19 +114,28 @@ export default function Play() {
 
   return (
     <div className="stack">
-      <PageHead title="Play" sub="A game against Stockfish, running entirely in your browser." />
+      <PageHead title="Play" sub="A game against Stockfish, running entirely in your browser." actions={<div className="row"><Link className="btn" to="/bots">Play a bot</Link><Link className="btn" to="/match">Engine vs engine</Link></div>} />
+      <div className="analysis">
+        <div className="stack-sm setup-preview" aria-hidden="true">
+          <div className="strip">
+            <span className="strip-avatar strip-avatar-b">{(setup.color === 'b' ? 'S' : 'Y').slice(0, 1)}</span>
+            <div className="strip-name">{setup.color === 'b' ? (bot ? bot.name : 'Opponent') : 'You'}</div>
+          </div>
+          <div className="board-wrap">
+            <Board fen={setup.fen && validateFen(setup.fen).ok ? setup.fen : START_FEN} orientation={setup.color === 'b' ? 'b' : 'w'} movable={null} lastMove={null} ariaLabel="Preview of the starting position" />
+          </div>
+          <div className="strip">
+            <span className="strip-avatar strip-avatar-b">{(setup.color === 'b' ? 'Y' : 'S').slice(0, 1)}</span>
+            <div className="strip-name">{setup.color === 'b' ? 'You' : bot ? bot.name : 'Opponent'}</div>
+          </div>
+        </div>
+        <div className="stack-sm">
       {bot ? (
         <Banner kind="info" icon="bot">
           Playing <strong>{bot.name}</strong>: {bot.tagline} <Link to="/bots">Choose another bot</Link>
         </Banner>
       ) : null}
       {fenParam ? <Banner kind="info">Starting from the position you were analysing. Clear the position field below to play from the standard start instead.</Banner> : null}
-      <div className="setup-grid">
-        <div className="setup-preview" aria-hidden="true">
-          <div className="board-wrap">
-            <Board fen={setup.fen && validateFen(setup.fen).ok ? setup.fen : START_FEN} orientation={setup.color === 'b' ? 'b' : 'w'} movable={null} lastMove={null} ariaLabel="Preview of the starting position" />
-          </div>
-        </div>
       <section className="sheet pad stack" aria-label="New game">
         <Field label="You play">
           <Segmented<Setup['color']>
@@ -164,6 +179,7 @@ export default function Play() {
           Finished games are saved to your Games library automatically and can be analysed from there. Leaving this page during a game ends it without saving (closing or reloading the tab asks first).
         </p>
       </section>
+        </div>
       </div>
     </div>
   );
@@ -181,6 +197,7 @@ function Game({ config, onExit, onRematch }: { config: Running; onExit: () => vo
   const [thinking, setThinking] = useState(false);
   const [busy, setBusy] = useState(false);
   const [ended, setEnded] = useState<Ended | null>(null);
+  const [live, setLive] = useState<{ ply: number; san: string; cls: string; mood: Mood; text: string } | null>(null);
   const [savedId, setSavedId] = useState<string | null>(null);
   const [notice, setNotice] = useState('');
   const [engineError, setEngineError] = useState<string | null>(null);
@@ -302,6 +319,7 @@ function Game({ config, onExit, onRematch }: { config: Running; onExit: () => vo
 
   const onMove = (m: { from: string; to: string; promotion?: string }): boolean => {
     if (over || !myTurn || paused || thinking || busy) return false;
+    const fenBefore = session.fen;
     const out = session.move({ from: m.from, to: m.to, promotion: m.promotion }, Date.now());
     if (!out.ok) {
       if (out.error === 'flagged' && out.ended) finish(out.ended);
@@ -310,6 +328,23 @@ function Game({ config, onExit, onRematch }: { config: Running; onExit: () => vo
     }
     playSound(soundForSan(out.ply.san));
     setNotice('');
+    if (prefs.coach && prefs.coachLive) {
+      const uci = `${m.from}${m.to}${m.promotion ?? ''}`;
+      const ply = out.ply.ply;
+      void (async () => {
+        try {
+          const e = await getEngine('live');
+          const a = await assessMove(e, fenBefore, uci, { depth: 11, cache: idbEvalCache });
+          if (!a) return;
+          const bad = a.cls === 'mistake' || a.cls === 'blunder' || a.cls === 'miss' || a.cls === 'inaccuracy';
+          const why = bad && a.winLoss >= 5 && a.bestSan ? `${a.bestSan} was better here.` : undefined;
+          const l = gradeLine(a.cls, why, ply);
+          setLive({ ply, san: out.ply.san, cls: a.cls, mood: l.mood, text: `${out.ply.san}: ${l.text}` });
+        } catch {
+          /* the comment is a bonus: the game goes on without it */
+        }
+      })();
+    }
     if (out.ended) finish(out.ended);
     rev();
     return true;
@@ -387,7 +422,7 @@ function Game({ config, onExit, onRematch }: { config: Running; onExit: () => vo
         <div className="stack-sm">
           <PlayerStrip {...strip(top)} />
           <div className="board-wrap">
-            <Board fen={session.fen} typedMoves={false} orientation={orientation} movable={over || paused ? null : userColor} onMove={onMove} lastMove={session.lastMove} ariaLabel={`Game board. ${session.turn === 'w' ? 'White' : 'Black'} to move. ${status}`} />
+            <Board resizable fen={session.fen} typedMoves={false} orientation={orientation} movable={over || paused ? null : userColor} onMove={onMove} lastMove={session.lastMove} ariaLabel={`Game board. ${session.turn === 'w' ? 'White' : 'Black'} to move. ${status}`} />
           </div>
           <PlayerStrip {...strip(orientation)} />
           <div className="controls" role="group" aria-label="Game controls">
@@ -401,6 +436,7 @@ function Game({ config, onExit, onRematch }: { config: Running; onExit: () => vo
         </div>
 
         <div className="stack-sm">
+          {live && prefs.coach && prefs.coachLive ? <Coach compact autoSpeak={live.cls === 'blunder' || live.cls === 'mistake' || live.cls === 'brilliant'} mood={live.mood} text={live.text} /> : null}
           <section className="sheet pad-sm stack-sm" aria-label="Game status">
             <div className="row-nowrap" role="status" aria-live="polite">
               {thinking ? <span className="spinner" aria-hidden="true" /> : null}
@@ -427,6 +463,7 @@ function Game({ config, onExit, onRematch }: { config: Running; onExit: () => vo
                 </div>
               </Banner>
             ) : null}
+            {ended ? <Coach compact autoSpeak mood={gameEndLine(ended.winner ? (ended.winner === userColor ? 'win' : 'loss') : 'draw', ended.text, session.ucis.length).mood} text={gameEndLine(ended.winner ? (ended.winner === userColor ? 'win' : 'loss') : 'draw', ended.text, session.ucis.length).text} /> : null}
             {ended ? (
               <div className="row">
                 {savedId ? (

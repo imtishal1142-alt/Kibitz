@@ -5,7 +5,7 @@ import { useQuery } from './useQuery';
 import { usePrefs } from './usePrefs';
 
 export const useGames = () => useQuery(listGames, ['games']);
-export const useAnalyses = () => useQuery(listAnalyses, ['analyses']);
+export const useAnalyses = () => useQuery(listAnalyses, ['analyses'], [], { batchMs: 1000 });
 export const usePuzzles = () => useQuery(listPuzzles, ['puzzles']);
 export const useSrs = () => useQuery(listSrs, ['puzzleSrs']);
 export const useAttempts = () => useQuery(() => listAttempts(0), ['attempts']);

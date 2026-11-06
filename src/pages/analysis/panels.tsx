@@ -10,6 +10,8 @@ import { uciLineToSan } from '../../lib/chess/rules';
 import { gameRecommendations } from '../../lib/analysis/gameAnalysis';
 import { CATEGORY_LABEL, moveLabel } from '../../lib/analysis/explain';
 import type { Explanation } from '../../lib/analysis/explain';
+import { Coach } from '../../components/Coach';
+import { gradeLine } from '../../lib/coach/lines';
 import type { ThreatReport } from '../../lib/analysis/assess';
 import { classFlagsText, formatDateTime } from '../../lib/ui/format';
 import type { LiveAnalysis } from '../../hooks/useLiveAnalysis';
@@ -99,6 +101,7 @@ export function CoachPanel({
               </span>
             ))}
           </div>
+          <Coach compact mood={gradeLine(explanation.cls, explanation.paragraphs[0]).mood} text={gradeLine(explanation.cls, explanation.paragraphs[0] ?? explanation.headline, move.ply).text} />
           <h3>{explanation.headline}</h3>
 
           <div className="facts" aria-label="Verified by the engine">
@@ -106,9 +109,11 @@ export function CoachPanel({
               <Icon name="check" size={14} /> Verified by the engine
             </div>
             <ul className="list-plain stack-sm" style={{ margin: 0 }}>
-              {explanation.paragraphs.map((p) => (
+              {explanation.paragraphs.slice(1).map((p) => (
                 <li key={p}>{p}</li>
               ))}
+              {explanation.threat ? <li><strong>Threat. </strong>{explanation.threat}</li> : null}
+              {explanation.reply ? <li><strong>Best reply. </strong>{explanation.reply}</li> : null}
               <li className="small muted">
                 Evaluation for the mover: {explanation.evidence.evalBefore} before, {explanation.evidence.evalAfter} after ({explanation.evidence.winLoss.toFixed(1)} win-percentage points lost).
               </li>

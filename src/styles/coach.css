@@ -1,0 +1,48 @@
+/* Kibi, the coach: character, speech bubble and the idle animations. */
+.kibi { display: flex; align-items: flex-start; gap: 14px; }
+.kibi-figure { flex: none; display: grid; place-items: center; }
+.kibi-av { display: block; overflow: visible; }
+.kibi-head { transform-origin: 60px 100px; animation: kibi-bob 5s ease-in-out infinite; }
+.kibi-eye { transform-box: fill-box; transform-origin: center; animation: kibi-blink 5.5s infinite; }
+.kibi-dots circle { animation: kibi-dot 1.6s ease-in-out infinite; }
+.kibi-dots circle:nth-child(2) { animation-delay: 0.2s; }
+.kibi-dots circle:nth-child(3) { animation-delay: 0.4s; }
+.kibi-sparks path { transform-box: fill-box; transform-origin: center; animation: kibi-spark 1.6s ease-in-out infinite; }
+.kibi-sparks path:nth-child(2) { animation-delay: 0.5s; }
+.kibi-cheer .kibi-head, .kibi-proud .kibi-head { animation: kibi-hop 0.9s ease-in-out 2; }
+.kibi-surprised .kibi-head { animation: kibi-jolt 0.35s ease-out 1; }
+.kibi-worried .kibi-head, .kibi-sad .kibi-head { animation: kibi-bob 3.5s ease-in-out infinite; }
+.kibi-speaking .kibi-mouth { transform-box: fill-box; transform-origin: center; animation: kibi-talk 0.28s ease-in-out infinite; }
+
+.kibi-bubble {
+  position: relative; flex: 1; min-width: 0; padding: 12px 16px; background: var(--card); border: 1px solid var(--line);
+  border-radius: 14px; box-shadow: 0 1px 0 rgba(0, 0, 0, 0.03); animation: kibi-pop 0.3s ease-out;
+}
+.kibi-bubble::before {
+  content: ''; position: absolute; left: -7px; top: 22px; width: 12px; height: 12px; background: var(--card);
+  border-left: 1px solid var(--line); border-bottom: 1px solid var(--line); transform: rotate(45deg);
+}
+.kibi-title { font-family: var(--font-display); font-weight: 700; font-size: 0.82rem; letter-spacing: 0.04em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 2px; }
+.kibi-text { margin: 0; font-size: 1rem; line-height: 1.5; color: var(--ink); }
+.kibi-actions { margin-top: 10px; }
+.kibi-compact { gap: 10px; }
+.kibi-compact .kibi-bubble { padding: 9px 13px; }
+.kibi-compact .kibi-text { font-size: 0.95rem; }
+.kibi-compact .kibi-bubble::before { top: 16px; }
+@media (max-width: 560px) { .kibi-figure svg { width: 56px; height: 56px; } }
+
+@keyframes kibi-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-2.5px); } }
+@keyframes kibi-blink { 0%, 93%, 100% { transform: scaleY(1); } 96% { transform: scaleY(0.1); } }
+@keyframes kibi-hop { 0%, 100% { transform: translateY(0); } 40% { transform: translateY(-7px); } }
+@keyframes kibi-jolt { 0% { transform: translateY(0) scale(1); } 40% { transform: translateY(-4px) scale(1.04); } 100% { transform: translateY(0) scale(1); } }
+@keyframes kibi-dot { 0%, 100% { opacity: 0.25; } 50% { opacity: 1; } }
+@keyframes kibi-spark { 0%, 100% { transform: scale(0.7) rotate(0); opacity: 0.6; } 50% { transform: scale(1.15) rotate(20deg); opacity: 1; } }
+@keyframes kibi-talk { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(0.55); } }
+@keyframes kibi-pop { from { opacity: 0; transform: translateY(4px) scale(0.98); } to { opacity: 1; transform: none; } }
+
+html[data-motion='off'] .kibi-head, html[data-motion='off'] .kibi-eye, html[data-motion='off'] .kibi-dots circle, html[data-motion='off'] .kibi-sparks path,
+html[data-motion='off'] .kibi-mouth, html[data-motion='off'] .kibi-bubble { animation: none !important; }
+@media (prefers-reduced-motion: reduce) {
+  html:not([data-motion='on']) .kibi-head, html:not([data-motion='on']) .kibi-eye, html:not([data-motion='on']) .kibi-dots circle,
+  html:not([data-motion='on']) .kibi-sparks path, html:not([data-motion='on']) .kibi-mouth, html:not([data-motion='on']) .kibi-bubble { animation: none !important; }
+}

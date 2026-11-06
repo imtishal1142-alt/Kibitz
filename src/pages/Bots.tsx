@@ -40,7 +40,7 @@ export default function Bots() {
   );
   return (
     <div className="stack">
-      <PageHead title="Bots" sub="Pick an opponent. Every bot is the bundled Stockfish, limited in a way the description spells out. None has a rating, because any number would be a guess." />
+      <PageHead title="Bots" sub="Pick an opponent, then press Play." />
       <div className="analysis bots-layout">
         <div className="stack-sm">
           {strip(flip ? me : bot.name, flip ? 'me' : 'bot')}
@@ -108,7 +108,7 @@ export default function Bots() {
           </div>
         </section>
       </div>
-      <p className="hint">Want to set the level yourself, or use a clock? Use the <a href="#/play">Play page</a>. Two engines against each other: <a href="#/match">Engine vs engine</a>.</p>
+      <p className="hint">Every bot is the bundled Stockfish, limited in a way its description spells out. None has a rating, because any number would be a guess. Want to set the level yourself, or use a clock? Use the <a href="#/play">Play page</a>. Two engines against each other: <a href="#/match">Engine vs engine</a>.</p>
     </div>
   );
 }

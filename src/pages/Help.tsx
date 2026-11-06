@@ -152,6 +152,10 @@ export default function Help() {
           <p>
             The <strong>threat check</strong> asks what the opponent would do if it were their turn again. The app passes the move in a copy of the position and lets the engine search it; if the opponent&apos;s winning chances would jump by 10 points or more, it reports a real threat and shows the engine&apos;s line. It is unavailable when you are in check, because passing is illegal then.
           </p>
+          <h3>Kibi, the coach</h3>
+          <p>
+            Kibi is a drawn character, not an AI model. Its lines are short fixed phrases chosen by what happened (a graded move, a solved puzzle, a finished drill), and anything specific it says, such as &quot;Nf3 was better here&quot;, is filled in from the engine check above. During a game it grades each of your moves with a quick depth-11 search, so its comments are less deep than a full review. It will not invent reasons: if the app has no verified reason, Kibi only gives the grade. It can read lines aloud using your device&apos;s own speech voices (Settings, Coach); nothing is sent anywhere, and how it sounds depends on your device. Everything can be switched off.
+          </p>
         </section>
 
         <section aria-labelledby="training">
@@ -229,7 +233,7 @@ export default function Help() {
         <section aria-labelledby="practice">
           <h2 id="practice" tabIndex={-1}>Daily session, progress and time use</h2>
           <ul>
-            <li><strong>Today&apos;s session</strong> is built from your own data: due puzzles, mistakes of yours that are due for a retest, one game to review, the weakness to work on, and a short reflection. Steps you have nothing for are left out. The streak counts a day when you did at least one piece of practice (puzzles, reviews, lessons, a game played, a retest or a review). Running an analysis does not count.</li>
+            <li><strong>Today&apos;s session</strong> is built from your own data: due puzzles, mistakes of yours that are due for a retest, one game to review, the weakness to work on, one rotating "something different" exercise (guess the move, an endgame, candidate moves, blunder prevention or an opening check, changing each day) and a short reflection. Steps you have nothing for are left out. The streak counts a day when you did at least one piece of practice (puzzles, reviews, lessons, a game played, a retest or a review). Running an analysis does not count.</li>
             <li><strong>Retests</strong>: each mistake you answer in Mistake replay comes back after 1, 3, 7, 14 and 30 days if you solved it (a move that loses at most 3 points counts), and in a few minutes if you did not.</li>
             <li><strong>Progress</strong> charts your accuracy and mistakes per game over time. <strong>Is your practice working?</strong> compares your recent games with earlier ones for a weakness you have been practising, and only gives a verdict when there are at least 6 games and 150 moves in each period, at least 10 puzzle attempts on that theme, and at least 4 earlier occurrences. Otherwise it says it lacks evidence. Even then it is a comparison of two groups of games, not proof that the practice caused the change.</li>
             <li><strong>Time use</strong> reads the clock times saved in a game. A move counts as played in time trouble with under {TIME_RULES.lowClockMs / 1000} s left, and as fast when it took under {TIME_RULES.fastMs / 1000} s. Notes appear only with at least {TIME_RULES.minMoves} timed moves and {TIME_RULES.minBucket} moves in a group, and always give the counts. A fast mistake may simply be a move you did not see.</li>

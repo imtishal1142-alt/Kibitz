@@ -1,11 +1,13 @@
+import { CoachAvatar } from '../components/CoachAvatar';
+import { listVoices, speak, speechAvailable, useSpeaking } from '../services/speech';
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Banner, ConfirmDialog, Dialog, Field, PageHead, Segmented, Spinner, downloadText } from '../components/ui';
 import { Icon } from '../components/Icon';
 import { cores, loadManifest, workerCount } from '../lib/engine/transport';
 import type { EngineManifest } from '../lib/engine/transport';
-import { PRESETS, BOARD_THEMES, DEFAULT_PREFS, resetPrefs } from '../lib/storage/prefs';
-import type { PresetId, ThemeChoice } from '../lib/storage/prefs';
+import { PALETTES, PRESETS, BOARD_THEMES, DEFAULT_PREFS, resetPrefs } from '../lib/storage/prefs';
+import type { Prefs, PresetId, ThemeChoice } from '../lib/storage/prefs';
 import { BackupError, clearAllData, exportBackup, importBackup, parseBackup, storageUsage } from '../lib/storage/backup';
 import type { BackupFile } from '../lib/storage/backup';
 import { AutoBackup } from '../components/AutoBackup';
@@ -130,6 +132,16 @@ export default function Settings() {
     }
   };
 
+  const speaking = useSpeaking();
+  const voiceOn = prefs.coachVoice;
+  const [voices, setVoices] = useState(listVoices);
+  useEffect(() => {
+    if (!speechAvailable()) return;
+    const f = () => setVoices(listVoices());
+    window.speechSynthesis.addEventListener('voiceschanged', f);
+    return () => window.speechSynthesis.removeEventListener('voiceschanged', f);
+  }, []);
+
   const flavorNote = manifest?.flavors.find((f) => f.id === prefs.flavor);
   const preset = PRESETS[prefs.analysisPreset];
   const used = usage.data;
@@ -138,8 +150,40 @@ export default function Settings() {
     <div className="stack">
       <PageHead title="Settings" sub="Everything here is saved in this browser only." actions={<Link className="btn" to="/help">Help and methods</Link>} />
 
+      <section className="sheet pad stack" aria-labelledby="set-coach">
+        <h2 id="set-coach">Coach</h2>
+        <div className="row" style={{ alignItems: 'center' }}>
+          <CoachAvatar mood={voiceOn ? 'happy' : 'idle'} size={64} speaking={speaking} />
+          <p className="muted" style={{ margin: 0, maxWidth: '56ch' }}>Kibi reacts to your moves, puzzles and drills with short lines built from what the engine verified. It can also read them aloud with your device&apos;s own voices.</p>
+        </div>
+        <label className="check"><input type="checkbox" checked={prefs.coach} onChange={(e) => set({ coach: e.target.checked })} /> Show the coach</label>
+        <label className="check"><input type="checkbox" checked={prefs.coachLive} onChange={(e) => set({ coachLive: e.target.checked })} /> Comment on my moves during a game (uses a quick engine check after each move)</label>
+        <label className="check"><input type="checkbox" checked={prefs.coachVoice} disabled={!speechAvailable()} onChange={(e) => set({ coachVoice: e.target.checked })} /> Read the coach&apos;s lines aloud{speechAvailable() ? '' : ' (this browser has no speech voices)'}</label>
+        {speechAvailable() && prefs.coachVoice ? (
+          <div className="grid-2">
+            <div className="stack-sm">
+              <label className="label" htmlFor="coach-voice">Voice</label>
+              <select id="coach-voice" className="select" value={prefs.coachVoiceName} onChange={(e) => set({ coachVoiceName: e.target.value })}>
+                <option value="">Device default</option>
+                {voices.map((v) => <option key={v.name} value={v.name}>{v.name} ({v.lang})</option>)}
+              </select>
+            </div>
+            <div className="stack-sm">
+              <label className="label" htmlFor="coach-rate">Speed: {prefs.coachRate.toFixed(1)}x</label>
+              <input id="coach-rate" type="range" min={0.7} max={1.4} step={0.1} value={prefs.coachRate} onChange={(e) => set({ coachRate: Number(e.target.value) })} />
+            </div>
+          </div>
+        ) : null}
+        {speechAvailable() && prefs.coachVoice ? (
+          <div className="row">
+            <button type="button" className="btn btn-sm" onClick={() => speak('Hello, I am Kibi. Knight takes e5, check. Well played!', { voiceName: prefs.coachVoiceName, rate: prefs.coachRate })}>Test the voice</button>
+            <span className="hint">Voices come from your device, so how it sounds varies and is not something this app can control or test.</span>
+          </div>
+        ) : null}
+      </section>
+
       <section className="sheet pad stack" aria-labelledby="set-look">
-        <h2 id="set-look" style={{ fontSize: '1.15rem' }}>Appearance</h2>
+        <h2 id="set-look">Appearance</h2>
         <div className="grid-2">
           <div className="stack-sm">
             <div className="label" id="set-theme-l">Theme</div>
@@ -156,6 +200,19 @@ export default function Settings() {
           </div>
         </div>
         <div className="stack-sm">
+          <div className="label" id="set-pal-l">Colour palette</div>
+          <div className="row" role="group" aria-labelledby="set-pal-l">
+            {PALETTES.map((p) => (
+              <button key={p.id} type="button" className="btn btn-sm" aria-pressed={prefs.palette === p.id} onClick={() => set({ palette: p.id })} style={prefs.palette === p.id ? { borderColor: 'var(--accent)', boxShadow: '0 0 0 2px var(--accent-tint)' } : undefined}>
+                <span aria-hidden style={{ display: 'inline-block', width: 12, height: 12, borderRadius: 999, background: p.swatch, border: '1px solid var(--line)' }} /> {p.label}
+              </button>
+            ))}
+          </div>
+          <div className="label">Board size</div>
+          <div className="row">
+            <span className="muted small">Drag the bottom-right corner of the board to resize it. Now {prefs.boardScale}% of the largest size that fits the screen.</span>
+            <button type="button" className="btn btn-sm" onClick={() => set({ boardScale: 90 })} disabled={prefs.boardScale === 90}>Reset size</button>
+          </div>
           <div className="label" id="set-board-l">Board colours</div>
           <div className="row" role="group" aria-labelledby="set-board-l">
             {Object.entries(BOARD_THEMES).map(([id, t]) => (
@@ -173,14 +230,16 @@ export default function Settings() {
         </div>
         <div className="stack-sm">
           <div className="label">Pieces</div>
-          <Segmented<'classic' | 'glyph'> label="Piece set" value={prefs.pieceSet} onChange={(pieceSet) => set({ pieceSet })} options={[{ value: 'classic', label: 'Classic' }, { value: 'glyph', label: 'Letter glyphs' }]} />
-          <p className="hint" style={{ margin: 0 }}>Letter glyphs are plain text symbols. They stay legible on very small screens and when colours are hard to tell apart.</p>
+          <Segmented<Prefs['pieceSet']> label="Piece set" value={prefs.pieceSet} onChange={(pieceSet) => set({ pieceSet })} options={[{ value: 'classic', label: 'Classic' }, { value: 'minimal', label: 'Minimal' }, { value: 'ink', label: 'Ink' }, { value: 'colour', label: 'Palette' }, { value: 'glyph', label: 'Figurines' }]} />
+          <p className="hint" style={{ margin: 0 }}>Minimal, Ink and Palette are drawn in the app. Palette tints the dark pieces with your accent colour. Figurines are plain text symbols that stay legible on very small screens.</p>
         </div>
         <div className="grid-2">
           <label className="check"><input type="checkbox" checked={prefs.coordinates} onChange={(e) => set({ coordinates: e.target.checked })} /> <span>Show file and rank letters on the board</span></label>
           <label className="check"><input type="checkbox" checked={prefs.highlightMoves} onChange={(e) => set({ highlightMoves: e.target.checked })} /> <span>Highlight the last move</span></label>
           <label className="check"><input type="checkbox" checked={prefs.legalMoveDots} onChange={(e) => set({ legalMoveDots: e.target.checked })} /> <span>Show legal-move dots when a piece is picked up</span></label>
           <label className="check"><input type="checkbox" checked={prefs.animations} onChange={(e) => set({ animations: e.target.checked })} /> <span>Animate piece movement</span></label>
+          <Segmented<Prefs['moveSpeed']> label="Piece speed" value={prefs.moveSpeed} onChange={(moveSpeed) => set({ moveSpeed })} options={[{ value: 'fast', label: 'Fast' }, { value: 'normal', label: 'Normal' }, { value: 'slow', label: 'Slow' }]} />
+          <label className="check"><input type="checkbox" checked={prefs.pieceEffects} onChange={(e) => set({ pieceEffects: e.target.checked })} /> <span>Piece effects: a lift on the selected piece, a ripple on captures and a pulse when a king is in check</span></label>
           <label className="check"><input type="checkbox" checked={prefs.autoQueen} onChange={(e) => set({ autoQueen: e.target.checked })} /> <span>Promote to a queen automatically (otherwise you choose)</span></label>
         </div>
         <div className="row">
@@ -192,7 +251,7 @@ export default function Settings() {
       </section>
 
       <section className="sheet pad stack" aria-labelledby="set-engine">
-        <h2 id="set-engine" style={{ fontSize: '1.15rem' }}>Engine</h2>
+        <h2 id="set-engine">Engine</h2>
         <p className="muted" style={{ margin: 0 }}>
           Stockfish runs inside your browser in a background worker. Nothing is sent to a server. Changing the build or memory restarts the engines the next time they are needed.
         </p>
@@ -307,7 +366,7 @@ export default function Settings() {
       </section>
 
       <section className="sheet pad stack" aria-labelledby="set-train">
-        <h2 id="set-train" style={{ fontSize: '1.15rem' }}>Training and statistics</h2>
+        <h2 id="set-train">Training and statistics</h2>
         <div className="grid-2">
           <Field label="Daily puzzle goal" htmlFor="set-goal" hint="Used by the Home plan and the training calendar.">
             <input id="set-goal" className="input" type="number" min={1} max={200} value={prefs.dailyGoal} onChange={(e) => set({ dailyGoal: Math.max(1, Math.min(200, Math.round(Number(e.target.value)) || DEFAULT_PREFS.dailyGoal)) })} />
@@ -323,7 +382,7 @@ export default function Settings() {
       </section>
 
       <section className="sheet pad stack" aria-labelledby="set-data">
-        <h2 id="set-data" style={{ fontSize: '1.15rem' }}>Privacy and your data</h2>
+        <h2 id="set-data">Privacy and your data</h2>
         <Banner kind="info" icon="shield">
           Your games, analyses, notes and settings are stored in this browser (IndexedDB and localStorage). There is no account and no server of ours. The only network request the app makes on its own is to Chess.com&apos;s public data API, and only when you ask it to import. Clearing site data in the browser, or using a private window, removes everything unless you have a backup.
         </Banner>
@@ -352,7 +411,7 @@ export default function Settings() {
 
         <div className="grid-2" style={{ alignItems: 'start' }}>
           <div className="stack-sm">
-            <h3 style={{ fontSize: '1rem' }}>Back up</h3>
+            <h3>Back up</h3>
             <p className="muted small" style={{ margin: 0 }}>Downloads one JSON file with your games, analyses, puzzles, notes, repertoire, calendar and settings.</p>
             <label className="check"><input type="checkbox" checked={includeCache} onChange={(e) => setIncludeCache(e.target.checked)} /> <span>Also include cached engine evaluations (large; they can be recomputed)</span></label>
             <div>
@@ -362,7 +421,7 @@ export default function Settings() {
             </div>
           </div>
           <div className="stack-sm">
-            <h3 style={{ fontSize: '1rem' }}>Restore</h3>
+            <h3>Restore</h3>
             <label className="sr-only" htmlFor="set-restore">Choose a backup file</label>
             <input ref={fileRef} id="set-restore" className="input" type="file" accept="application/json,.json" onChange={(e) => void onPick(e.target.files?.[0])} />
             {importError ? <p role="alert" className="small" style={{ margin: 0, color: 'var(--c-blunder)' }}>{importError}</p> : null}
@@ -386,7 +445,7 @@ export default function Settings() {
         </div>
 
         <div className="stack-sm" style={{ borderTop: '1px solid var(--line-2)', paddingTop: 14 }}>
-          <h3 style={{ fontSize: '1rem' }}>Clear</h3>
+          <h3>Clear</h3>
           <div className="row">
             <button className="btn" type="button" onClick={() => setConfirmCache(true)}>Clear cached evaluations</button>
             <button className="btn" type="button" onClick={() => setConfirmReset(true)}>Reset settings</button>
